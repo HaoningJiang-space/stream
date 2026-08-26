@@ -817,9 +817,9 @@ class Workload(DiGraphWrapper[Node]):
                 dim_sizes = {str(dim): self.get_dimension_size(dim) for dim in self.get_dims(node)}
                 n.set_shape("box")
                 label = f"{node.name}\nType: {node.transfer_type}\nDims: {dim_sizes}"
-                # label += self._get_mem_alloc_label(node, mapping)
-                # if ssis:
-                #     label += self._get_for_loop_label(ssis.get(node, None))
+                label += self._get_mem_alloc_label(node, mapping)
+                if ssis:
+                    label += self._get_for_loop_label(ssis.get(node, None))
                 n.set_label(label)
                 n.set_style("filled")
                 n.set_fillcolor("#ffcb9a")
@@ -884,15 +884,12 @@ class Workload(DiGraphWrapper[Node]):
 
     def _get_for_loop_label(self, ssis: SteadyStateIterationSpace | None) -> str:
         if ssis is not None:
-            temporal_loop_dims = reversed(ssis.get_temporal_variables())
-            temporal_loop_sizes = reversed(ssis.get_temporal_sizes())
-            reuses = reversed(ssis.get_temporal_reuses())
             label = "\nForLoops:"
             indent = ""
-            for dim, size, reuse in zip(temporal_loop_dims, temporal_loop_sizes, reuses, strict=True):
-                label += f"\n{indent}{dim}: {size}; Reuse={reuse}"
+            for dim in reversed(ssis.variables):
+                label += f"\\l{indent}{dim}: {dim.size}; Reuse={dim.reuse}"
                 indent += "  "
-            label += "\n"
+            label += "\\l"
             return f"{label}"
         return ""
 
