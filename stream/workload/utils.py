@@ -254,7 +254,12 @@ def collect_spatial_unrollings(workload: "Workload", mapping: "Mapping"):
         assert node_mapping is not None, f"No mapping found for node {node.name}"
         unrollings = workload.get_unique_dims_inter_core_tiling(node, mapping)
         _reject_illegal_spatial_unroll(workload, node, unrollings)
-        spatial_unrollings[node] = unrollings
+
+        # TODO document
+        total_unrolling = {}
+        for dim, size in unrollings:
+            total_unrolling[dim] = total_unrolling.get(dim, 1) * size
+        spatial_unrollings[node] = tuple(total_unrolling.items())
 
     unique_spatial_unrollings: list[tuple[LayerDim, int]] = []
     for unrollings in spatial_unrollings.values():
@@ -268,8 +273,7 @@ def collect_spatial_unrollings(workload: "Workload", mapping: "Mapping"):
                 idx = unique_spatial_unrollings.index(existing)
                 unique_spatial_unrollings.pop(idx)
                 unique_spatial_unrollings.insert(idx, (dim, size))
-    unique_spatial_unrollings = [(unique_spatial_unrollings[0][0], 8)]
-    # unique_spatial_unrollings = [(unique_spatial_unrollings[0][0], 4), (unique_spatial_unrollings[0][0], 2)]
+
     return spatial_unrollings, unique_spatial_unrollings
 
 
