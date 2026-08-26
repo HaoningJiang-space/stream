@@ -1836,6 +1836,7 @@ class TransferAndTensorAllocator:
         self, *, tee: bool = True
     ) -> tuple[TensorReuseLevels, TensorDepths, TensorAlloc, TransferAlloc, MemoryAlloc, int, int, int]:
         self.model.set_param(SolverParams.VERBOSITY, 1 if tee else 0)
+        self.model.write(os.path.join(self.output_path, "model_full.lp"))
         self.model.optimize(self._mip_progress_callback)
         if self.model.get_status() != "OPTIMAL":
             # Produce a structured, per-resource diagnosis (this computes the IIS on backends that
@@ -2129,6 +2130,10 @@ class TransferAndTensorAllocator:
         base_name: str,
     ) -> SolverVar:
         n = self._safe_name(base_name)
+
+        if f"{n}__and" == "bddepth_output_1_Core_46_L0__and":
+            print("break")
+
         w = self.model.add_var(vtype=SolverVarType.BINARY, name=f"{n}__and")
         self.model.add_constr(w <= a, name=f"{n}__ub1")
         self.model.add_constr(w <= b, name=f"{n}__ub2")

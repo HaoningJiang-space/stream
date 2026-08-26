@@ -268,6 +268,8 @@ def collect_spatial_unrollings(workload: "Workload", mapping: "Mapping"):
                 idx = unique_spatial_unrollings.index(existing)
                 unique_spatial_unrollings.pop(idx)
                 unique_spatial_unrollings.insert(idx, (dim, size))
+    unique_spatial_unrollings = [(unique_spatial_unrollings[0][0], 8)]
+    # unique_spatial_unrollings = [(unique_spatial_unrollings[0][0], 4), (unique_spatial_unrollings[0][0], 2)]
     return spatial_unrollings, unique_spatial_unrollings
 
 

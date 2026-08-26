@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from functools import reduce
 from itertools import product
 from math import isqrt, prod
+import os
+from pathlib import Path
 from typing import Self, cast
 
 from xdsl.context import Context
@@ -1322,22 +1324,48 @@ class AIEConvertOfs(ModulePass):
     name = "aie-convert-ofs"
 
     def apply(self, ctx: Context, op: ModuleOp) -> None:
+        dump_dir = os.environ.get("STREAM_REWRITE_DUMP_DIR")
+        dump_index = 0
+
+        def dump(label: str) -> None:
+            nonlocal dump_index
+            if dump_dir is None:
+                return
+            path = Path(dump_dir)
+            path.mkdir(parents=True, exist_ok=True)
+            with (path / f"{dump_index:02d}_{label}.mlir").open("w") as file:
+                file.write(str(op))
+            dump_index += 1
+
+        dump("before")
+
         # create new shim tile
         device = next(op for op in op.walk() if isinstance(op, DeviceOp))
         shim_tiles = {column: TileOp(column, 0) for column in range(NB_COLUMNS)}
         PatternRewriteWalker(ChannelToObjectFifoPass({x: y.result for x, y in shim_tiles.items()})).rewrite_module(op)
+        dump("channel_to_fifo")
         Rewriter().insert_op(
             [x for x in shim_tiles.values() if x.result.uses], InsertPoint.at_start(device.region.block)
         )
+        dump("create_shim")
         PatternRewriteWalker(TransferToRuntimeSequence(), apply_recursively=False).rewrite_module(op)
+        dump("transfer_to_runtime")
         PatternRewriteWalker(StrensorToMemref()).rewrite_module(op)
+        dump("strensor_to_memref")
         PatternRewriteWalker(OrderDMAs(), apply_recursively=False).rewrite_module(op)
+        dump("order_dmas")
         PatternRewriteWalker(SyncDMAs(), apply_recursively=False).rewrite_module(op)
+        dump("sync_dmas")
         PatternRewriteWalker(StartDMAs(), apply_recursively=False).rewrite_module(op)
+        dump("start_dmas")
         PatternRewriteWalker(RealizeLinks()).rewrite_module(op)
+        dump("realize_links")
         PatternRewriteWalker(TransferToObjectFIFOPattern()).rewrite_module(op)
+        dump("tranfer_to_object_fifo")
         PatternRewriteWalker(RemoveChannels()).rewrite_module(op)
+        dump("remove_channels")
         PatternRewriteWalker(RemoveEmptyCores()).rewrite_module(op)
+        dump("remove_empty_cores")
         _verify_shim_fifos_are_fed(op)
 
 
