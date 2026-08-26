@@ -14,6 +14,7 @@ from stream.datatypes import InterCoreTiling, LayerDim
 from stream.hardware.architecture.accelerator import Accelerator
 from stream.hardware.architecture.core import Core
 from stream.mapping.mapping import Mapping
+from stream.opt.allocation.constraint_optimization.context import build_transfer_context
 from stream.opt.allocation.constraint_optimization.transfer_and_tensor_allocation import (
     MemoryAlloc,
     TensorDepths,
@@ -117,6 +118,7 @@ class SteadyStateScheduler:
         self.tensor_depths: TensorDepths = {}
 
         self.nb_cols_to_use = nb_cols_to_use
+        self.transfer_context = build_transfer_context(accelerator, nb_cols_to_use=nb_cols_to_use)
         self.backend = backend
         self.constraint_selection = constraint_selection
         self.total_mac_ops = total_mac_ops
@@ -314,6 +316,7 @@ class SteadyStateScheduler:
             mapping=self.mapping,
             cost_lut=self.cost_lut,
             nb_cols_to_use=self.nb_cols_to_use,
+            context=self.transfer_context,
             output_path=self.output_path,
             backend=self.backend,
             constraint_selection=self.constraint_selection,
@@ -476,32 +479,23 @@ class SteadyStateScheduler:
             assert len(srcs) == 1, f"Expected exactly one source for tensor {tensor}, found {len(srcs)}"
             src = new_nodes[srcs[0].name]
             dsts = [new_nodes[n.name] for n in self.workload.nodes if isinstance(n, HasInputs) and tensor in n.inputs]
-            is_constant_i_transfer = isinstance(src, InEdge)
             is_constant_o_transfer = any(isinstance(dst, OutEdge) for dst in dsts)
-            if is_constant_i_transfer:
-                self.add_two_transfer_nodes_for_constant_input_transfer(tensor, src, dsts, new_nodes)
-            elif is_constant_o_transfer:
+            if is_constant_o_transfer and not isinstance(src, InEdge):
                 self.add_two_transfer_nodes_for_constant_output_transfer(tensor, src, dsts, new_nodes)
             else:
-                self.add_single_transfer_node_for_non_constant_transfer(tensor, src, dsts, new_nodes)
+                self.add_transfer_nodes(tensor, src, dsts, new_nodes)
         new_workload = Workload(new_nodes.values())
         return new_workload
 
-    def add_two_transfer_nodes_for_constant_input_transfer(
-        self, tensor: Tensor, src: HasOutputs, dsts: list[HasInputs], new_nodes: dict[str, Node]
-    ):
+    def add_transfer_nodes(self, tensor: Tensor, src: HasOutputs, dsts: list[HasInputs], new_nodes: dict[str, Node]):
         """
-        For constant transfers, we add two transfer nodes:
-        - one from the source to the on-chip memory buffer,
-        - a second one from the on-chip memory buffer to the destination.
-        This is to ensure that the constant tensor is properly allocated in memory and can be reused across iterations.
+        Move ``tensor`` from its source to its destinations, either directly or staged on a memory tile.
 
-        Falls back to a single direct transfer from the source to the destinations (MEM_TO_COMPUTE)
-        when the accelerator has no on-chip memory tiles (e.g. TPU-like hardware), or when the tensor
-        is read only once and the memory tile would buy nothing.
+        Staging splits the move in two -- source to the on-chip buffer, buffer to every destination --
+        so the tile can hold the tensor across reads and re-lay it out on the way through. See
+        :meth:`_stages_on_mem_tile`.
         """
-        assert isinstance(src, InEdge), f"Expected source of constant transfer to be an InEdge, found {type(src)}"
-        if not self._get_accelerator_memory_cores() or not is_reused_on_chip(self.workload, tensor, dsts):
+        if not self._stages_on_mem_tile(tensor, src, dsts):
             transfer_type = self.determine_transfer_type(src, dsts)
             out_name = f"{tensor.name}_1"
             transfer_node, updated_tensors = self.generate_transfer_node(dsts, tensor, transfer_type, out_name)
@@ -523,6 +517,38 @@ class SteadyStateScheduler:
         new_nodes[transfer_node_2.name] = transfer_node_2
         for dst, updated_tensor in zip(dsts, updated_tensors_2, strict=True):
             self.update_destination_node_inputs(tensor, src, new_nodes, dst, updated_tensor)
+
+    def _stages_on_mem_tile(self, tensor: Tensor, src: HasOutputs, dsts: list[HasInputs]) -> bool:
+        """Whether a transfer is staged in a memory tile instead of landing straight on the cores.
+
+        Two things ask for a staging buffer. An offchip input read more than once is held in the tile,
+        which keeps the fan-out off the shim's two DMA channels: one channel feeds the tile, which then
+        serves every core from its own. And a producer and consumer that disagree on layout need the
+        tensor re-laid out between them, which is the tile's other job.
+        """
+        if not self._get_accelerator_memory_cores():
+            return False
+        if isinstance(src, InEdge):
+            if self.transfer_context.force_io_transfers_on_mem_tile:
+                return True
+            return is_reused_on_chip(self.workload, tensor, dsts)
+        produced = self._declared_layout(src, tensor)
+        if produced is None:
+            return False
+        consumed = (self._declared_layout(dst, tensor) for dst in dsts)
+        return any(layout is not None and layout != produced for layout in consumed)
+
+    def _declared_layout(self, node: Node, tensor: Tensor):
+        """The layout ``node``'s kernel declares for ``tensor``, None when it declares none.
+
+        None is "not known", never "differs": a node without a kernel, a kernel that declares
+        no layouts, and an operand past the end all leave the transfer unstaged.
+        """
+        kernel = self.mapping.get(node).kernel
+        layouts = kernel.operand_layouts() if kernel else ()
+        operands = (*getattr(node, "inputs", ()), *getattr(node, "outputs", ()))
+        index = operands.index(tensor)
+        return layouts[index] if index < len(layouts) else None
 
     def update_destination_node_inputs(self, tensor, src, new_nodes, dst, updated_tensor):
         # Find corresponding node in new_nodes as it might have already been updated
@@ -612,41 +638,6 @@ class SteadyStateScheduler:
         # Remove the original src node from the mapping as it has been updated with new outputs
         self.mapping.remove(src)
         return new_src
-
-    def add_single_transfer_node_for_non_constant_transfer(
-        self, tensor: Tensor, src: HasOutputs, dsts: list[HasInputs], new_nodes: dict[str, Node]
-    ):
-        """
-        For non-constant transfers, we add a single transfer node from the source to the destinations.
-        """
-        transfer_type = self.determine_transfer_type(src, dsts)
-        if transfer_type == TransferType.NONE:
-            return
-        transfer_node, updated_tensors = self.generate_transfer_node(
-            dsts, tensor, transfer_type, out_name=f"{tensor.name}_1"
-        )
-        new_nodes[transfer_node.name] = transfer_node
-        for dst, updated_tensor in zip(dsts, updated_tensors, strict=True):
-            # Find corresponding node in new_nodes as it might have already been updated
-            dst_new = new_nodes[dst.name]
-            # Update the dst input to the transfer node
-            assert len(src.outputs) == 1, "Src must have exactly one output tensor for index below."
-            input_idx = dst_new.inputs.index(tensor)
-            new_inputs = dst_new.inputs[:input_idx] + (updated_tensor,) + dst_new.inputs[input_idx + 1 :]
-            if isinstance(dst_new, ComputationNode):
-                new_dst = replace(dst_new, inputs=new_inputs)
-            elif isinstance(dst_new, OutEdge):
-                new_dst = OutEdge(
-                    name=dst_new.name,
-                    inputs=new_inputs,
-                )
-            else:
-                raise ValueError(f"Unexpected dst node type: {type(dst_new)}")
-            new_nodes[dst_new.name] = new_dst
-            # Update the mapping entry for this new_dst node to be the same as the original dst node
-            self.mapping.set(new_dst, self.mapping.get(dst))
-            # Remove the original dst node from the mapping as it has been updated with new inputs
-            self.mapping.remove(dst)
 
     def update_fusion_splits(self) -> dict[LayerDim, int]:
         # Update the fusion_splits based on the new workload with transfer nodes
@@ -835,20 +826,45 @@ class SteadyStateScheduler:
                 offchip_core = self.accelerator.get_core(self.accelerator.offchip_core_id)
                 possible_memory_cores = ((offchip_core,),)
         else:
-            possible_memory_cores_set: set[Core] = set()
+            # The destination order is the order the consumers declared, because that is what
+            # pairs a spatial index with a core. Sorting here would silently hand each index a
+            # different core than the computation node it feeds whenever a layer's cores are
+            # not listed in ascending id order.
+            destinations: dict[Core, None] = {}
             for dst in dsts:
                 assert len(self._retrieve_core_allocation(dst)) == 1, "TODO: Support multiple compute allocations."
-                possible_memory_cores_set.update(self._retrieve_core_allocation(dst)[0])
-            possible_memory_cores = (tuple(sorted(possible_memory_cores_set, key=lambda x: x.id)),)
+                destinations.update(dict.fromkeys(self._retrieve_core_allocation(dst)[0]))
+            possible_memory_cores = (tuple(destinations),)
         return possible_memory_cores
 
     def determine_possible_inter_core_tiling(
         self, node: TransferNode, possible_dst_allocs: tuple[tuple[Core, ...], ...], dsts: tuple[HasInputs, ...]
     ) -> tuple[InterCoreTiling, ...]:
         possible_inter_core_tiling = []
+        node_dims = set(self.ssw.get_dims(node))
+        # The first hop of a transfer chain lands on a memory tile, so its own destinations
+        # are transfers; the consumers that decide the split are the compute nodes behind it.
+        compute_dsts = [dst for dst in dsts if isinstance(dst, ComputationNode)] or [
+            dst
+            for dst in get_compute_predecessors_successors(tr=node, workload=self.ssw)
+            if isinstance(dst, ComputationNode)
+        ]
+        # A tensor whose dimensions the consumers do not split is held whole by every tile
+        # it sits on, so its transfer carries no tiling however many copies exist.
+        # Only the hop that lands on the memory tiles carries copies; the hop from them to
+        # the cores still describes how those cores split the work.
+        replicated = (
+            node.transfer_type is TransferType.MEM_TO_MEM
+            and bool(compute_dsts)
+            and not any(
+                dim in node_dims
+                for dst in compute_dsts
+                for dim, _ in self.ssw.get_unique_dims_inter_core_tiling(dst, self.mapping)
+            )
+        )
         for dst_allocs in possible_dst_allocs:
             nb_cores = len(dst_allocs)
-            if nb_cores == 1:
+            if nb_cores == 1 or replicated:
                 dst_tiling = tuple()
             elif all(isinstance(dst, ComputationNode) for dst in dsts):
                 # For fan-out: use the destination with the largest resource allocation
@@ -1026,9 +1042,23 @@ class SteadyStateScheduler:
         # Snap the count down to a divisor of the compute split so the transfer is one even inter-core tiling.
         if total_relevant_unrolling > 1:
             required_nb_memory_cores = largest_divisor_leq(total_relevant_unrolling, required_nb_memory_cores)
-        all_mem_cores = self._get_accelerator_memory_cores()
+        # Unrolling binds allocation position to spatial index, so column order keeps a tile with its own cores.
+        all_mem_cores = sorted(self._get_accelerator_memory_cores(), key=lambda core: (core.col_id, core.id))
         candidates = [tuple(combo) for combo in combinations(all_mem_cores, required_nb_memory_cores)]
+        # A tensor its consumers do not split is held whole, so a single tile can be left
+        # feeding every column. One copy per occupied column is the alternative: each tile
+        # serves its own column, and the shim broadcasts the tensor to them.
+        if total_relevant_unrolling == 1 and node.transfer_type is TransferType.MEM_TO_MEM:
+            per_column = tuple(c for c in all_mem_cores if c.col_id in self._column_ids_of(src))
+            if len(per_column) > 1 and per_column not in candidates:
+                candidates.append(per_column)
         return tuple(candidates)
+
+    def _column_ids_of(self, src: HasOutputs) -> set[int]:
+        """The array columns the source's cores sit in, empty if they carry no coordinates."""
+        allocations = self.mapping.get(src).resource_allocation
+        cores = allocations[0] if allocations else ()
+        return {core.col_id for core in cores if getattr(core, "col_id", None) is not None}
 
     def _columns_of(self, src: HasOutputs) -> int:
         """How many array columns the source's cores sit in, 0 if unknown.
@@ -1036,7 +1066,4 @@ class SteadyStateScheduler:
         Accelerator descriptions need not give their cores coordinates; without them the
         caller falls back to the rows-per-column estimate.
         """
-        allocations = self.mapping.get(src).resource_allocation
-        cores = allocations[0] if allocations else ()
-        columns = {core.col_id for core in cores if getattr(core, "col_id", None) is not None}
-        return len(columns)
+        return len(self._column_ids_of(src))

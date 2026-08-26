@@ -40,7 +40,10 @@ from stream.opt.allocation.constraint_optimization.context import (
 from stream.opt.allocation.constraint_optimization.timeslot_allocation import (
     _resource_key,
 )
-from stream.opt.allocation.constraint_optimization.utils import get_active_latency
+from stream.opt.allocation.constraint_optimization.utils import (
+    get_active_latency,
+    get_transfer_latency_for_path,
+)
 from stream.opt.solver import (
     ConstraintSelection,
     LinExpr,
@@ -301,12 +304,7 @@ class TransferAndTensorAllocator:
 
     @staticmethod
     def _transfer_latency_for_path(tr: TransferNode, path: MulticastPathPlan) -> int:
-        if not path or not path.links_used:
-            return 0
-        min_bw = min(link.bandwidth for link in path.links_used)
-        assert len(tr.inputs) == 1, "Only single-input transfers are supported for latency calculation."
-        tensor = tr.inputs[0]
-        return ceil(tensor.size_bits() / min_bw)
+        return get_transfer_latency_for_path(tr, path)
 
     def _ensure_same_ssis_for_all_transfers(self) -> None:
         first_ssis = self.ssis[self.transfer_nodes[0]]
@@ -417,6 +415,37 @@ class TransferAndTensorAllocator:
         """
         return self._unique_tensor_list(tr.inputs)
 
+    def _placement_width(self, tensors: list[Tensor]) -> int:
+        """How many cores one side of a transfer occupies."""
+        return max((len(choice) for t in tensors for choice in self._tensor_choices(t)), default=1)
+
+    def _distinct_slice_width(self, tensors: list[Tensor]) -> int:
+        """How many distinct slices one side of a transfer holds.
+
+        Cores that a spatial loop does not address separately read the same slice, and the
+        object-fifo lowering serves them from one channel, so they do not widen the fan-out.
+        """
+        return max(
+            (
+                prod(v.size for v in self.ssis[t].variables if v.type is IterationVariableType.SPATIAL and v.relevant)
+                for t in tensors
+                if t in self.ssis
+            ),
+            default=1,
+        )
+
+    def _transfer_fan_out(self, tr: TransferNode) -> int:
+        """DMA channels one source core drives: a fifo per destination it feeds a distinct slice to."""
+        n_src = self._distinct_slice_width(self._transfer_outgoing_tensors(tr))
+        n_dst = self._distinct_slice_width(self._transfer_incoming_tensors(tr))
+        return max(1, n_dst // n_src)
+
+    def _transfer_fan_in(self, tr: TransferNode) -> int:
+        """DMA channels one destination core is fed by: a fifo per source that gathers into it."""
+        n_src = self._placement_width(self._transfer_outgoing_tensors(tr))
+        n_dst = self._placement_width(self._transfer_incoming_tensors(tr))
+        return max(1, n_src // n_dst)
+
     def _transfer_incoming_dma_expr(self, tr: TransferNode, core: Core):
         """
         DMA contribution of one transfer to the incoming DMA load of one core.
@@ -429,14 +458,16 @@ class TransferAndTensorAllocator:
             so this helper is only used in the per-transfer mode.
         """
         tensors = self._transfer_incoming_tensors(tr)
-        return self.model.quicksum(self._tensor_on_core_expr(t, core) for t in tensors)
+        fan = self._transfer_fan_in(tr)
+        return self.model.quicksum(fan * self._tensor_on_core_expr(t, core) for t in tensors)
 
     def _transfer_outgoing_dma_expr(self, tr: TransferNode, core: Core):
         """
         DMA contribution of one transfer to the outgoing DMA load of one core.
         """
         tensors = self._transfer_outgoing_tensors(tr)
-        return self.model.quicksum(self._tensor_on_core_expr(t, core) for t in tensors)
+        fan = self._transfer_fan_out(tr)
+        return self.model.quicksum(fan * self._tensor_on_core_expr(t, core) for t in tensors)
 
     def _global_incoming_dma_expr(self, core: Core):
         """

@@ -8,6 +8,7 @@ from xdsl.ir.affine import AffineConstantExpr, AffineDimExpr, AffineExpr
 from stream.datatypes import InterCoreTiling, LayerDim
 from stream.workload.iterator_type import (
     NonlinearReductionUnrollError,
+    check_spatial_unroll_accumulation_free,
     check_spatial_unroll_legal,
     nonlinear_reduction_dims,
     sequential_dims,
@@ -179,35 +180,24 @@ def _create_spatial_iteration_variables(workload: "Workload", spatial_unrollings
                         type=IterationVariableType.SPATIAL,
                     )
                 )
-            elif dim not in workload.get_dims(node):
-                # if isinstance(node, ComputationNode):
-                #     effect = LoopEffect.ABSENT
-                # elif isinstance(node, TransferNode):
-                #     compute_preds_succs = get_compute_predecessors_successors(node, workload)
-                #     dim_not_in_any_compute = all(dim not in workload.get_dims(n) for n in compute_preds_succs)
-                #     effect = LoopEffect.ABSENT if dim_not_in_any_compute else LoopEffect.INVARIANT
-                # # This dimension is not present, so add an absent spatial var
-                iteration_variables[node].append(
-                    IterationVariable(
-                        dimension=dim,
-                        size=unrolling,
-                        effect=LoopEffect.ABSENT,
-                        type=IterationVariableType.SPATIOTEMPORAL,
-                    )
-                )
             elif any(dim == su[0] for su in spatial_unrollings[node]):
                 # This node has a different unrolling size for the unique dim
                 # Create a hybrid of both spatial and temporal iteration variables
                 spatial_size = next(su[1] for su in spatial_unrollings[node] if su[0] == dim)
                 remaining_size, rem = divmod(unrolling, spatial_size)
                 assert rem == 0, f"Unrolling size {unrolling} not divisible by spatial size {spatial_size}"
-                # First add the spatiotemporal variable
-                effect = LoopEffect.VARYING if dim in workload.get_dims(node) else LoopEffect.INVARIANT
+                own = dim in workload.get_dims(node)
+                effect = LoopEffect.VARYING if own else LoopEffect.INVARIANT
+                # First add the spatiotemporal variable. A dimension outside this operand's
+                # index space addresses nothing over time, so the remainder the cores iterate
+                # is absent rather than invariant: the tensor is already where it is needed
+                # and no step of that loop asks for it again. The spatial half stays, so the
+                # operand still reaches every core the dimension is spread over.
                 iteration_variables[node].append(
                     IterationVariable(
                         dimension=dim,
                         size=remaining_size,
-                        effect=effect,
+                        effect=effect if own else LoopEffect.ABSENT,
                         type=IterationVariableType.SPATIOTEMPORAL,
                     )
                 )
@@ -218,6 +208,17 @@ def _create_spatial_iteration_variables(workload: "Workload", spatial_unrollings
                         size=spatial_size,
                         effect=effect,
                         type=IterationVariableType.SPATIAL,
+                    )
+                )
+            elif dim not in workload.get_dims(node):
+                # Not this node's dimension and no unrolling of its own: one absent extent
+                # over the whole split.
+                iteration_variables[node].append(
+                    IterationVariable(
+                        dimension=dim,
+                        size=unrolling,
+                        effect=LoopEffect.ABSENT,
+                        type=IterationVariableType.SPATIOTEMPORAL,
                     )
                 )
             else:
@@ -237,14 +238,17 @@ def _create_spatial_iteration_variables(workload: "Workload", spatial_unrollings
 
 
 def _reject_illegal_spatial_unroll(
-    workload: "Workload", node: "HasIterationSpace", unrollings: InterCoreTiling
+    workload: "Workload", node: "HasIterationSpace", unrollings: InterCoreTiling, code_generated: bool
 ) -> None:
-    """Raise if a mapping spatially unrolls a SEQUENTIAL dimension or a nonlinear reduction of ``node``."""
-    if not (sequential_dims(node) or nonlinear_reduction_dims(node)):
+    """Raise if a mapping spatially unrolls a SEQUENTIAL dimension or a nonlinear reduction of ``node``,
+    or, when ``node`` is code-generated, any reduction at all."""
+    if not (code_generated or sequential_dims(node) or nonlinear_reduction_dims(node)):
         return
     node_dims = workload.get_dims(node)
     spatial_positions = [node_dims.index(dim) for dim, factor in unrollings if factor > 1 and dim in node_dims]
     check_spatial_unroll_legal(node, spatial_positions)
+    if code_generated:
+        check_spatial_unroll_accumulation_free(node, spatial_positions)
 
 
 def collect_spatial_unrollings(workload: "Workload", mapping: "Mapping"):
@@ -253,7 +257,7 @@ def collect_spatial_unrollings(workload: "Workload", mapping: "Mapping"):
         node_mapping = mapping.get(node)
         assert node_mapping is not None, f"No mapping found for node {node.name}"
         unrollings = workload.get_unique_dims_inter_core_tiling(node, mapping)
-        _reject_illegal_spatial_unroll(workload, node, unrollings)
+        _reject_illegal_spatial_unroll(workload, node, unrollings, node_mapping.kernel is not None)
         spatial_unrollings[node] = unrollings
 
     unique_spatial_unrollings: list[tuple[LayerDim, int]] = []

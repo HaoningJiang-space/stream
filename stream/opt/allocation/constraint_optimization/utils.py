@@ -306,12 +306,19 @@ def get_partitioned_nodes(
 
 
 def get_transfer_latency_for_path(tr: TransferNode, path: MulticastPathPlan) -> int:
-    if not path:
+    """Cycles one firing of this transfer costs on this path.
+
+    The bytes over the narrowest link, spread over the chains that carry them: sources and
+    targets that pair up one to one take a slice each over disjoint chains and move at once,
+    where a transfer that fans out of or into a single core shares that core's link.
+    """
+    if not path or not path.links_used:
         return 0
     min_bw = min(link.bandwidth for link in path.links_used)
     assert len(tr.inputs) == 1, "Only single-input transfers are supported for latency calculation."
     tensor = tr.inputs[0]
-    return ceil(tensor.size_bits() / min_bw)
+    chains = len(path.targets) if 1 < len(path.sources) == len(path.targets) else 1
+    return ceil(tensor.size_bits() / (min_bw * chains))
 
 
 def get_active_transfer_latency_for_path(tr: TransferNode, choice: MulticastPathPlan, reuse_factor, ssis) -> int:

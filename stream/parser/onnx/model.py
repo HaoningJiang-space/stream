@@ -67,6 +67,9 @@ class ONNXModelParser:
     OP_TYPE_TO_PARSER: dict[str, type[OnnxOperatorParser]] = {
         "Conv": ConvParser,
         "Gemm": GemmParser,
+        # The score GEMM with its online softmax folded in: a Gemm to the tiling
+        # machinery, since the softmax is elementwise over the block it produces.
+        "MatmulSoftmax": GemmParser,
         "MatMul": MatMulParser,
         "MaxPool": MaxPoolParser,
         "GlobalAveragePool": GlobalAveragePoolParser,
@@ -86,6 +89,7 @@ class ONNXModelParser:
         "Pow": ElementwiseParser,
         "Relu": ElementwiseParser,
         "Silu": ElementwiseParser,
+        "PartialSoftmax": ElementwiseParser,
         "Gelu": ElementwiseParser,
         "Sigmoid": ElementwiseParser,
         "Tanh": ElementwiseParser,
