@@ -179,6 +179,8 @@ class TransferAndTensorAllocator:
         self.y_path_choice: dict[tuple[TransferNode, MulticastPathPlan], SolverVar] = {}
 
         # auxiliary indicators
+        self._handover_bits: dict[int, int] = {}
+        self.transfer_side_indicator: dict[tuple[TransferNode, Core, bool], SolverVar] = {}
         self.transfer_core_indicator: dict[tuple[TransferNode, Core], SolverVar] = {}
         self.tensor_core_indicator: dict[tuple[Tensor, Core], SolverVar] = {}
         self.same_core_indicator: dict[tuple[Tensor, Tensor, Core], SolverVar] = {}
@@ -222,7 +224,12 @@ class TransferAndTensorAllocator:
         for node in self.workload.topological_sort():
             if not isinstance(node, HasOutputs):
                 continue
-            for tensor in node.outputs:
+            # A node's outputs, and the state it keeps: the state is resident on the cores the
+            # node runs on, so it is allocated exactly where its node is and never moved.
+            carried = (
+                [x for x in node.inputs if is_state_operand(node, x)] if isinstance(node, HasIterationSpace) else []
+            )
+            for tensor in (*node.outputs, *carried):
                 if tensor in self.possible_tensor_allocations:
                     continue
                 raw_alloc = self._retrieve_core_allocation(node)
@@ -302,8 +309,11 @@ class TransferAndTensorAllocator:
     def _mem_factor(t: Tensor, core: Core) -> int:
         return 1
 
-    @staticmethod
-    def _transfer_latency_for_path(tr: TransferNode, path: MulticastPathPlan) -> int:
+    def _transfer_latency_for_path(self, tr: TransferNode, path: MulticastPathPlan) -> int:
+        # A transfer served out of memory the two cores share reads in place: no bytes cross a link,
+        # so it adds no time to the slot, the same reason it spends no DMA channel.
+        if self._choice_shares_memory(tr, path):
+            return 0
         return get_transfer_latency_for_path(tr, path)
 
     def _ensure_same_ssis_for_all_transfers(self) -> None:
@@ -434,6 +444,105 @@ class TransferAndTensorAllocator:
             default=1,
         )
 
+    @staticmethod
+    def _communicating_pairs(choice: MulticastPathPlan) -> tuple[tuple[Core, Core], ...]:
+        """Which source and target of this transfer actually hand to one another.
+
+        Codegen matches a producer to a consumer by spatial index, and the spatial part of
+        a split runs fastest, so the consumer holding spatial point ``j`` is fed by the
+        producers at ``j``, ``j + m``, ``j + 2m`` and so on, ``m`` being the narrower of
+        the two sides. Which is the same relation the flash bindings use to find the core
+        holding the other half of an online-softmax step.
+        """
+        src, dst = choice.sources, choice.targets
+        if not src or not dst:
+            return ()
+        narrow = min(len(src), len(dst))
+        return tuple((src[i], dst[j]) for i in range(len(src)) for j in range(len(dst)) if i % narrow == j % narrow)
+
+    def _handovers(self) -> list[tuple[Core, Core, int]]:
+        """Cores that pass a kernel's state to the step behind them, and the bits each holds.
+
+        A kernel that keeps a running reduction hands the finished scale to whichever core
+        consumes its output, in a buffer both ends hold. Which core meets which is the same
+        relation the transfer between them uses, so it is read off the allocation the mapping
+        already declares rather than being decided again.
+        """
+        found: list[tuple[Core, Core, int]] = []
+        for node in self.ssc_nodes:
+            kernel = self.mapping.get(node).kernel
+            for state in kernel.state_operands() if kernel else ():
+                if not state.handover:
+                    continue
+                held = next((t for t in node.inputs if is_state_operand(node, t)), None)
+                if held is None:
+                    continue
+                bits = self.workload.get_tensor_single_core(held, node, self.mapping).size_bits()
+                sources = self._retrieve_core_allocation(node)[0]
+                for consumer in self._consumers(node):
+                    targets = self._retrieve_core_allocation(consumer)[0]
+                    narrow = min(len(sources), len(targets))
+                    found += [
+                        (sources[i], targets[j], state.handover * bits)
+                        for i in range(len(sources))
+                        for j in range(len(targets))
+                        if narrow and i % narrow == j % narrow
+                    ]
+        return found
+
+    def _consumers(self, node: ComputationNode) -> list[ComputationNode]:
+        """The computation nodes this one's output reaches, across the transfer between them."""
+        reached = []
+        for succ in self.workload.successors(node):
+            reached += (
+                [succ]
+                if isinstance(succ, ComputationNode)
+                else [x for x in self.workload.successors(succ) if isinstance(x, ComputationNode)]
+            )
+        return reached
+
+    def _transfer_is_broadcast(self, tr: TransferNode) -> bool:
+        """Whether several cores are served the same slice, so one fifo carries them all.
+
+        ``requiresDMAs`` bails out before it ever looks at the tiles unless the fifo has a
+        single consumer, so a broadcast is on the DMA however the cores are placed.
+        """
+        tensors = self._transfer_incoming_tensors(tr)
+        return self._distinct_slice_width(tensors) < self._placement_width(tensors)
+
+    def _transfer_shares_memory(self, tr: TransferNode, core: Core, incoming: bool) -> bool:
+        """Whether this core is served this transfer out of memory it already shares.
+
+        The object-fifo lowering keeps a fifo out of the DMA when it has one consumer, no
+        repeat count and no layout transform on the way. Stream only routes a transfer core
+        to core when the two sides already agree on layout -- a disagreement is what puts it
+        on a memory tile -- so the case left to check is whether the cores this one actually
+        hands to, or takes from, are its neighbours.
+        """
+        choices = self.possible_transfer_allocations.get(tr) or ()
+        if not choices or self._transfer_is_broadcast(tr):
+            return False
+        # Only a transfer that lands straight on the cores is lowered core to core. One
+        # staged on a memory tile is two transfers, and each leg ends on the tile.
+        if tr.transfer_type is not TransferType.COMPUTE_TO_COMPUTE:
+            return False
+        for choice in choices:
+            touching = [(a, b) for a, b in self._communicating_pairs(choice) if (b if incoming else a) == core]
+            if not touching:
+                return False
+            if any(not self.context.shares_memory(one, other) for one, other in touching):
+                return False
+        return True
+
+    def _choice_shares_memory(self, tr: TransferNode, choice: MulticastPathPlan) -> bool:
+        """Whether this transfer, placed on this choice, lands core to core out of memory the two
+        sides already share -- the object-fifo lowering that spends no DMA channel and moves no bytes
+        over a link. The per-choice form of the same conditions ``_transfer_shares_memory`` reads."""
+        if tr.transfer_type is not TransferType.COMPUTE_TO_COMPUTE or self._transfer_is_broadcast(tr):
+            return False
+        pairs = self._communicating_pairs(choice)
+        return bool(pairs) and all(self.context.shares_memory(one, other) for one, other in pairs)
+
     def _transfer_fan_out(self, tr: TransferNode) -> int:
         """DMA channels one source core drives: a fifo per destination it feeds a distinct slice to."""
         n_src = self._distinct_slice_width(self._transfer_outgoing_tensors(tr))
@@ -457,17 +566,17 @@ class TransferAndTensorAllocator:
             the aggregation across transfers is handled in _add_dma_usage_constraints(),
             so this helper is only used in the per-transfer mode.
         """
-        tensors = self._transfer_incoming_tensors(tr)
-        fan = self._transfer_fan_in(tr)
-        return self.model.quicksum(fan * self._tensor_on_core_expr(t, core) for t in tensors)
+        if self._transfer_shares_memory(tr, core, incoming=True):
+            return 0
+        return self._transfer_fan_in(tr) * self._transfer_side_uses_core_var(tr, core, incoming=True)._raw
 
     def _transfer_outgoing_dma_expr(self, tr: TransferNode, core: Core):
         """
         DMA contribution of one transfer to the outgoing DMA load of one core.
         """
-        tensors = self._transfer_outgoing_tensors(tr)
-        fan = self._transfer_fan_out(tr)
-        return self.model.quicksum(fan * self._tensor_on_core_expr(t, core) for t in tensors)
+        if self._transfer_shares_memory(tr, core, incoming=False):
+            return 0
+        return self._transfer_fan_out(tr) * self._transfer_side_uses_core_var(tr, core, incoming=False)._raw
 
     def _global_incoming_dma_expr(self, core: Core):
         """
@@ -568,6 +677,33 @@ class TransferAndTensorAllocator:
         )
         return u
 
+    def _transfer_side_uses_core_var(self, tr: TransferNode, core: Core, incoming: bool) -> SolverVar:
+        """Whether any tensor this transfer brings to (or takes from) this core sits on it.
+
+        A fifo carries every slice its core works through, one after another, so what a
+        transfer costs a core is its fan and not the number of slices that travel over it.
+        """
+        key = (tr, core, incoming)
+        if key in self.transfer_side_indicator:
+            return self.transfer_side_indicator[key]
+
+        side = "in" if incoming else "out"
+        u = self.model.add_var(vtype=SolverVarType.BINARY, name=f"us_{tr.name}_{_resource_key(core)}_{side}")
+        self.transfer_side_indicator[key] = u
+
+        tensors = self._transfer_incoming_tensors(tr) if incoming else self._transfer_outgoing_tensors(tr)
+        occ_exprs = [self._tensor_on_core_expr(t, core) for t in tensors if isinstance(t, Tensor)]
+        if not occ_exprs:
+            self.model.add_constr(u == 0, name=f"us_zero_{tr.name}_{_resource_key(core)}_{side}")
+            return u
+        for i, occ in enumerate(occ_exprs):
+            self.model.add_constr(u >= occ, name=f"us_lb_{tr.name}_{_resource_key(core)}_{side}_{i}")
+        self.model.add_constr(
+            u <= self.model.quicksum(occ_exprs),
+            name=f"us_ub_{tr.name}_{_resource_key(core)}_{side}",
+        )
+        return u
+
     def _tensor_uses_core_var(self, t: Tensor, core: Core) -> SolverVar:
         key = (t, core)
         if key in self.tensor_core_indicator:
@@ -655,9 +791,12 @@ class TransferAndTensorAllocator:
                         stop = i
                         break
                 assert stop >= -1, f"Something went wrong for {t.name} REUSE indexing: {reuses}"
+                # The declared reuse is a floor, not a target: holding a tensor across more
+                # levels than asked for only removes transfers, and the capacity, routing and
+                # compute-compatibility constraints already say when that does not fit.
                 self.model.add_constr(
-                    self.z_stop[(t, stop)] == 1,
-                    name=f"zStop_FixedStop_{t.name}_L{stop}",
+                    self.model.quicksum(self.z_stop[(t, s)]._raw for s in range(stop, len(sizes))) == 1,
+                    name=f"zStop_AtLeast_{t.name}_L{stop}",
                 )
 
     def __create_transfer_path_vars(self):
@@ -825,7 +964,9 @@ class TransferAndTensorAllocator:
         self.core_load: dict[Core, Any] = defaultdict(int)
         # Transfer output tensors on their chosen compute/memory cores
         for node in self.workload.get_iteration_space_nodes():
-            for t in node.outputs:
+            # A node's outputs, and the state it keeps resident while it runs there.
+            carried = [x for x in node.inputs if is_state_operand(node, x)]
+            for t in (*node.outputs, *carried):
                 tile = self.workload.get_tensor_single_core(t, node, self.mapping)
                 tensor_size = tile.size_bits()
                 tile_dims, tile_dtype = self._tile_shape(node, t, tile)
@@ -852,6 +993,17 @@ class TransferAndTensorAllocator:
                             "dims": tile_dims,
                             "dtype": tile_dtype,
                         }
+
+        # The core that writes a handover holds it. A core reading one out of memory it
+        # already shares reads it in place; one further away is given a copy of its own.
+        for one, other, bits in self._handovers():
+            holders = (one,) if self.context.shares_memory(one, other) else (one, other)
+            for core in holders:
+                self.core_load[core] = self.core_load[core] + bits
+                self._handover_bits[core.id] = self._handover_bits.get(core.id, 0) + bits
+                terms = self._resource_terms[("memory_capacity", core.id)]
+                held = terms.get("handover", {}).get("value", 0) + bits / 8
+                terms["handover"] = {"value": held, "dims": (), "dtype": ""}
 
         for c, expr in self.core_load.items():
             cap = c.get_memory_capacity()
@@ -1308,6 +1460,16 @@ class TransferAndTensorAllocator:
         self.core_dma_in: dict[Core, SolverVar] = {}
         self.core_dma_out: dict[Core, SolverVar] = {}
 
+        # A handover read out of memory the two cores share costs neither of them a channel;
+        # one that has to cross the array costs the sender an outgoing and the reader an
+        # incoming, like any other fifo between two cores.
+        handover_out: dict[Core, int] = defaultdict(int)
+        handover_in: dict[Core, int] = defaultdict(int)
+        for one, other, _ in self._handovers():
+            if not self.context.shares_memory(one, other):
+                handover_out[one] += 1
+                handover_in[other] += 1
+
         dma_cores = self._all_dma_candidate_cores()
 
         for core in dma_cores:
@@ -1320,6 +1482,8 @@ class TransferAndTensorAllocator:
             else:
                 in_expr = self.model.quicksum(self._transfer_incoming_dma_expr(tr, core) for tr in self.transfer_nodes)
                 out_expr = self.model.quicksum(self._transfer_outgoing_dma_expr(tr, core) for tr in self.transfer_nodes)
+                in_expr = in_expr + handover_in[core]
+                out_expr = out_expr + handover_out[core]
 
             self.model.add_constr(
                 v_in == in_expr,
@@ -2518,8 +2682,9 @@ class TransferAndTensorAllocator:
             core = cores.get(core_id)
             if core is None:
                 continue
-            resident = 0
-            per_tensor: dict[str, int] = {}
+            handed = self._handover_bits.get(core_id, 0)
+            resident = handed
+            per_tensor: dict[str, int] = {"handover": handed} if handed else {}
             try:
                 for indicator, bits, tensor_name in terms:
                     # A MILP binary comes back as 0.9999...; anything above the midpoint is a 1.

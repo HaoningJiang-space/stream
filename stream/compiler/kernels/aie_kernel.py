@@ -65,6 +65,24 @@ def induction_variable(op: Operation, var: StrensorVar, occurrence: int = 0) -> 
     raise ValueError(f"kernel call is not inside the loop iterating {var} ({occurrence})")
 
 
+@dataclass(frozen=True)
+class StateOperand:
+    """A buffer a kernel keeps on its core from one step of a loop to the next.
+
+    Read at ``carried_over - 1`` and written at ``carried_over``, which is the recurrence
+    :func:`~stream.workload.iterator_type.is_state_operand` recognises and what makes that
+    dimension SEQUENTIAL. ``rows`` is the extent kept per step; the node supplies the extent
+    of ``indexed_by``, so splitting that dimension divides the state with it. ``handover`` is
+    how deep a copy the next step of the computation reads, zero for a state kept private.
+    """
+
+    name: str
+    rows: int
+    carried_over: int
+    indexed_by: int
+    handover: int = 0
+
+
 @dataclass
 class AIEKernel(ABC):
     utilization: float
@@ -88,6 +106,11 @@ class AIEKernel(ABC):
     def function_call(self, op: ComputationNodeOp) -> Sequence[Operation]: ...
 
     def operand_layouts(self) -> Sequence[TiledStridedLayout]:
+        return []
+
+    def state_operands(self) -> Sequence[StateOperand]:
+        """What this kernel keeps in its core between iterations. Empty for a kernel that
+        keeps nothing, which is every kernel that is not carrying a running reduction."""
         return []
 
     def rewrite(self, op: ComputationNodeOp, rewriter: PatternRewriter) -> None:
