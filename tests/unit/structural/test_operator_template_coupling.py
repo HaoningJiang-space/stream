@@ -111,6 +111,9 @@ def test_runner_writes_hashed_provenance_sidecar(tmp_path):
     manifest = json.loads((tmp_path / "report.json.run.json").read_text(encoding="utf-8"))
     assert manifest["source_commit"] == "frozen-commit"
     assert manifest["invocation"] == ["python", "runner.py"]
+    assert manifest["report"]["path"] == "report.json"
+    assert manifest["stdout"]["path"] == "report.json.stdout.log"
+    assert manifest["stderr"]["path"] == "report.json.stderr.log"
     assert len(manifest["report"]["sha256"]) == 64
     assert len(manifest["stdout"]["sha256"]) == 64
     assert len(manifest["stderr"]["sha256"]) == 64

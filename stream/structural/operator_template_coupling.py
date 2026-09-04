@@ -154,9 +154,9 @@ def write_operator_template_coupling_provenance(
         "host": platform.node(),
         "source_commit": report["source"]["commit"],
         "invocation": list(invocation),
-        "report": {"path": str(report_path), "sha256": _plain_file_digest(report_path)},
-        "stdout": {"path": str(stdout_path), "sha256": _plain_file_digest(stdout_path)},
-        "stderr": {"path": str(stderr_path), "sha256": _plain_file_digest(stderr_path)},
+        "report": {"path": report_path.name, "sha256": _plain_file_digest(report_path)},
+        "stdout": {"path": stdout_path.name, "sha256": _plain_file_digest(stdout_path)},
+        "stderr": {"path": stderr_path.name, "sha256": _plain_file_digest(stderr_path)},
         "environment": environment,
         "environment_sha256": sha256(
             json.dumps(environment, sort_keys=True, separators=(",", ":")).encode()
@@ -170,12 +170,16 @@ def verify_operator_template_coupling_provenance(manifest_path: str | Path) -> b
     """Accept a formal run only when its completion marker and every recorded hash match."""
 
     try:
-        manifest = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
+        manifest_path = Path(manifest_path).resolve()
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         if manifest["schema"] != "stream-gate-run-provenance-v1" or not manifest["source_commit"]:
             return False
         for artifact in ("report", "stdout", "stderr"):
             entry = manifest[artifact]
-            if _plain_file_digest(Path(entry["path"])) != entry["sha256"]:
+            artifact_path = Path(entry["path"])
+            if artifact_path.is_absolute() or artifact_path.parent != Path("."):
+                return False
+            if _plain_file_digest(manifest_path.parent / artifact_path) != entry["sha256"]:
                 return False
         environment_digest = sha256(
             json.dumps(manifest["environment"], sort_keys=True, separators=(",", ":")).encode()
