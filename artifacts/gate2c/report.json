@@ -1,0 +1,143 @@
+{
+  "contract": {
+    "audited_structural_model": {
+      "composition": "sum of tensor-owned objective factors",
+      "objective_factor": "one tensor-owned link-service event sum per variable",
+      "physical_event_ownership": "each link-service event belongs to exactly one staging tensor factor",
+      "sha256": "sha256:a30439a300647d0303e73662afe9b44b622fc9f9b9bc3ad2c66159d22ac58082",
+      "source": "stream/structural/predictive_gate.py",
+      "variable": "one concrete placement/path assignment per nondegenerate staging tensor"
+    },
+    "classification": {
+      "COUPLED_NOT_SOLVED": "at least one non-unary factor exists; this census does not benchmark VE",
+      "SEPARABLE": "all factors are unary; induced width is zero and independent argmin is exact"
+    },
+    "contract": "gate2c-executable-factor-coupling-census",
+    "excluded_claims": [
+      "VE_speedup",
+      "VE_scalability",
+      "TETRA_feasible_set_separability",
+      "latency_optimality"
+    ],
+    "excluded_interactions": [
+      "shared_memory_capacity",
+      "cross_tensor_link_contention",
+      "cross_tensor_multicast",
+      "exact_reuse",
+      "partial_materialization",
+      "streaming_schedule"
+    ],
+    "metrics": [
+      "factor_arity_histogram",
+      "non_unary_factor_count",
+      "primal_graph_edge_count",
+      "largest_coupled_component",
+      "interaction_variable_ratio",
+      "induced_width",
+      "independent_argmin_evaluations"
+    ],
+    "source_gate": {
+      "artifact": "artifacts/gate2b/report.json",
+      "required_verdicts": [
+        "PASS",
+        "NARROW"
+      ],
+      "required_workloads": [
+        "swiglu",
+        "fsrcnn",
+        "resnet18",
+        "attention_head"
+      ],
+      "sha256": "sha256:49a7a09edcdbae137c72ed5ffdfc2bf3b021d9809ab71d2f36ba1584043bf971"
+    },
+    "version": 1
+  },
+  "generated_at": "2026-09-04T19:42:45.028169+00:00",
+  "inference_regime": "SEPARABLE",
+  "source_gate": {
+    "audited_model_path": "stream/structural/predictive_gate.py",
+    "audited_model_sha256": "sha256:a30439a300647d0303e73662afe9b44b622fc9f9b9bc3ad2c66159d22ac58082",
+    "opportunity_class": "PLACEMENT_ONLY",
+    "path": "artifacts/gate2b/report.json",
+    "sha256": "sha256:49a7a09edcdbae137c72ed5ffdfc2bf3b021d9809ab71d2f36ba1584043bf971",
+    "verdict": "NARROW"
+  },
+  "summary": {
+    "factor_count": 17,
+    "independent_argmin_evaluations": 85,
+    "induced_width": 0,
+    "interaction_variable_ratio": 0.0,
+    "largest_coupled_component": 1,
+    "non_unary_factor_count": 0,
+    "primal_graph_edge_count": 0,
+    "variable_count": 17,
+    "workload_count": 4
+  },
+  "verdict": "PASS",
+  "workloads": {
+    "attention_head": {
+      "factor_arity_histogram": {
+        "1": 2
+      },
+      "factor_count": 2,
+      "family": "attention_fork_join",
+      "independent_argmin_evaluations": 10,
+      "induced_width": 0,
+      "inference_regime": "SEPARABLE",
+      "interaction_variable_ratio": 0.0,
+      "largest_coupled_component": 1,
+      "naive_assignment_space": "25",
+      "non_unary_factor_count": 0,
+      "primal_graph_edge_count": 0,
+      "variable_count": 2
+    },
+    "fsrcnn": {
+      "factor_arity_histogram": {
+        "1": 8
+      },
+      "factor_count": 8,
+      "family": "sequential_cnn",
+      "independent_argmin_evaluations": 40,
+      "induced_width": 0,
+      "inference_regime": "SEPARABLE",
+      "interaction_variable_ratio": 0.0,
+      "largest_coupled_component": 1,
+      "naive_assignment_space": "390625",
+      "non_unary_factor_count": 0,
+      "primal_graph_edge_count": 0,
+      "variable_count": 8
+    },
+    "resnet18": {
+      "factor_arity_histogram": {
+        "1": 6
+      },
+      "factor_count": 6,
+      "family": "residual_cnn",
+      "independent_argmin_evaluations": 30,
+      "induced_width": 0,
+      "inference_regime": "SEPARABLE",
+      "interaction_variable_ratio": 0.0,
+      "largest_coupled_component": 1,
+      "naive_assignment_space": "15625",
+      "non_unary_factor_count": 0,
+      "primal_graph_edge_count": 0,
+      "variable_count": 6
+    },
+    "swiglu": {
+      "factor_arity_histogram": {
+        "1": 1
+      },
+      "factor_count": 1,
+      "family": "transformer_ffn",
+      "independent_argmin_evaluations": 5,
+      "induced_width": 0,
+      "inference_regime": "SEPARABLE",
+      "interaction_variable_ratio": 0.0,
+      "largest_coupled_component": 1,
+      "naive_assignment_space": "5",
+      "non_unary_factor_count": 0,
+      "primal_graph_edge_count": 0,
+      "variable_count": 1
+    }
+  }
+}
