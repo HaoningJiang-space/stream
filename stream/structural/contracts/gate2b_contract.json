@@ -1,0 +1,45 @@
+{
+  "contract": "gate2b-real-workload-opportunity-census",
+  "version": 1,
+  "source_gate": {
+    "name": "Gate 2A Real-Workload Production Lifting Validity",
+    "version": "gate2a-v1",
+    "artifact": "artifacts/gate2a/report.json",
+    "sha256": "sha256:d2473721f8e9d4796db5db7797ddf7c0099e82d4788ab4d081fe9b6a218aa145",
+    "required_verdict": "PASS",
+    "required_workloads": ["swiglu", "fsrcnn", "resnet18", "attention_head"]
+  },
+  "decision_space": {
+    "eligible_tensor": "transfer-produced tensor with two or more adjacent transfers",
+    "concrete_assignment": "one compatible staging placement and one path choice for every adjacent transfer",
+    "nondegenerate_tensor": "concrete assignment domain size greater than one",
+    "placement_nondegenerate": "more than one compatible staging placement",
+    "path_nondegenerate": "more than one compatible adjacent-path tuple for at least one fixed placement",
+    "naive_space": "cartesian product of eligible tensor assignment domains; reported only as a census, not as a coupling claim"
+  },
+  "classification": {
+    "PASS": "every workload has a nondegenerate tensor and the frozen portfolio contains an independent path choice",
+    "NARROW": "some nondegenerate tensor opportunity exists, but a workload has none or all variation is placement-only",
+    "FAIL": "the frozen portfolio contains no nondegenerate tensor"
+  },
+  "metrics": [
+    "eligible_tensor_count",
+    "nondegenerate_tensor_count",
+    "placement_nondegenerate_count",
+    "path_nondegenerate_count",
+    "domain_size_histogram",
+    "naive_assignment_space",
+    "eligible_logical_bits",
+    "controlled_logical_bits",
+    "controlled_logical_bits_ratio",
+    "eligible_logical_edge_bits",
+    "controlled_logical_edge_bits"
+  ],
+  "excluded_claims": [
+    "factor_coupling",
+    "variable_elimination_scalability",
+    "physical_traffic_volume",
+    "TETRA_latency_improvement",
+    "capacity_or_contention_interaction"
+  ]
+}
