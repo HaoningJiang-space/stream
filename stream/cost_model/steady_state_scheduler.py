@@ -104,6 +104,7 @@ class SteadyStateScheduler:
         backend: str = "ORTOOLS_GSCIP",
         constraint_selection: ConstraintSelection | None = None,
         total_mac_ops: int | None = None,
+        max_transfer_plans_per_endpoint: int = 1,
     ):
         """
         Initialize the SteadyStateScheduler with the allocation and accelerator.
@@ -134,6 +135,9 @@ class SteadyStateScheduler:
         self.backend = backend
         self.constraint_selection = constraint_selection
         self.total_mac_ops = total_mac_ops
+        if type(max_transfer_plans_per_endpoint) is not int or max_transfer_plans_per_endpoint < 1:
+            raise ValueError("max_transfer_plans_per_endpoint must be a positive integer")
+        self.max_transfer_plans_per_endpoint = max_transfer_plans_per_endpoint
 
         self.output_path = output_path
         if self.output_path:
@@ -1048,6 +1052,7 @@ class SteadyStateScheduler:
                 possible_resource_plans = self.accelerator.communication_manager.get_possible_transfer_plan(
                     src_allocs=src_allocs,
                     dst_allocs=dst_allocs,
+                    max_plans=self.max_transfer_plans_per_endpoint,
                 )
                 all_possible_resource_plans.extend(possible_resource_plans)
         return tuple(all_possible_resource_plans)

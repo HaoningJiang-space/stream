@@ -5,6 +5,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from stream.cost_model.communication_manager import CommunicationManager
 from stream.cost_model.steady_state_scheduler import PreparedScheduleProblem, SteadyStateScheduler
 from stream.datatypes import LayerDim
 from stream.mapping.mapping import Mapping
@@ -116,6 +117,42 @@ def test_build_tta_rejects_a_stale_mapping():
 
     with pytest.raises(ValueError, match="stale"):
         scheduler.build_tta(stale)
+
+
+def test_scheduler_forwards_configured_transfer_plan_limit(monkeypatch):
+    scheduler = _scheduler()
+    scheduler.max_transfer_plans_per_endpoint = 4
+    source = MagicMock()
+    source_allocation = (MagicMock(),)
+    destination_allocation = (MagicMock(),)
+    plans = (MagicMock(), MagicMock())
+    monkeypatch.setattr(scheduler, "_retrieve_core_allocation", lambda _node: (source_allocation,))
+    scheduler.accelerator.communication_manager.get_possible_transfer_plan.return_value = plans
+
+    result = scheduler.determine_possible_transfer_plans(source, (destination_allocation,))
+
+    assert result == plans
+    scheduler.accelerator.communication_manager.get_possible_transfer_plan.assert_called_once_with(
+        src_allocs=source_allocation,
+        dst_allocs=destination_allocation,
+        max_plans=4,
+    )
+
+
+@pytest.mark.parametrize("invalid", [True, 1.5, "4", 0])
+def test_transfer_plan_limits_fail_closed(invalid):
+    with pytest.raises(ValueError, match="positive integer"):
+        SteadyStateScheduler(
+            MagicMock(),
+            MagicMock(),
+            Mapping(),
+            {},
+            MagicMock(),
+            max_transfer_plans_per_endpoint=invalid,
+        )
+    manager = object.__new__(CommunicationManager)
+    with pytest.raises(ValueError, match="positive integer"):
+        manager.get_possible_transfer_plan([], [], max_plans=invalid)
 
 
 def test_transfer_tensor_names_do_not_alias_source_graph_names():

@@ -17,6 +17,8 @@ import argparse
 import inspect
 from unittest.mock import MagicMock
 
+import pytest
+
 from stream.opt.solver import ConstraintSelection
 
 # ---------------------------------------------------------------------------
@@ -141,6 +143,48 @@ def test_scheduler_defaults_constraint_selection_when_none():
         MagicMock(),  # cost_lut
     )
     assert scheduler.constraint_selection is None, "SteadyStateScheduler constraint_selection must default to None"
+
+
+def test_transfer_plan_limit_flows_from_legacy_config_to_scheduler(monkeypatch):
+    """The public StageContext configuration reaches the scheduler constructor unchanged."""
+    from stream.opt.allocation.constraint_optimization.config import ConstraintOptStageConfig
+    from stream.stages.allocation import constraint_optimization_allocation as allocation_module
+    from stream.stages.context import StageContext
+
+    captured = {}
+
+    class SchedulerStub:
+        def __init__(self, *_args, **kwargs):
+            captured.update(kwargs)
+            self.mapping = MagicMock()
+
+        def run(self):
+            return MagicMock()
+
+    monkeypatch.setattr(allocation_module, "SteadyStateScheduler", SchedulerStub)
+    ctx = StageContext.from_kwargs(
+        workload=MagicMock(),
+        accelerator=MagicMock(),
+        mapping=MagicMock(),
+        cost_lut=MagicMock(),
+        fusion_splits={},
+        output_path="/tmp/test",
+        max_transfer_plans_per_endpoint=4,
+    )
+    stage = allocation_module.ConstraintOptimizationAllocationStage([MagicMock()], ctx)
+
+    stage.find_best_tensor_transfer_allocation()
+
+    assert stage.config == ConstraintOptStageConfig.from_legacy_kwargs(max_transfer_plans_per_endpoint=4)
+    assert captured["max_transfer_plans_per_endpoint"] == 4
+
+
+@pytest.mark.parametrize("invalid", [True, 1.5, "4", 0])
+def test_transfer_plan_limit_requires_a_positive_integer(invalid):
+    from stream.opt.allocation.constraint_optimization.config import TransferMilpConfig
+
+    with pytest.raises(ValueError, match="positive integer"):
+        TransferMilpConfig(max_transfer_plans_per_endpoint=invalid)
 
 
 # ---------------------------------------------------------------------------

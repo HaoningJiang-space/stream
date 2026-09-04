@@ -48,6 +48,7 @@ from stream.workload.tensor import Tensor
 
 _MIN_STAGING_TRANSFERS = 2
 _MAX_AUTOMATIC_WORKERS = 8
+_GATE2A_TRANSFER_PLAN_LIMIT = 1
 _WORKER_ARGUMENT_COUNT = 3
 _FRONTEND_STAGES = (
     "accelerator_parser",
@@ -134,6 +135,7 @@ def run_real_workload_lifting(
             Path(temporary),
             repeat_count,
             worker_count,
+            _GATE2A_TRANSFER_PLAN_LIMIT,
         )
     preparation_wall_seconds = perf_counter() - preparation_started
 
@@ -151,6 +153,7 @@ def run_real_workload_lifting(
         "execution": {
             "attempt_count": attempt_count,
             "max_workers": worker_count,
+            "max_transfer_plans_per_endpoint": _GATE2A_TRANSFER_PLAN_LIMIT,
             "preparation_wall_seconds": round(preparation_wall_seconds, 6),
         },
         "hardware": {"path": str(hardware_path), "sha256": _file_digest(hardware_path)},
@@ -181,6 +184,7 @@ def _run_preparation_attempts(
     temporary_root: Path,
     repeat_count: int,
     max_workers: int,
+    max_transfer_plans_per_endpoint: int,
 ) -> dict[str, Any]:
     attempts_by_workload: dict[str, list[dict[str, Any] | None]] = {
         workload_spec["id"]: [None] * repeat_count for workload_spec in workload_specs
@@ -196,6 +200,7 @@ def _run_preparation_attempts(
                     hardware_path,
                     temporary_root / f"{workload_id}-{repeat}",
                     repeat,
+                    max_transfer_plans_per_endpoint,
                 )
                 pending[future] = (workload_id, repeat)
         for future in as_completed(pending):
@@ -249,7 +254,11 @@ def _summarize_workload_preparation(
 
 
 def _run_isolated_attempt(
-    workload_spec: dict[str, str], hardware_path: Path, work_dir: Path, repeat: int
+    workload_spec: dict[str, str],
+    hardware_path: Path,
+    work_dir: Path,
+    repeat: int,
+    max_transfer_plans_per_endpoint: int,
 ) -> dict[str, Any]:
     """Prepare once in a fresh interpreter with a repeat-specific hash seed."""
 
@@ -264,6 +273,7 @@ def _run_isolated_attempt(
                 "hardware_path": str(hardware_path),
                 "work_dir": str(work_dir / "preparation"),
                 "result_path": str(result_path),
+                "max_transfer_plans_per_endpoint": max_transfer_plans_per_endpoint,
             },
             sort_keys=True,
         ),
@@ -309,6 +319,7 @@ def _run_preparation_worker(request_path: Path) -> None:
                 request["workload_spec"],
                 Path(request["hardware_path"]),
                 Path(request["work_dir"]),
+                max_transfer_plans_per_endpoint=int(request["max_transfer_plans_per_endpoint"]),
             )
         manifest["execution_boundary"] = execution_audit.manifest()
         result = {
@@ -332,7 +343,13 @@ def _run_preparation_worker(request_path: Path) -> None:
     result_path.write_text(json.dumps(result, sort_keys=True), encoding="utf-8")
 
 
-def _prepare_once(workload_spec: dict[str, str], hardware_path: Path, work_dir: Path) -> dict[str, Any]:
+def _prepare_once(
+    workload_spec: dict[str, str],
+    hardware_path: Path,
+    work_dir: Path,
+    *,
+    max_transfer_plans_per_endpoint: int = _GATE2A_TRANSFER_PLAN_LIMIT,
+) -> dict[str, Any]:
     work_dir.mkdir(parents=True, exist_ok=True)
     context = StageContext.from_kwargs(
         accelerator=str(hardware_path),
@@ -378,7 +395,15 @@ def _prepare_once(workload_spec: dict[str, str], hardware_path: Path, work_dir: 
     group_manifests = []
     for index, (sub_workload, mapping_path) in enumerate(zip(sub_workloads, mapping_paths, strict=True)):
         group_manifests.append(
-            _prepare_group(index, sub_workload, mapping_path, context.get("accelerator"), source_names, work_dir)
+            _prepare_group(
+                index,
+                sub_workload,
+                mapping_path,
+                context.get("accelerator"),
+                source_names,
+                work_dir,
+                max_transfer_plans_per_endpoint,
+            )
         )
     return {
         "frontend_trace": frontend_trace,
@@ -396,6 +421,7 @@ def _prepare_group(
     accelerator,
     source_names: dict[str, set[str]],
     work_dir: Path,
+    max_transfer_plans_per_endpoint: int,
 ) -> dict[str, Any]:
     group_dir = work_dir / f"group_{index}"
     group_dir.mkdir(parents=True, exist_ok=True)
@@ -436,6 +462,7 @@ def _prepare_group(
         backend="ORTOOLS_GSCIP",
         constraint_selection=ConstraintSelection(),
         total_mac_ops=context.get("total_mac_ops"),
+        max_transfer_plans_per_endpoint=max_transfer_plans_per_endpoint,
     )
     preparation_trace: list[str] = []
     try:
@@ -871,11 +898,11 @@ def _require_complete_trace(stage: str, actual: list[str], expected: tuple[str, 
         )
 
 
-def _source_manifest(expected_commit: str | None) -> dict[str, Any]:
+def _source_manifest(expected_commit: str | None, *, executed_module_path: str | Path | None = None) -> dict[str, Any]:
     root_ok, root = _git_checked("rev-parse", "--show-toplevel")
     resolved_root = Path(root).resolve() if root_ok else None
     inside_git = resolved_root == Path.cwd().resolve()
-    executed_module = Path(__file__).resolve()
+    executed_module = Path(executed_module_path or __file__).resolve()
     module_within_checkout = resolved_root is not None and executed_module.is_relative_to(resolved_root)
     head_ok, head = _git_checked("rev-parse", "HEAD") if inside_git else (False, "")
     status_ok, status = _git_checked("status", "--porcelain") if inside_git else (False, "")

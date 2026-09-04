@@ -1,0 +1,77 @@
+{
+  "contract": "gate2d-alternative-route-domain-expansion",
+  "version": 1,
+  "design_status": "mechanism-probe-informed deterministic systems gate",
+  "source_gate": {
+    "artifact": "artifacts/gate2a/report.json",
+    "sha256": "sha256:d2473721f8e9d4796db5db7797ddf7c0099e82d4788ab4d081fe9b6a218aa145",
+    "required_verdict": "PASS",
+    "required_workloads": ["swiglu", "fsrcnn", "resnet18", "attention_head"]
+  },
+  "route_plan_limits": [1, 4],
+  "repeat_count": 2,
+  "max_parallel_workers": 8,
+  "expansion": {
+    "scope": "retain more already-generated beam-search route plans for each fixed source/target allocation",
+    "baseline_limit": 1,
+    "expanded_limit": 4,
+    "measured_invariants": [
+      "workload denominator",
+      "operator tiling",
+      "tensor and transfer identities",
+      "placement candidate identities",
+      "baseline semantic hashes",
+      "route-insensitive structural manifest",
+      "canonical baseline route resources remain available"
+    ]
+  },
+  "static_review": {
+    "base_commit": "a64a87617342333cc637c727bdce86eaee5a0f3d",
+    "expected_changed_paths": [
+      "scripts/run_route_option_gate.py",
+      "stream/cost_model/communication_manager.py",
+      "stream/cost_model/steady_state_scheduler.py",
+      "stream/opt/allocation/constraint_optimization/config.py",
+      "stream/stages/allocation/constraint_optimization_allocation.py",
+      "stream/structural/contracts/gate2d_contract.json",
+      "stream/structural/pipeline.py",
+      "stream/structural/real_workload_lifting.py",
+      "stream/structural/route_option_gate.py",
+      "tests/unit/structural/test_route_option_gate.py",
+      "tests/unit/structural/test_scheduler_preparation.py",
+      "tests/unit/test_pipeline_threading.py"
+    ],
+    "review_only_invariants": [
+      "TTA objective",
+      "timeslot algorithm",
+      "constraint semantics"
+    ],
+    "evidence_boundary": "These invariants are bound to the reviewed commit diff and regression suite; Gate 2D does not dynamically execute TTA."
+  },
+  "pass_criteria": {
+    "source_identified": true,
+    "environment_compatible": true,
+    "workload_denominator_match": true,
+    "static_review_scope_match": true,
+    "baseline_semantic_hash_match": true,
+    "structural_invariant_hash_match": true,
+    "deterministic_preparation": true,
+    "lifting_success": true,
+    "forbidden_execution_events": 0,
+    "same_tensor_and_transfer_variables": true,
+    "placement_domains_identical": true,
+    "route_resource_signatures_unique": true,
+    "path_domains_included": true,
+    "compatible_path_counts_monotone": true,
+    "strict_path_domain_expansion": true,
+    "expanded_path_nondegenerate_tensor_ratio": 1.0,
+    "expanded_controlled_logical_bits_ratio": 1.0
+  },
+  "excluded_claims": [
+    "latency_improvement",
+    "route_quality",
+    "TETRA_feasibility_for_every_cartesian_assignment",
+    "cross_tensor_coupling",
+    "VE_scalability"
+  ]
+}

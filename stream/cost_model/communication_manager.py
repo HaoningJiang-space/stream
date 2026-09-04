@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 # Tune these defaults as needed
 _K_PATHS_PER_TERMINAL = 4  # k in k-shortest
 _BEAM_WIDTH = 8  # B in beam search
-_MAX_ALLOCATIONS_PER_MEETING = 1
+_DEFAULT_MAX_PLANS_PER_ENDPOINT = 1
 _MAX_MEETINGS = 8
 _MAX_POSSIBLE_ALLOCATIONS = 6
 
@@ -275,9 +275,10 @@ class CommunicationManager:
             if not beam:
                 raise nx.NetworkXNoPath("beam search eliminated all states; try larger beam_width or k_paths")
 
-        # Emit unique edge-sets as MulticastPathPlans
+        # Emit route plans that are unique both as graph paths and as TTA resource sets.
         plans: list[MulticastPathPlan] = []
         seen_edge_sets: set[frozenset[tuple]] = set()
+        seen_resource_sets: set[frozenset[tuple]] = set()
 
         for st in beam:
             if len(st.full_paths) != len(pairs):
@@ -293,6 +294,19 @@ class CommunicationManager:
                     cl = G.edges[(u, v)]["cl"]
                     if cl not in links_used:
                         links_used.append(cl)
+            resource_set = frozenset(
+                (
+                    getattr(link.sender, "id", link.sender),
+                    getattr(link.receiver, "id", link.receiver),
+                    link.bandwidth,
+                    link.unit_energy_cost,
+                    link.bidirectional,
+                )
+                for link in links_used
+            )
+            if resource_set in seen_resource_sets:
+                continue
+            seen_resource_sets.add(resource_set)
 
             plans.append(
                 MulticastPathPlan(
@@ -317,7 +331,7 @@ class CommunicationManager:
         offchip_mem_penalty: float = 1000.0,
         k_paths: int = _K_PATHS_PER_TERMINAL,
         beam_width: int = _BEAM_WIDTH,
-        max_allocations: int = _MAX_ALLOCATIONS_PER_MEETING,
+        max_allocations: int = _DEFAULT_MAX_PLANS_PER_ENDPOINT,
     ) -> list["MulticastPathPlan"]:
         """
         Simple multi-src + multi-dst planner without meeting points.
@@ -339,11 +353,19 @@ class CommunicationManager:
         self,
         src_allocs: list["Core"],
         dst_allocs: list["Core"],
+        *,
+        max_plans: int = _DEFAULT_MAX_PLANS_PER_ENDPOINT,
     ) -> tuple[MulticastPathPlan, ...]:
+        if type(max_plans) is not int or max_plans < 1:
+            raise ValueError("max_plans must be a positive integer")
         request = MulticastRequest(
             sources=src_allocs,  # type: ignore
             destinations=dst_allocs,  # type: ignore
         )
-        multicast_plans = self._enumerate_multicast_plans(request, offchip_mem_penalty=1)
+        multicast_plans = self._enumerate_multicast_plans(
+            request,
+            offchip_mem_penalty=1,
+            max_allocations=max_plans,
+        )
         # Stable output ordering
         return tuple(multicast_plans)

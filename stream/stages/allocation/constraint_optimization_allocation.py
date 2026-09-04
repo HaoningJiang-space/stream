@@ -82,6 +82,7 @@ class ConstraintOptimizationAllocationStage(Stage):
             backend=self.backend,
             constraint_selection=self.constraint_selection,
             total_mac_ops=self.ctx.get("total_mac_ops"),
+            max_transfer_plans_per_endpoint=self.config.transfer.max_transfer_plans_per_endpoint,
         )
         workload = scheduler.run()
         return workload, scheduler

@@ -308,7 +308,10 @@ def _pipeline_manifest(
         multiplicities=tuple(
             sorted((_entity_id(node), multiplicity) for node, multiplicity in prepared.multiplicities.items())
         ),
-        scheduler_parameters=(("nb_cols_to_use", scheduler.nb_cols_to_use),),
+        scheduler_parameters=(
+            ("max_transfer_plans_per_endpoint", scheduler.max_transfer_plans_per_endpoint),
+            ("nb_cols_to_use", scheduler.nb_cols_to_use),
+        ),
         transfer_context=_transfer_context_manifest(scheduler),
     )
 

@@ -61,8 +61,9 @@ class CoreConstraintProfile:
 
 @dataclass(frozen=True)
 class TransferMilpConfig:
-    # Currently unused; defaults mirror existing behavior.
+    # Defaults mirror existing behavior.
     nb_cols_to_use: int = 4
+    max_transfer_plans_per_endpoint: int = 1
     force_io_via_cache: bool = True
     mem_dma_channels: int = 6
     shim_dma_channels: int = 2
@@ -70,6 +71,8 @@ class TransferMilpConfig:
     def __post_init__(self) -> None:
         if self.nb_cols_to_use <= 0:
             raise ValueError("nb_cols_to_use must be positive")
+        if type(self.max_transfer_plans_per_endpoint) is not int or self.max_transfer_plans_per_endpoint < 1:
+            raise ValueError("max_transfer_plans_per_endpoint must be a positive integer")
 
 
 @dataclass(frozen=True)
@@ -90,6 +93,7 @@ class ConstraintOptStageConfig:
         """
         transfer_cfg = TransferMilpConfig(
             nb_cols_to_use=kwargs.get("nb_cols_to_use", 4),
+            max_transfer_plans_per_endpoint=kwargs.get("max_transfer_plans_per_endpoint", 1),
         )
         profiles = kwargs.get("core_profiles", default_core_profiles())
         return cls(transfer=transfer_cfg, profiles=profiles)
