@@ -1,0 +1,41 @@
+{
+  "contract": "gate1a_intended_space",
+  "version": 1,
+  "classification": ["EXACT", "UNSUPPORTED"],
+  "minimum_deterministic_assignments": 1000,
+  "compile_repetitions": 3,
+  "operator_literals": [
+    "inter_core_tiling",
+    "hardware_zone"
+  ],
+  "tensor_literals": {
+    "materialization": ["full", "partial", "streaming"],
+    "distribution": ["local", "block", "replicated", "shared"]
+  },
+  "distribution_plans": [
+    "local",
+    "block",
+    "replicate",
+    "shared",
+    "unicast_fanout",
+    "multicast_tree",
+    "full_materialize"
+  ],
+  "dag_classes": [
+    "edge",
+    "chain",
+    "gemm_chain",
+    "conv_chain",
+    "residual_diamond",
+    "fork_join"
+  ],
+  "pass_requirements": {
+    "intended_gate1b_exact_coverage": 1.0,
+    "false_exact": 0,
+    "silent_relaxation": 0,
+    "soundness_violations": 0,
+    "completeness_violations": 0,
+    "baseline_round_trip_violations": 0,
+    "nondeterministic_compiles": 0
+  }
+}

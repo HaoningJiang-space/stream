@@ -14,6 +14,7 @@ namespaces = true
 # the top-level accelerator YAMLs. Test workloads/onnx fixtures are intentionally
 # NOT shipped.
 "stream" = [
+    "structural/contracts/*.json",
     "inputs/aie/hardware/*.yaml",
     "inputs/aie/hardware/cores/*.yaml",
     "inputs/examples/hardware/*.yaml",
