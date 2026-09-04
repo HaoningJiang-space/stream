@@ -8,7 +8,7 @@ import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from hashlib import sha256
-from importlib.metadata import PackageNotFoundError, version
+from importlib.metadata import PackageNotFoundError, distributions, version
 from importlib.resources import files
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -347,10 +347,24 @@ def _template_from_spec(target: str, spec: dict[str, Any]) -> OperatorTemplate:
 def _direct_reference_mapping(workload, baseline: Mapping, template: OperatorTemplate) -> Mapping:
     """Independent singleton construction; deliberately does not call the compiler."""
 
+    return _direct_reference_mapping_for_templates(workload, baseline, (template,))
+
+
+def _direct_reference_mapping_for_templates(
+    workload,
+    baseline: Mapping,
+    templates: tuple[OperatorTemplate, ...],
+) -> Mapping:
+    """Independently construct a mapping for one or more atomic template choices."""
+
     reference = Mapping(fused_groups=baseline.fused_groups, runtime_args=dict(baseline.runtime_args))
+    template_by_target = {template.target: template for template in templates}
+    if len(template_by_target) != len(templates):
+        raise OperatorTemplateFaithfulnessError("direct reference templates must have unique targets")
     for node in workload.get_computation_nodes():
         source = baseline.get(node)
-        if node.name != template.target:
+        template = template_by_target.get(node.name)
+        if template is None:
             reference.set(
                 node,
                 NodeMapping(
@@ -566,7 +580,11 @@ def _validate_contract(contract: dict[str, Any]) -> None:
         raise OperatorTemplateFaithfulnessError("source-gate digest must use the sha256 namespace")
 
 
-def _source_manifest(expected_commit: str | None) -> dict[str, Any]:
+def _source_manifest(
+    expected_commit: str | None,
+    *,
+    extra_snapshot_paths: tuple[Path, ...] = (),
+) -> dict[str, Any]:
     root_ok, root = _git_checked("rev-parse", "--show-toplevel")
     resolved_root = Path(root).resolve() if root_ok else None
     inside = resolved_root == Path.cwd().resolve()
@@ -588,7 +606,7 @@ def _source_manifest(expected_commit: str | None) -> dict[str, Any]:
         ),
         "clean": not status if inside else None,
         "dirty_paths": status.splitlines(),
-        "snapshot_digest": _source_snapshot_digest(),
+        "snapshot_digest": _source_snapshot_digest(extra_snapshot_paths),
         "expected_commit_matches_head": commit_matches,
     }
 
@@ -624,10 +642,22 @@ def _static_review_manifest(contract, source) -> dict[str, Any]:
 
 
 def _environment_manifest() -> dict[str, Any]:
+    installed_distributions = sorted(
+        (distribution.metadata["Name"].lower(), distribution.version)
+        for distribution in distributions()
+        if distribution.metadata["Name"]
+    )
     return {
         "host": platform.node(),
         "python": sys.version,
-        "packages": {name: _package_version(name) for name in ("onnx", "ortools", "zigzag-dse", "stream-dse")},
+        "packages": {
+            name: _package_version(name)
+            for name in ("onnx", "ortools", "pyyaml", "stream-dse", "xdsl", "zigzag-dse")
+        },
+        "installed_distributions": [
+            {"name": name, "version": package_version} for name, package_version in installed_distributions
+        ],
+        "installed_distribution_manifest_sha256": _digest(installed_distributions),
     }
 
 
@@ -638,9 +668,10 @@ def _package_version(name: str) -> str | None:
         return None
 
 
-def _source_snapshot_digest() -> str:
+def _source_snapshot_digest(extra_paths: tuple[Path, ...] = ()) -> str:
     entries = []
-    for root in (Path("stream"), Path("scripts/run_operator_template_faithfulness.py")):
+    roots = (Path("stream"), Path("scripts/run_operator_template_faithfulness.py"), *extra_paths)
+    for root in roots:
         candidates = root.rglob("*") if root.is_dir() else (root,)
         for path in candidates:
             if path.is_file() and "__pycache__" not in path.parts and path.suffix in {".py", ".json"}:

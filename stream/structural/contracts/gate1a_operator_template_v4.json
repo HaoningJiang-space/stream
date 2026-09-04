@@ -1,0 +1,85 @@
+{
+  "contract": "gate1a-v4-shared-tensor-operator-template-compatibility",
+  "version": 4,
+  "source_gate": {
+    "artifact": "artifacts/gate1a-v3/report.json",
+    "sha256": "sha256:8e1fd5771393da2f62766037b14caac67b2207fee90ac7b42e60ef3373832716",
+    "required_verdict": "NARROW",
+    "required_evidence_class": "MICRO_EXACT_PRE_TILING_COMPILER",
+    "required_singleton_unsupported_count": 8
+  },
+  "coupled_pairs": {
+    "residual_diamond": ["A", "Add"],
+    "fork_join": ["B", "C"]
+  },
+  "template_family": [
+    {"core_ids": [0], "splits": []},
+    {"core_ids": [1], "splits": []},
+    {"core_ids": [2], "splits": []},
+    {"core_ids": [3], "splits": []},
+    {"core_ids": [0, 1], "splits": [[0, 2]]},
+    {"core_ids": [2, 3], "splits": [[0, 2]]},
+    {"core_ids": [0, 1, 2, 3], "splits": [[0, 4]]}
+  ],
+  "assignment_policy": "cross all seven paired templates for both consumers of each frozen shared tensor",
+  "artifact_acceptance": "successful runner exit plus a parseable report.json.run.json completion marker whose report/stdout/stderr/environment hashes all verify",
+  "compatibility_rule": "zero or one distinct non-empty tensor-relevant split signature across the two consumers",
+  "reference_pipeline": "independently construct both selected NodeMappings, then run unchanged KernelState, TilingGeneration, transfer construction, option generation, SSIS, and timeslot preparation",
+  "compile_repetitions": 3,
+  "expected_assignment_count": 98,
+  "expected_baseline_round_trip_count": 2,
+  "expected_exact_executable_count": 90,
+  "expected_joint_recovery_count": 8,
+  "expected_unsupported_assignments": [
+    "fork_join:B=4,C=6",
+    "fork_join:B=5,C=6",
+    "fork_join:B=6,C=4",
+    "fork_join:B=6,C=5",
+    "residual_diamond:A=4,Add=6",
+    "residual_diamond:A=5,Add=6",
+    "residual_diamond:A=6,Add=4",
+    "residual_diamond:A=6,Add=5"
+  ],
+  "expected_unsupported_reason_counts": {
+    "SHARED_INPUT_TILING_INCOMPATIBLE": 8
+  },
+  "max_workers": 8,
+  "hardware": "stream/inputs/examples/hardware/tpu_like_quad_core.yaml",
+  "static_review": {
+    "base_commit": "337a9b9616f89f57f77de7e3bfbd3f34fdf6d800",
+    "expected_changed_paths": [
+      "scripts/run_operator_template_coupling.py",
+      "stream/structural/contracts/gate1a_operator_template_v4.json",
+      "stream/structural/operator_template_coupling.py",
+      "stream/structural/operator_template_faithfulness.py",
+      "tests/unit/structural/test_operator_template_coupling.py"
+    ]
+  },
+  "pass_criteria": {
+    "source_gate_hash_matches": true,
+    "source_identified": true,
+    "static_review_scope_match": true,
+    "assignment_denominator_complete": true,
+    "paired_candidate_set_exact": true,
+    "compiled_reference_outcome_exact": true,
+    "compatibility_prediction_exact": true,
+    "parallel_worker_count_exact": true,
+    "downstream_serial_parallel_replay_exact": true,
+    "compiler_deterministic": true,
+    "baseline_round_trip_exact": true,
+    "unsupported_assignment_set_exact": true,
+    "unsupported_reason_counts_exact": true,
+    "exact_executable_count_matches": true,
+    "joint_recovery_count_matches": true,
+    "binary_relation_not_cartesian": true,
+    "unexpected_preparation_failure_count": 0,
+    "silent_relaxation_count": 0
+  },
+  "excluded_claims": [
+    "real_workload_joint_template_coverage",
+    "all_5873_potential_states_executable",
+    "performance_objective_coupling",
+    "latency_improvement",
+    "VE_scalability"
+  ]
+}
