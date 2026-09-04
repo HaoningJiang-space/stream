@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import pytest
 from xdsl.dialects.builtin import bf16
 from xdsl.ir.affine import AffineMap
 
@@ -13,6 +14,7 @@ from stream.structural.stream_contract import (
     CompileStage,
     CompileStatus,
     Gate1AEvalConfig,
+    IllegalStructuralAssignmentError,
     LiteralKind,
     PipelineSemanticManifest,
     StructuralLiteral,
@@ -84,7 +86,7 @@ def test_pre_transfer_compiler_intersects_candidates_exactly_without_mutating_re
             "A.zone",
             LiteralKind.HARDWARE_ZONE,
             node.name,
-            (core_group_key((cores[0],)), core_group_key((cores[2],))),
+            (core_group_key((cores[2],)),),
         ),
         StructuralLiteral(
             "A.tiling",
@@ -98,10 +100,27 @@ def test_pre_transfer_compiler_intersects_candidates_exactly_without_mutating_re
     compiled = compile_pre_transfer(mapping, literals, _config())
 
     assert [group[0].id for group in mapping.get(node).resource_allocation] == [0, 1, 2]
-    assert [group[0].id for group in compiled.mapping.get(node).resource_allocation] == [0, 2]
+    assert [group[0].id for group in compiled.mapping.get(node).resource_allocation] == [2]
     assert compiled.mapping.get(node).inter_core_tiling == (((dim, 2),),)
     assert compiled.status is CompileStatus.EXACT
     assert all(audit_candidate_set(reference, compiled, literal).exact for literal in literals)
+
+
+def test_empty_intersection_is_illegal_and_multi_zone_domain_is_not_false_exact():
+    mapping, node, cores, _ = _mapping()
+    empty = StructuralLiteral("A.empty", LiteralKind.HARDWARE_ZONE, node.name, ("cores:99",))
+    multiple = StructuralLiteral(
+        "A.multi",
+        LiteralKind.HARDWARE_ZONE,
+        node.name,
+        (core_group_key((cores[0],)), core_group_key((cores[1],))),
+    )
+
+    with pytest.raises(IllegalStructuralAssignmentError):
+        compile_pre_transfer(mapping, (empty,), _config())
+    result = compile_pre_transfer(mapping, (multiple,), _config())
+    assert result.classifications[0].reason is UnsupportedReason.INCOMPATIBLE_TILING_IR
+    assert len(result.mapping.get(node).resource_allocation) == 3
 
 
 def test_compiler_is_deterministic_and_baseline_round_trip_is_semantically_identical():
@@ -196,3 +215,28 @@ def test_two_stage_contract_filters_paths_before_downstream_scheduling():
     assert post.classifications[0].stage is CompileStage.POST_TRANSFER
     assert post.classifications[1].reason is UnsupportedReason.NO_PIPELINE_LITERAL
     assert post.status is CompileStatus.UNSUPPORTED
+
+
+def test_path_identity_includes_hop_objective_and_link_order():
+    source, middle, target = _core(0), _core(1), _core(2)
+    first = CommunicationLink(source, middle, bandwidth=32, unit_energy_cost=1)
+    second = CommunicationLink(middle, target, bandwidth=32, unit_energy_cost=1)
+    base = MulticastPathPlan((source,), (target,), 2, (first, second))
+    different_hops = MulticastPathPlan((source,), (target,), 3, (first, second))
+    different_order = MulticastPathPlan((source,), (target,), 2, (second, first))
+
+    assert len({path_key(base), path_key(different_hops), path_key(different_order)}) == 3
+
+
+def test_problem_hash_excludes_compiler_classification_metadata():
+    mapping, _, _, _ = _mapping()
+    baseline = compile_post_transfer(mapping, (), _config(), pipeline_manifest=_pipeline_manifest())
+    diagnostic = compile_post_transfer(
+        mapping,
+        (StructuralLiteral("T.mode", LiteralKind.MATERIALIZATION, "T", ("streaming",)),),
+        _config(),
+        pipeline_manifest=_pipeline_manifest(),
+    )
+
+    assert baseline.semantic_hash != diagnostic.semantic_hash
+    assert baseline.problem_hash == diagnostic.problem_hash

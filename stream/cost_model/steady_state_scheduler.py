@@ -1,6 +1,7 @@
 import logging
 import os
-from dataclasses import replace
+from collections.abc import Callable
+from dataclasses import dataclass, replace
 from itertools import combinations
 from math import ceil, prod
 from typing import cast
@@ -71,6 +72,15 @@ _LOOP_NEST_DEPTH: dict[str, int] = {
 _NON_COMPUTE_CORE_TYPES: frozenset[str] = frozenset({"offchip", "shim", "memory"})
 
 
+@dataclass(frozen=True, slots=True)
+class PreparedScheduleProblem:
+    """The objects passed unchanged from scheduler preparation into TTA."""
+
+    timeslots: dict[Node, int]
+    multiplicities: dict[ComputationNode, int]
+    mapping: Mapping
+
+
 def largest_divisor_leq(n: int, cap: int) -> int:
     """Largest divisor of ``n`` at most ``cap`` (never below 1)."""
     cap = max(1, min(cap, n))
@@ -81,7 +91,7 @@ def largest_divisor_leq(n: int, cap: int) -> int:
 
 
 class SteadyStateScheduler:
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913, PLR0917
         self,
         workload: Workload,
         accelerator: "Accelerator",
@@ -279,13 +289,16 @@ class SteadyStateScheduler:
             logger.warning("could not build steady-state IR: %s", exc)
             return None
 
-    def run(self) -> Workload:
-        """
-        Run the steady state scheduler on the given workload.
+    def prepare_problem(
+        self,
+        *,
+        pre_mapping_transform: Callable[[Mapping], Mapping] | None = None,
+        post_mapping_transform: Callable[[Mapping], Mapping] | None = None,
+    ) -> PreparedScheduleProblem:
+        """Build the exact mapping, SSIS, multiplicities, and timeslots consumed by TTA."""
 
-        Returns:
-            TimeSlotAllocation: The scheduled workload.
-        """
+        if pre_mapping_transform is not None:
+            self.mapping = pre_mapping_transform(self.mapping)
         # Update the workload graph to include transfer nodes
         self.ssw = self.build_transfer_graph()
         # Update the fusion_splits based on the new workload with transfer nodes
@@ -294,6 +307,8 @@ class SteadyStateScheduler:
         # self.ssw.visualize(os.path.join(self.output_path, "tiled_workload_with_transfers.png"))
         # Update the mapping for the new workload graph
         self.mapping = self.update_mapping()
+        if post_mapping_transform is not None:
+            self.mapping = post_mapping_transform(self.mapping)
         # Update the cost lut for the new workload graph
         self.cost_lut = self.update_cost_lut()
         # Update the steady state iteration spaces to include transfer nodes and tensors
@@ -306,15 +321,23 @@ class SteadyStateScheduler:
         # disjoint core/link assignment exists across same-class nodes in that slot).
         timeslots = self.ssw.get_timeslots(self.mapping)
         # timeslots = self.ssw.get_timeslots_simple()  # baseline: one slot per node, no resource awareness
+        return PreparedScheduleProblem(timeslots, multiplicities, self.mapping)
+
+    def build_tta(self, prepared: PreparedScheduleProblem) -> TransferAndTensorAllocator:
+        """Construct unchanged TTA from a prepared problem and reject stale inputs."""
+
+        if prepared.mapping is not self.mapping:
+            raise ValueError("prepared mapping is stale or belongs to another scheduler")
+        assert self.ssw is not None
         # At this point, the only nodes without an allocation are the transfer nodes
-        tta = TransferAndTensorAllocator(
+        return TransferAndTensorAllocator(
             self.ssw,
-            timeslots,
+            prepared.timeslots,
             accelerator=self.accelerator,
             iterations=self.iterations,
             ssis=self.ssis,
-            multiplicities=multiplicities,
-            mapping=self.mapping,
+            multiplicities=prepared.multiplicities,
+            mapping=prepared.mapping,
             cost_lut=self.cost_lut,
             nb_cols_to_use=self.nb_cols_to_use,
             context=self.transfer_context,
@@ -322,6 +345,16 @@ class SteadyStateScheduler:
             backend=self.backend,
             constraint_selection=self.constraint_selection,
         )
+
+    def run(self) -> Workload:
+        """
+        Run the steady state scheduler on the given workload.
+
+        Returns:
+            TimeSlotAllocation: The scheduled workload.
+        """
+        prepared = self.prepare_problem()
+        tta = self.build_tta(prepared)
         (
             tensor_reuse_levels,
             tensor_depths,

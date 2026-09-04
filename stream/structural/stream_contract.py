@@ -16,6 +16,8 @@ from hashlib import sha256
 from importlib.resources import files
 from typing import Any
 
+from xdsl.ir.affine import AffineMap
+
 from stream.cost_model.communication_manager import MulticastPathPlan
 from stream.hardware.architecture.core import Core
 from stream.mapping.mapping import Mapping, NodeMapping
@@ -36,6 +38,10 @@ class UnsupportedReason(StrEnum):
     INCOMPATIBLE_TILING_IR = "UNSUPPORTED_INCOMPATIBLE_TILING_IR"
 
 
+class IllegalStructuralAssignmentError(ValueError):
+    """A literal intersection removed every legal option from its target domain."""
+
+
 class LiteralKind(StrEnum):
     OPERATOR_TILING = "inter_core_tiling"
     HARDWARE_ZONE = "hardware_zone"
@@ -43,6 +49,7 @@ class LiteralKind(StrEnum):
     OUTPUT_LAYOUT = "output_layout"
     MATERIALIZATION = "materialization"
     DISTRIBUTION = "distribution"
+    DISTRIBUTION_PLAN = "distribution_plan"
     TRANSFER_PATH = "transfer_path"
     EXACT_REUSE = "exact_reuse"
 
@@ -132,6 +139,12 @@ class PipelineSemanticManifest:
     timeslots: tuple[tuple[str, int], ...]
     reuse_option_domains: tuple[tuple[str, tuple[int, ...]], ...]
     constraint_families: tuple[str, ...]
+    ssis_domains: tuple[tuple[str, tuple[tuple[str, int, str, str, str], ...]], ...] = ()
+    candidate_correlations: tuple[tuple[str, tuple[str, ...], tuple[str, ...], tuple[str, ...]], ...] = ()
+    iterations: int = 0
+    multiplicities: tuple[tuple[str, int], ...] = ()
+    scheduler_parameters: tuple[tuple[str, Any], ...] = ()
+    transfer_context: tuple[tuple[str, Any], ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -151,6 +164,8 @@ class CompiledStructuralAssignment:
         return CompileStatus.UNSUPPORTED
 
     def semantic_manifest(self) -> dict[str, Any]:
+        """Compiler artifact, including diagnostic classification metadata."""
+
         return {
             "stage": self.stage.value,
             "status": self.status.value,
@@ -171,6 +186,20 @@ class CompiledStructuralAssignment:
     @property
     def semantic_hash(self) -> str:
         payload = json.dumps(self.semantic_manifest(), sort_keys=True, separators=(",", ":"))
+        return sha256(payload.encode()).hexdigest()
+
+    def problem_manifest(self) -> dict[str, Any]:
+        """Downstream problem semantics, excluding compiler-only metadata."""
+
+        return {
+            "eval_config": _jsonable(self.eval_config),
+            "mapping": canonical_mapping_manifest(self.mapping),
+            "pipeline": _jsonable(self.pipeline_manifest),
+        }
+
+    @property
+    def problem_hash(self) -> str:
+        payload = json.dumps(self.problem_manifest(), sort_keys=True, separators=(",", ":"))
         return sha256(payload.encode()).hexdigest()
 
 
@@ -224,16 +253,26 @@ def tiling_key(tiling: tuple[tuple[Any, int], ...]) -> str:
 
 
 def path_key(path: MulticastPathPlan) -> str:
-    links = sorted((link.sender.id, link.receiver.id) for link in path.links_used)
+    # Preserve every dataclass field, including link order.  This is a semantic
+    # identity key, not merely a route-equivalence approximation.
     return json.dumps(
         {
-            "sources": [core.id for core in path.sources],
-            "targets": [core.id for core in path.targets],
-            "links": links,
+            "sources": [_resource_id(core) for core in path.sources],
+            "targets": [_resource_id(core) for core in path.targets],
+            "total_hops_objective": path.total_hops_objective,
+            "links": [(_resource_id(link.sender), _resource_id(link.receiver)) for link in path.links_used],
         },
         sort_keys=True,
         separators=(",", ":"),
     )
+
+
+def _resource_id(resource: Any) -> str:
+    if isinstance(resource, str):
+        return f"str:{resource}"
+    if hasattr(resource, "id"):
+        return f"{type(resource).__name__}:{resource.id}"
+    raise TypeError(f"unsupported path endpoint type: {type(resource).__name__}")
 
 
 def compile_pre_transfer(
@@ -249,10 +288,20 @@ def compile_pre_transfer(
     classifications: list[LiteralClassification] = []
     for literal in literals:
         if literal.kind is LiteralKind.HARDWARE_ZONE:
-            _filter_node_options(compiled, literal, "resource_allocation", core_group_key, ComputationNode)
+            matches = _matching_options(
+                compiled, literal, "resource_allocation", core_group_key, ComputationNode
+            )
+            if len(matches) != 1:
+                classifications.append(_unsupported(literal))
+                continue
+            _set_node_options(compiled, literal, "resource_allocation", matches, ComputationNode)
             classifications.append(_exact(literal, CompileStage.PRE_TRANSFER))
         elif literal.kind is LiteralKind.OPERATOR_TILING:
-            _filter_node_options(compiled, literal, "inter_core_tiling", tiling_key, ComputationNode)
+            matches = _matching_options(compiled, literal, "inter_core_tiling", tiling_key, ComputationNode)
+            if not all(option == matches[0] for option in matches):
+                classifications.append(_unsupported(literal))
+                continue
+            _set_node_options(compiled, literal, "inter_core_tiling", matches, ComputationNode)
             classifications.append(_exact(literal, CompileStage.PRE_TRANSFER))
         else:
             classifications.append(_unsupported(literal))
@@ -309,11 +358,12 @@ def canonical_mapping_manifest(mapping: Mapping) -> dict[str, Any]:
             "resource_options": sorted(resources),
             "tiling_options": sorted(tiling_key(option) for option in node_mapping.inter_core_tiling),
             "memory_options": sorted(core_group_key(tuple(option)) for option in node_mapping.memory_allocation),
+            "kernel": _kernel_manifest(node_mapping.kernel),
         }
     return {
         "nodes": nodes,
         "fused_groups": sorted(group.name for group in mapping.fused_groups),
-        "runtime_args": dict(sorted(mapping.runtime_args.items())),
+        "runtime_args": _jsonable(dict(sorted(mapping.runtime_args.items()))),
     }
 
 
@@ -332,13 +382,35 @@ def _copy_mapping(mapping: Mapping) -> Mapping:
     return copied
 
 
+def _kernel_manifest(kernel: Any) -> Any:
+    if kernel is None:
+        return None
+    layouts = kernel.operand_layouts() if hasattr(kernel, "operand_layouts") else ()
+    return {
+        "type": type(kernel).__name__,
+        "operand_layouts": [str(layout) for layout in layouts],
+    }
+
+
 def _filter_node_options(
     mapping: Mapping,
     literal: StructuralLiteral,
     attribute: str,
     key: Callable[[Any], str],
     expected_node_type: type,
-) -> None:
+) -> tuple[str, ...]:
+    options = _matching_options(mapping, literal, attribute, key, expected_node_type)
+    _set_node_options(mapping, literal, attribute, options, expected_node_type)
+    return tuple(key(option) for option in options)
+
+
+def _matching_options(
+    mapping: Mapping,
+    literal: StructuralLiteral,
+    attribute: str,
+    key: Callable[[Any], str],
+    expected_node_type: type,
+) -> tuple[Any, ...]:
     matches = [node for node in mapping.nodes() if node.name == literal.target]
     if len(matches) != 1 or not isinstance(matches[0], expected_node_type):
         raise ValueError(
@@ -347,7 +419,26 @@ def _filter_node_options(
     node = matches[0]
     node_mapping = mapping.get(node)
     options = tuple(option for option in getattr(node_mapping, attribute) if key(option) in literal.allowed)
-    setattr(node_mapping, attribute, options)
+    if not options:
+        raise IllegalStructuralAssignmentError(
+            f"literal {literal.literal_id!r} leaves target {literal.target!r} with an empty {attribute} domain"
+        )
+    return options
+
+
+def _set_node_options(
+    mapping: Mapping,
+    literal: StructuralLiteral,
+    attribute: str,
+    options: tuple[Any, ...],
+    expected_node_type: type,
+) -> None:
+    matches = [node for node in mapping.nodes() if node.name == literal.target]
+    if len(matches) != 1 or not isinstance(matches[0], expected_node_type):
+        raise ValueError(
+            f"literal {literal.literal_id!r} target {literal.target!r} is not a unique {expected_node_type.__name__}"
+        )
+    setattr(mapping.get(matches[0]), attribute, options)
 
 
 def _exact(literal: StructuralLiteral, stage: CompileStage) -> LiteralClassification:
@@ -360,6 +451,7 @@ def _unsupported(literal: StructuralLiteral) -> LiteralClassification:
         LiteralKind.OUTPUT_LAYOUT: UnsupportedReason.NO_LAYOUT_CONSTRAINT,
         LiteralKind.MATERIALIZATION: UnsupportedReason.NO_PIPELINE_LITERAL,
         LiteralKind.DISTRIBUTION: UnsupportedReason.NO_TENSOR_PLACEMENT_FILTER,
+        LiteralKind.DISTRIBUTION_PLAN: UnsupportedReason.NO_TRANSFER_PATH_STAGE,
         LiteralKind.EXACT_REUSE: UnsupportedReason.NO_EXACT_REUSE_LITERAL,
         LiteralKind.TRANSFER_PATH: UnsupportedReason.NO_TRANSFER_PATH_STAGE,
         LiteralKind.OPERATOR_TILING: UnsupportedReason.INCOMPATIBLE_TILING_IR,
@@ -369,8 +461,16 @@ def _unsupported(literal: StructuralLiteral) -> LiteralClassification:
 
 
 def _jsonable(value: Any) -> Any:
+    if value is None or isinstance(value, bool | int | float | str):
+        return value
+    if isinstance(value, AffineMap):
+        return {"type": "AffineMap", "value": str(value)}
     if hasattr(value, "__dataclass_fields__"):
         return {name: _jsonable(getattr(value, name)) for name in value.__dataclass_fields__}
-    if isinstance(value, tuple):
+    if isinstance(value, dict):
+        return {str(key): _jsonable(item) for key, item in sorted(value.items(), key=lambda pair: str(pair[0]))}
+    if isinstance(value, tuple | list):
         return [_jsonable(item) for item in value]
-    return value.value if isinstance(value, StrEnum) else value
+    if isinstance(value, StrEnum):
+        return value.value
+    raise TypeError(f"cannot serialize {type(value).__name__} in a Gate 1A semantic manifest")

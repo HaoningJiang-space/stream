@@ -787,7 +787,10 @@ class GurobiBackend(SolverModel):
 # OR-Tools MathOpt imports
 # ---------------------------------------------------------------------------
 
-from ortools.math_opt.io.python import mps_converter  # noqa: E402
+try:  # OR-Tools < 9.15 lacks this optional model-export helper.
+    from ortools.math_opt.io.python import mps_converter  # noqa: E402
+except ModuleNotFoundError:  # pragma: no cover - depends on installed OR-Tools
+    mps_converter = None
 from ortools.math_opt.python import mathopt  # noqa: E402
 
 # ---------------------------------------------------------------------------
@@ -1125,6 +1128,8 @@ class ORToolsBackend(SolverModel):
         )
 
     def write(self, path: str) -> None:
+        if mps_converter is None:
+            raise NotImplementedError("MPS export requires OR-Tools >= 9.15")
         actual_path = path
         if path.endswith(".ilp"):
             actual_path = path[:-4] + ".mps"

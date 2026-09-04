@@ -51,3 +51,23 @@ The frozen denominator is `stream/structural/contracts/gate1a_intended_space_v1.
 - `NOT_RUN`: any required evidence layer or sample count is incomplete.
 
 Missing capability is therefore a narrowing result; incorrect semantics is a failure.
+
+## Gate 1A v1 Result
+
+The contractual verdict is `FAIL`. All 1,000 assignments were independently compiled three times, covering 504
+unique materialization-by-distribution-by-plan-by-DAG cells. Six bounded micro-DAGs were separately constructed
+through the plain production path and the structural compiler; their TTA primary-decision feasible sets were
+enumerated independently with no-good cuts and matched exactly.
+
+The evidence artifact is `artifacts/gate1a/report.json`. It records 1,000 assignment IDs and three problem hashes
+per assignment, source/environment hashes, six baseline round trips, and the independently enumerated solution
+counts. The two `EXACT` operator literals are deliberately bounded to singleton/no-op baseline domains; they do
+not establish general multi-candidate compilation. Tensor materialization, tensor distribution, and distribution
+plan remain `UNSUPPORTED`, so coverage is $2/5=0.4$ and no nontrivial tensor-realization subset survives.
+
+The eex004 host used OR-Tools 9.11 on glibc 2.17, outside the declared OR-Tools 9.15 dependency. The negative
+tensor-capability result follows compiler dispatch before solving and is backend-independent; any future positive,
+backend-sensitive result still requires a conforming OR-Tools 9.15 rerun.
+
+Per the frozen stop rule, Gate 1B latency and candidate-quality experiments must not run. The next step is to add a
+minimal first-class tensor restriction seam, then rerun Gate 1A; it is not to tune the structural objective or VE.

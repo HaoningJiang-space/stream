@@ -4,6 +4,8 @@
   "classification": ["EXACT", "UNSUPPORTED"],
   "minimum_deterministic_assignments": 1000,
   "compile_repetitions": 3,
+  "assignment_id_pattern": "gate1a-v1-{index:04d}",
+  "enumeration": "lexicographic_cartesian_cycle",
   "operator_literals": [
     "inter_core_tiling",
     "hardware_zone"
