@@ -1,0 +1,5625 @@
+{
+  "assignments": [
+    {
+      "assignment_id": "edge:A:0",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "3d68ef04fc1e1ad71048f092cab5fa2e69be5c8b567aca737b650862ceb11b14",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "159b6eda0a802f6cdfeb14abed7aa7ef33bce836eb2c2cf9ae92710669e92c06",
+        "159b6eda0a802f6cdfeb14abed7aa7ef33bce836eb2c2cf9ae92710669e92c06",
+        "159b6eda0a802f6cdfeb14abed7aa7ef33bce836eb2c2cf9ae92710669e92c06"
+      ],
+      "dag_class": "edge",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "3d68ef04fc1e1ad71048f092cab5fa2e69be5c8b567aca737b650862ceb11b14",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:0|splits:none"
+    },
+    {
+      "assignment_id": "edge:A:1",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "22a1329882b75e977cb73fa8c5589e4ee3dfea28f865b8f373d714c49216848f",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "92062ad0b5341039b39cce5bf5716368203bd275501d897cf98f04e48fe4ea67",
+        "92062ad0b5341039b39cce5bf5716368203bd275501d897cf98f04e48fe4ea67",
+        "92062ad0b5341039b39cce5bf5716368203bd275501d897cf98f04e48fe4ea67"
+      ],
+      "dag_class": "edge",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "22a1329882b75e977cb73fa8c5589e4ee3dfea28f865b8f373d714c49216848f",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:1|splits:none"
+    },
+    {
+      "assignment_id": "edge:A:2",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "68848fb4180008ebe8a7086dc2eed75c60da8aefc2a930babb8129433a6fb56c",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "a8acd85e4c5e4f5b580492d4de53a9b7ff9bb2e6b364b80c462ddc32c42b6d91",
+        "a8acd85e4c5e4f5b580492d4de53a9b7ff9bb2e6b364b80c462ddc32c42b6d91",
+        "a8acd85e4c5e4f5b580492d4de53a9b7ff9bb2e6b364b80c462ddc32c42b6d91"
+      ],
+      "dag_class": "edge",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "68848fb4180008ebe8a7086dc2eed75c60da8aefc2a930babb8129433a6fb56c",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:2|splits:none"
+    },
+    {
+      "assignment_id": "edge:A:3",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "45e07ee41546e181e9552f366099a983c9d3ca77729bd95b5a417891666afb06",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "58554f6740be649e5f725c1198bdf24150f0f13d8d590b46eb3eedb50d41f5cb",
+        "58554f6740be649e5f725c1198bdf24150f0f13d8d590b46eb3eedb50d41f5cb",
+        "58554f6740be649e5f725c1198bdf24150f0f13d8d590b46eb3eedb50d41f5cb"
+      ],
+      "dag_class": "edge",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "45e07ee41546e181e9552f366099a983c9d3ca77729bd95b5a417891666afb06",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:3|splits:none"
+    },
+    {
+      "assignment_id": "edge:A:4",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "3c471c42c9b30dcf4b5c73d04ee0fb370ab35b48d656b526a0d38cb882692aae",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "2672f9a82c9fb81b4d7f2fd292398b8716a9a5b62d7d533ae4b9d624e61b5871",
+        "2672f9a82c9fb81b4d7f2fd292398b8716a9a5b62d7d533ae4b9d624e61b5871",
+        "2672f9a82c9fb81b4d7f2fd292398b8716a9a5b62d7d533ae4b9d624e61b5871"
+      ],
+      "dag_class": "edge",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "3c471c42c9b30dcf4b5c73d04ee0fb370ab35b48d656b526a0d38cb882692aae",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:0,1|splits:D0=2"
+    },
+    {
+      "assignment_id": "edge:A:5",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "9a9e2e2803c506de5d7bdb883394bd731bae4599c89551bfeb3704ee20e81e6c",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "ca43521c33807a144613d40b1ed004e187ba4fbbcef9c528f4839559e5603fc6",
+        "ca43521c33807a144613d40b1ed004e187ba4fbbcef9c528f4839559e5603fc6",
+        "ca43521c33807a144613d40b1ed004e187ba4fbbcef9c528f4839559e5603fc6"
+      ],
+      "dag_class": "edge",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "9a9e2e2803c506de5d7bdb883394bd731bae4599c89551bfeb3704ee20e81e6c",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:2,3|splits:D0=2"
+    },
+    {
+      "assignment_id": "edge:A:6",
+      "baseline_round_trip_exact": true,
+      "compiled_outcome": {
+        "problem_hash": "2e187c18f610c4b3d2118e8f625924130d3ca30962f530831f9a9674e7d5196e",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "6d41b698711f847cb9b61b5e7b3edf451e8912ebd9af162bf5afaad0743c3fa6",
+        "6d41b698711f847cb9b61b5e7b3edf451e8912ebd9af162bf5afaad0743c3fa6",
+        "6d41b698711f847cb9b61b5e7b3edf451e8912ebd9af162bf5afaad0743c3fa6"
+      ],
+      "dag_class": "edge",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "2e187c18f610c4b3d2118e8f625924130d3ca30962f530831f9a9674e7d5196e",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:0,1,2,3|splits:D0=4"
+    },
+    {
+      "assignment_id": "edge:B:0",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "4f60568e03178f94dca3c8d30609c2ebbd568d676101a232de78c42ff4de3940",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "9e96d559e4ee12f07cf4b506f178561354ae283f9f38d76d6e8ade803990b07d",
+        "9e96d559e4ee12f07cf4b506f178561354ae283f9f38d76d6e8ade803990b07d",
+        "9e96d559e4ee12f07cf4b506f178561354ae283f9f38d76d6e8ade803990b07d"
+      ],
+      "dag_class": "edge",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "4f60568e03178f94dca3c8d30609c2ebbd568d676101a232de78c42ff4de3940",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:0|splits:none"
+    },
+    {
+      "assignment_id": "edge:B:1",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "e66a680323b745f73893984f6bc547ef6fca9b39e0520825bdb1823f982acbf0",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "487ae52e910a2afaae501344782302d6b3c60f736f1e8224d28fc9c4fda21dcb",
+        "487ae52e910a2afaae501344782302d6b3c60f736f1e8224d28fc9c4fda21dcb",
+        "487ae52e910a2afaae501344782302d6b3c60f736f1e8224d28fc9c4fda21dcb"
+      ],
+      "dag_class": "edge",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "e66a680323b745f73893984f6bc547ef6fca9b39e0520825bdb1823f982acbf0",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:1|splits:none"
+    },
+    {
+      "assignment_id": "edge:B:2",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "959e4b068dbb6ed186eb9cff0ba568015d2a444fa07bdebf84dafe543fd6385a",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "41e065576bdab908288513306aa27d0b0d6a1c17052c33472ed09523a3df4cce",
+        "41e065576bdab908288513306aa27d0b0d6a1c17052c33472ed09523a3df4cce",
+        "41e065576bdab908288513306aa27d0b0d6a1c17052c33472ed09523a3df4cce"
+      ],
+      "dag_class": "edge",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "959e4b068dbb6ed186eb9cff0ba568015d2a444fa07bdebf84dafe543fd6385a",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:2|splits:none"
+    },
+    {
+      "assignment_id": "edge:B:3",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "9e20c11aed9a74e8340fd2b84338cc8bc216795097e2e2f87027a9874ca40af8",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "18d1e82cbabc98565a64e29f32c5e09bb3c68a906af8a4f8c75667b76f77e135",
+        "18d1e82cbabc98565a64e29f32c5e09bb3c68a906af8a4f8c75667b76f77e135",
+        "18d1e82cbabc98565a64e29f32c5e09bb3c68a906af8a4f8c75667b76f77e135"
+      ],
+      "dag_class": "edge",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "9e20c11aed9a74e8340fd2b84338cc8bc216795097e2e2f87027a9874ca40af8",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:3|splits:none"
+    },
+    {
+      "assignment_id": "edge:B:4",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "41ef4b4ff8cc09e48b277f5f8d30cf5b855fa1ee053edb764edf4b49f4ac2531",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "b01bc72e1779f269042f8fd8d4ae500a28b51526997e9468e61c27a92d74f75f",
+        "b01bc72e1779f269042f8fd8d4ae500a28b51526997e9468e61c27a92d74f75f",
+        "b01bc72e1779f269042f8fd8d4ae500a28b51526997e9468e61c27a92d74f75f"
+      ],
+      "dag_class": "edge",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "41ef4b4ff8cc09e48b277f5f8d30cf5b855fa1ee053edb764edf4b49f4ac2531",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:0,1|splits:D0=2"
+    },
+    {
+      "assignment_id": "edge:B:5",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "5b35abf3898d9c209b412ce1d68c745e6a37e05bc57d148f65795d0e0355a286",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "2ed3080fc92516ca0377b8d4725f27c0f2afcb21375cb0606573fe07f5867733",
+        "2ed3080fc92516ca0377b8d4725f27c0f2afcb21375cb0606573fe07f5867733",
+        "2ed3080fc92516ca0377b8d4725f27c0f2afcb21375cb0606573fe07f5867733"
+      ],
+      "dag_class": "edge",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "5b35abf3898d9c209b412ce1d68c745e6a37e05bc57d148f65795d0e0355a286",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:2,3|splits:D0=2"
+    },
+    {
+      "assignment_id": "edge:B:6",
+      "baseline_round_trip_exact": true,
+      "compiled_outcome": {
+        "problem_hash": "2e187c18f610c4b3d2118e8f625924130d3ca30962f530831f9a9674e7d5196e",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "f3493cf968a885bee909af9f1245bc39db2e5377b202b84310a5c79b9e8f1a84",
+        "f3493cf968a885bee909af9f1245bc39db2e5377b202b84310a5c79b9e8f1a84",
+        "f3493cf968a885bee909af9f1245bc39db2e5377b202b84310a5c79b9e8f1a84"
+      ],
+      "dag_class": "edge",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "2e187c18f610c4b3d2118e8f625924130d3ca30962f530831f9a9674e7d5196e",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:0,1,2,3|splits:D0=4"
+    },
+    {
+      "assignment_id": "chain:A:0",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "e507bf5e541b61ce40ba581759c32345d814675d5430b6b6d713b267978ccf89",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "79711ff415085e85e53f02bdc153cbe1b1e34c340668027f3c11f57214f239c9",
+        "79711ff415085e85e53f02bdc153cbe1b1e34c340668027f3c11f57214f239c9",
+        "79711ff415085e85e53f02bdc153cbe1b1e34c340668027f3c11f57214f239c9"
+      ],
+      "dag_class": "chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "e507bf5e541b61ce40ba581759c32345d814675d5430b6b6d713b267978ccf89",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:0|splits:none"
+    },
+    {
+      "assignment_id": "chain:A:1",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "ac1b7521455b22a5956ecda6b48bf695883590192b97066a8c284e4589630cb1",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "c3223507b5b26b71c7349eb9c44c75912373646d8dc49d3e3ef868a315ebff33",
+        "c3223507b5b26b71c7349eb9c44c75912373646d8dc49d3e3ef868a315ebff33",
+        "c3223507b5b26b71c7349eb9c44c75912373646d8dc49d3e3ef868a315ebff33"
+      ],
+      "dag_class": "chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "ac1b7521455b22a5956ecda6b48bf695883590192b97066a8c284e4589630cb1",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:1|splits:none"
+    },
+    {
+      "assignment_id": "chain:A:2",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "93c55cca7ddae88694725525e30cae3c47b38576e747c986cf522535c76ee547",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "78d3671765e8960b1b6f9d51e9173ff297d418bbb19ff5a8b24808af2969871e",
+        "78d3671765e8960b1b6f9d51e9173ff297d418bbb19ff5a8b24808af2969871e",
+        "78d3671765e8960b1b6f9d51e9173ff297d418bbb19ff5a8b24808af2969871e"
+      ],
+      "dag_class": "chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "93c55cca7ddae88694725525e30cae3c47b38576e747c986cf522535c76ee547",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:2|splits:none"
+    },
+    {
+      "assignment_id": "chain:A:3",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "2f148db1e068dbd4fe53dcef8e5b642b92186123916ef2334310cc7d75b5cc4a",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "1bdd7b8ea2f7e81deab925770e87971354c1159fa55121ce4f8ec7dfcd54f405",
+        "1bdd7b8ea2f7e81deab925770e87971354c1159fa55121ce4f8ec7dfcd54f405",
+        "1bdd7b8ea2f7e81deab925770e87971354c1159fa55121ce4f8ec7dfcd54f405"
+      ],
+      "dag_class": "chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "2f148db1e068dbd4fe53dcef8e5b642b92186123916ef2334310cc7d75b5cc4a",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:3|splits:none"
+    },
+    {
+      "assignment_id": "chain:A:4",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "50cbde9f4a4e1f8948bec260b0340976f9322d226252cc5edafa73da023946c6",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "f330da36b97e61c0e5f3726e6eb00ad98dcce2d747e577f514c7e8c8f12ac70a",
+        "f330da36b97e61c0e5f3726e6eb00ad98dcce2d747e577f514c7e8c8f12ac70a",
+        "f330da36b97e61c0e5f3726e6eb00ad98dcce2d747e577f514c7e8c8f12ac70a"
+      ],
+      "dag_class": "chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "50cbde9f4a4e1f8948bec260b0340976f9322d226252cc5edafa73da023946c6",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:0,1|splits:D0=2"
+    },
+    {
+      "assignment_id": "chain:A:5",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "aea4042545225ce92554bd801c6966a912e4b6afdf7bf4a49d1cb7fd522e4138",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "c05c2ace622f20624aa5128cda38150e721f8c5b4c6351c86c17901980fa9561",
+        "c05c2ace622f20624aa5128cda38150e721f8c5b4c6351c86c17901980fa9561",
+        "c05c2ace622f20624aa5128cda38150e721f8c5b4c6351c86c17901980fa9561"
+      ],
+      "dag_class": "chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "aea4042545225ce92554bd801c6966a912e4b6afdf7bf4a49d1cb7fd522e4138",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:2,3|splits:D0=2"
+    },
+    {
+      "assignment_id": "chain:A:6",
+      "baseline_round_trip_exact": true,
+      "compiled_outcome": {
+        "problem_hash": "3f98ba0f2dda1cc8e32b3ffcace567c4ca15bc9db0e67c2da274e4d8eb735e24",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "deb6e7f6fd79bbd8159e3d10392b2661c5ae3ce8f449c0d3bc0ff2b2613d00e8",
+        "deb6e7f6fd79bbd8159e3d10392b2661c5ae3ce8f449c0d3bc0ff2b2613d00e8",
+        "deb6e7f6fd79bbd8159e3d10392b2661c5ae3ce8f449c0d3bc0ff2b2613d00e8"
+      ],
+      "dag_class": "chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "3f98ba0f2dda1cc8e32b3ffcace567c4ca15bc9db0e67c2da274e4d8eb735e24",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:0,1,2,3|splits:D0=4"
+    },
+    {
+      "assignment_id": "chain:B:0",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "b9f8eaa2a8352743639034d58a131c2edaea9b52a60e1978786ed2ff07014908",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "6eb0910fec855a63eeb7d190d2b4e04cf2f670e8d75511acfa6768420fe6494a",
+        "6eb0910fec855a63eeb7d190d2b4e04cf2f670e8d75511acfa6768420fe6494a",
+        "6eb0910fec855a63eeb7d190d2b4e04cf2f670e8d75511acfa6768420fe6494a"
+      ],
+      "dag_class": "chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "b9f8eaa2a8352743639034d58a131c2edaea9b52a60e1978786ed2ff07014908",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:0|splits:none"
+    },
+    {
+      "assignment_id": "chain:B:1",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "2d796dc030307847f2f272e6f8b598eab5675bd4c59b0d80c4f52ffe80467871",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "cc627ca831cf9b8838721042d9175731acba6491ba5c9b286dd94ba39ca94fb7",
+        "cc627ca831cf9b8838721042d9175731acba6491ba5c9b286dd94ba39ca94fb7",
+        "cc627ca831cf9b8838721042d9175731acba6491ba5c9b286dd94ba39ca94fb7"
+      ],
+      "dag_class": "chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "2d796dc030307847f2f272e6f8b598eab5675bd4c59b0d80c4f52ffe80467871",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:1|splits:none"
+    },
+    {
+      "assignment_id": "chain:B:2",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "5a98083fa0f73c797edeb454a0ec7620bc2b698f91b54f0369bf8fbc251c27db",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "b50714ef8fb41132d93fe875be829c71b663f9bc52fdcddd6d5b741272e397e8",
+        "b50714ef8fb41132d93fe875be829c71b663f9bc52fdcddd6d5b741272e397e8",
+        "b50714ef8fb41132d93fe875be829c71b663f9bc52fdcddd6d5b741272e397e8"
+      ],
+      "dag_class": "chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "5a98083fa0f73c797edeb454a0ec7620bc2b698f91b54f0369bf8fbc251c27db",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:2|splits:none"
+    },
+    {
+      "assignment_id": "chain:B:3",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "ac585330e190f56f8664b6cac090564151dcc4581eb4109e8edf0bb5b98d093e",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "68ce67e7ccd28fd91bab0d81e92d56df846ba5959e894dfe17f60b10f3a3bbf0",
+        "68ce67e7ccd28fd91bab0d81e92d56df846ba5959e894dfe17f60b10f3a3bbf0",
+        "68ce67e7ccd28fd91bab0d81e92d56df846ba5959e894dfe17f60b10f3a3bbf0"
+      ],
+      "dag_class": "chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "ac585330e190f56f8664b6cac090564151dcc4581eb4109e8edf0bb5b98d093e",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:3|splits:none"
+    },
+    {
+      "assignment_id": "chain:B:4",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "fed185881436ce920ddd5c9f6a3fa32292679972f2bc6f8832a5ac97b2aea4f9",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "ff483f3ec8b71df5253adb35ac522c6528070138f58199d702f1d97782f765e2",
+        "ff483f3ec8b71df5253adb35ac522c6528070138f58199d702f1d97782f765e2",
+        "ff483f3ec8b71df5253adb35ac522c6528070138f58199d702f1d97782f765e2"
+      ],
+      "dag_class": "chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "fed185881436ce920ddd5c9f6a3fa32292679972f2bc6f8832a5ac97b2aea4f9",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:0,1|splits:D0=2"
+    },
+    {
+      "assignment_id": "chain:B:5",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "3485a9920a4db2c0e5c38c3edcc9553f62b30cd592ffafe5b4c284cfa4eeedf9",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "5326992ee87fefe9a896ce971487c84127a4e26b05a9b49b476f14dbc79e340c",
+        "5326992ee87fefe9a896ce971487c84127a4e26b05a9b49b476f14dbc79e340c",
+        "5326992ee87fefe9a896ce971487c84127a4e26b05a9b49b476f14dbc79e340c"
+      ],
+      "dag_class": "chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "3485a9920a4db2c0e5c38c3edcc9553f62b30cd592ffafe5b4c284cfa4eeedf9",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:2,3|splits:D0=2"
+    },
+    {
+      "assignment_id": "chain:B:6",
+      "baseline_round_trip_exact": true,
+      "compiled_outcome": {
+        "problem_hash": "3f98ba0f2dda1cc8e32b3ffcace567c4ca15bc9db0e67c2da274e4d8eb735e24",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "0198a5161e56cf8e4add0af4c64f64e32de83dfb4596d660c06853aa84824010",
+        "0198a5161e56cf8e4add0af4c64f64e32de83dfb4596d660c06853aa84824010",
+        "0198a5161e56cf8e4add0af4c64f64e32de83dfb4596d660c06853aa84824010"
+      ],
+      "dag_class": "chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "3f98ba0f2dda1cc8e32b3ffcace567c4ca15bc9db0e67c2da274e4d8eb735e24",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:0,1,2,3|splits:D0=4"
+    },
+    {
+      "assignment_id": "chain:C:0",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "10f94b7b330ffcd455dac3ced727ad4928bc34e49d289d2d7a814a656209b5d1",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "2b7b9f820af69d8907d62515b7f0c1de9968c770a28aa53107c963d1cc5ef8aa",
+        "2b7b9f820af69d8907d62515b7f0c1de9968c770a28aa53107c963d1cc5ef8aa",
+        "2b7b9f820af69d8907d62515b7f0c1de9968c770a28aa53107c963d1cc5ef8aa"
+      ],
+      "dag_class": "chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "10f94b7b330ffcd455dac3ced727ad4928bc34e49d289d2d7a814a656209b5d1",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "C",
+      "template": "C|cores:0|splits:none"
+    },
+    {
+      "assignment_id": "chain:C:1",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "7aaf760292005dd6cb135cc0496de6ef02f246ee3769d7edb2b8da6d0d61c9ff",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "2ca1552a1a4cd7128bf2a1a70ee1bc8acfa09e8fd2ed2f227f2684a8a8e944e9",
+        "2ca1552a1a4cd7128bf2a1a70ee1bc8acfa09e8fd2ed2f227f2684a8a8e944e9",
+        "2ca1552a1a4cd7128bf2a1a70ee1bc8acfa09e8fd2ed2f227f2684a8a8e944e9"
+      ],
+      "dag_class": "chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "7aaf760292005dd6cb135cc0496de6ef02f246ee3769d7edb2b8da6d0d61c9ff",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "C",
+      "template": "C|cores:1|splits:none"
+    },
+    {
+      "assignment_id": "chain:C:2",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "0e18248b3eb7c288bc8199a3e228c3206181a66085b7628cf67b70efb239f300",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "fa3733498cfad36a071e6f107ac51e3489dbe18088dd268b5aafae8ee0ea4787",
+        "fa3733498cfad36a071e6f107ac51e3489dbe18088dd268b5aafae8ee0ea4787",
+        "fa3733498cfad36a071e6f107ac51e3489dbe18088dd268b5aafae8ee0ea4787"
+      ],
+      "dag_class": "chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "0e18248b3eb7c288bc8199a3e228c3206181a66085b7628cf67b70efb239f300",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "C",
+      "template": "C|cores:2|splits:none"
+    },
+    {
+      "assignment_id": "chain:C:3",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "0f4696a471910becbd7d64d456ad450471333a682c4d91a4efa57bac15caced0",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "d81bbfc1ad152573b325e96e977b46b24117923f1cc0d50dd67f5afcf6ea6d91",
+        "d81bbfc1ad152573b325e96e977b46b24117923f1cc0d50dd67f5afcf6ea6d91",
+        "d81bbfc1ad152573b325e96e977b46b24117923f1cc0d50dd67f5afcf6ea6d91"
+      ],
+      "dag_class": "chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "0f4696a471910becbd7d64d456ad450471333a682c4d91a4efa57bac15caced0",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "C",
+      "template": "C|cores:3|splits:none"
+    },
+    {
+      "assignment_id": "chain:C:4",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "4162d5bc7aac6328bf529c79e1c6707fc82fe7d4b1cd4f7e4abf2193f22ea735",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "74f16e7805b62dfa2794a62e9c00ba2646df83ffc03a30ce4a871d5cbeff7adc",
+        "74f16e7805b62dfa2794a62e9c00ba2646df83ffc03a30ce4a871d5cbeff7adc",
+        "74f16e7805b62dfa2794a62e9c00ba2646df83ffc03a30ce4a871d5cbeff7adc"
+      ],
+      "dag_class": "chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "4162d5bc7aac6328bf529c79e1c6707fc82fe7d4b1cd4f7e4abf2193f22ea735",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "C",
+      "template": "C|cores:0,1|splits:D0=2"
+    },
+    {
+      "assignment_id": "chain:C:5",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "56211de56d940798c774a10e4f812141322f5f37a1ce80eef484f906cefb4de1",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "771e6b6fd962290efb4a56c10a340c4e52f4e81e956c2c49fea1264035ff6a09",
+        "771e6b6fd962290efb4a56c10a340c4e52f4e81e956c2c49fea1264035ff6a09",
+        "771e6b6fd962290efb4a56c10a340c4e52f4e81e956c2c49fea1264035ff6a09"
+      ],
+      "dag_class": "chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "56211de56d940798c774a10e4f812141322f5f37a1ce80eef484f906cefb4de1",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "C",
+      "template": "C|cores:2,3|splits:D0=2"
+    },
+    {
+      "assignment_id": "chain:C:6",
+      "baseline_round_trip_exact": true,
+      "compiled_outcome": {
+        "problem_hash": "3f98ba0f2dda1cc8e32b3ffcace567c4ca15bc9db0e67c2da274e4d8eb735e24",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "ef95fafab6fccbad5c9eded33c298f9d24654a06fec11b45ea784ddf5dd527a0",
+        "ef95fafab6fccbad5c9eded33c298f9d24654a06fec11b45ea784ddf5dd527a0",
+        "ef95fafab6fccbad5c9eded33c298f9d24654a06fec11b45ea784ddf5dd527a0"
+      ],
+      "dag_class": "chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "3f98ba0f2dda1cc8e32b3ffcace567c4ca15bc9db0e67c2da274e4d8eb735e24",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "C",
+      "template": "C|cores:0,1,2,3|splits:D0=4"
+    },
+    {
+      "assignment_id": "gemm_chain:Gemm0:0",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "5b94a87d2171ceea28983876cb4d08fb7a63ddf2bfb9b9a151a93cc2f0a050bd",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "4dd28acf009aa5a891824dc0d32e2bf506f3468ff0e6602049cc35f3d223ffa0",
+        "4dd28acf009aa5a891824dc0d32e2bf506f3468ff0e6602049cc35f3d223ffa0",
+        "4dd28acf009aa5a891824dc0d32e2bf506f3468ff0e6602049cc35f3d223ffa0"
+      ],
+      "dag_class": "gemm_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "5b94a87d2171ceea28983876cb4d08fb7a63ddf2bfb9b9a151a93cc2f0a050bd",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "Gemm0",
+      "template": "Gemm0|cores:0|splits:none"
+    },
+    {
+      "assignment_id": "gemm_chain:Gemm0:1",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "abef79feb08ab0d32e8a6d7367bc40a4fa9ceb81e8fc2b2adefaeb500b318ed4",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "d9cbaa74921011e79dd6568264f9a308021c38cbe3ea07083f9cfe28960c6363",
+        "d9cbaa74921011e79dd6568264f9a308021c38cbe3ea07083f9cfe28960c6363",
+        "d9cbaa74921011e79dd6568264f9a308021c38cbe3ea07083f9cfe28960c6363"
+      ],
+      "dag_class": "gemm_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "abef79feb08ab0d32e8a6d7367bc40a4fa9ceb81e8fc2b2adefaeb500b318ed4",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "Gemm0",
+      "template": "Gemm0|cores:1|splits:none"
+    },
+    {
+      "assignment_id": "gemm_chain:Gemm0:2",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "e7183b4e752b566567653a7b260f64be12848968c947a4c8f751b254c24a1f31",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "5bd87be27d27b1b47ca01bb3f663a5fab9749bd5fea7df1011ef7be2613b72ce",
+        "5bd87be27d27b1b47ca01bb3f663a5fab9749bd5fea7df1011ef7be2613b72ce",
+        "5bd87be27d27b1b47ca01bb3f663a5fab9749bd5fea7df1011ef7be2613b72ce"
+      ],
+      "dag_class": "gemm_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "e7183b4e752b566567653a7b260f64be12848968c947a4c8f751b254c24a1f31",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "Gemm0",
+      "template": "Gemm0|cores:2|splits:none"
+    },
+    {
+      "assignment_id": "gemm_chain:Gemm0:3",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "55cce650fc39091c49675eba5a6d58fbc0daebb5ed56a26421645a15c536206c",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "d6a60040d3dd8bfd68b538cbc15c2ddf2293763d70269ac3a4f23fbe0e35a544",
+        "d6a60040d3dd8bfd68b538cbc15c2ddf2293763d70269ac3a4f23fbe0e35a544",
+        "d6a60040d3dd8bfd68b538cbc15c2ddf2293763d70269ac3a4f23fbe0e35a544"
+      ],
+      "dag_class": "gemm_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "55cce650fc39091c49675eba5a6d58fbc0daebb5ed56a26421645a15c536206c",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "Gemm0",
+      "template": "Gemm0|cores:3|splits:none"
+    },
+    {
+      "assignment_id": "gemm_chain:Gemm0:4",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "60143ac3fafb47685d985441f5381e0960146dd555bf6d3a5fbfa68693d1461e",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "6bcbb644d21ba5ffd6884d7f98a3b63db31325fb2ed97aea7e01ecc97fbed97b",
+        "6bcbb644d21ba5ffd6884d7f98a3b63db31325fb2ed97aea7e01ecc97fbed97b",
+        "6bcbb644d21ba5ffd6884d7f98a3b63db31325fb2ed97aea7e01ecc97fbed97b"
+      ],
+      "dag_class": "gemm_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "60143ac3fafb47685d985441f5381e0960146dd555bf6d3a5fbfa68693d1461e",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "Gemm0",
+      "template": "Gemm0|cores:0,1|splits:D0=2"
+    },
+    {
+      "assignment_id": "gemm_chain:Gemm0:5",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "e5997362ad889e6747edcac0c2054e63de7b9fa9507df46513ed97b035a94148",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "943cd2ba3f9d2d0b4ef86080cc6f087528c4390673f5f798515581f09332ad99",
+        "943cd2ba3f9d2d0b4ef86080cc6f087528c4390673f5f798515581f09332ad99",
+        "943cd2ba3f9d2d0b4ef86080cc6f087528c4390673f5f798515581f09332ad99"
+      ],
+      "dag_class": "gemm_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "e5997362ad889e6747edcac0c2054e63de7b9fa9507df46513ed97b035a94148",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "Gemm0",
+      "template": "Gemm0|cores:2,3|splits:D0=2"
+    },
+    {
+      "assignment_id": "gemm_chain:Gemm0:6",
+      "baseline_round_trip_exact": true,
+      "compiled_outcome": {
+        "problem_hash": "b28eaa908cff9f72db6506f2991b6337887a90fb88cb077be80a462b6aea12fa",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "a239fc787031670013bb764e9b4074828a531b97fbd6b2c06fba29e355a8a8a5",
+        "a239fc787031670013bb764e9b4074828a531b97fbd6b2c06fba29e355a8a8a5",
+        "a239fc787031670013bb764e9b4074828a531b97fbd6b2c06fba29e355a8a8a5"
+      ],
+      "dag_class": "gemm_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "b28eaa908cff9f72db6506f2991b6337887a90fb88cb077be80a462b6aea12fa",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "Gemm0",
+      "template": "Gemm0|cores:0,1,2,3|splits:D0=4"
+    },
+    {
+      "assignment_id": "gemm_chain:Gemm1:0",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "0dc1790c8e3d3bbc7c88b64761a3873abe250c5f93b6a38848d1700f1cd92178",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "82b95d17186859f44b022d857b9bd21debb83b5c585db38bb3a9d67dbe95aaad",
+        "82b95d17186859f44b022d857b9bd21debb83b5c585db38bb3a9d67dbe95aaad",
+        "82b95d17186859f44b022d857b9bd21debb83b5c585db38bb3a9d67dbe95aaad"
+      ],
+      "dag_class": "gemm_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "0dc1790c8e3d3bbc7c88b64761a3873abe250c5f93b6a38848d1700f1cd92178",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "Gemm1",
+      "template": "Gemm1|cores:0|splits:none"
+    },
+    {
+      "assignment_id": "gemm_chain:Gemm1:1",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "315eb8e57d6df11b79f360349d43c72131d77f86dd975364bc58783ffc3edafa",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "8f245906dc9e4c1f35861a55465e2d0be6946c89aa36b34bfc9fdef75dfad6fc",
+        "8f245906dc9e4c1f35861a55465e2d0be6946c89aa36b34bfc9fdef75dfad6fc",
+        "8f245906dc9e4c1f35861a55465e2d0be6946c89aa36b34bfc9fdef75dfad6fc"
+      ],
+      "dag_class": "gemm_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "315eb8e57d6df11b79f360349d43c72131d77f86dd975364bc58783ffc3edafa",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "Gemm1",
+      "template": "Gemm1|cores:1|splits:none"
+    },
+    {
+      "assignment_id": "gemm_chain:Gemm1:2",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "de6c47b8a5550984e0d2f034972829f2c5af8ab7b83cf1665477e166601faa45",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "6c329b68dfe87769c03713906a3c997dc6d4dabefb4bd58fd6a1a0a4c99d40a8",
+        "6c329b68dfe87769c03713906a3c997dc6d4dabefb4bd58fd6a1a0a4c99d40a8",
+        "6c329b68dfe87769c03713906a3c997dc6d4dabefb4bd58fd6a1a0a4c99d40a8"
+      ],
+      "dag_class": "gemm_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "de6c47b8a5550984e0d2f034972829f2c5af8ab7b83cf1665477e166601faa45",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "Gemm1",
+      "template": "Gemm1|cores:2|splits:none"
+    },
+    {
+      "assignment_id": "gemm_chain:Gemm1:3",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "63085979aae039ef5c1bfc123b9c788452a84274e89407c216a56bd94e9f6e1e",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "afff4aacbc2d3c90ab73420c1018e1249f2c2e92ce31631987bf7b4a62e2df86",
+        "afff4aacbc2d3c90ab73420c1018e1249f2c2e92ce31631987bf7b4a62e2df86",
+        "afff4aacbc2d3c90ab73420c1018e1249f2c2e92ce31631987bf7b4a62e2df86"
+      ],
+      "dag_class": "gemm_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "63085979aae039ef5c1bfc123b9c788452a84274e89407c216a56bd94e9f6e1e",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "Gemm1",
+      "template": "Gemm1|cores:3|splits:none"
+    },
+    {
+      "assignment_id": "gemm_chain:Gemm1:4",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "1536dac79d5e0ecc77879667181f88c962420a4ece6a3af68f782eb4183668ae",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "70ea013fa0fa942bd86c435ae8923a962ae99d6f635dc10e18b77e1887066461",
+        "70ea013fa0fa942bd86c435ae8923a962ae99d6f635dc10e18b77e1887066461",
+        "70ea013fa0fa942bd86c435ae8923a962ae99d6f635dc10e18b77e1887066461"
+      ],
+      "dag_class": "gemm_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "1536dac79d5e0ecc77879667181f88c962420a4ece6a3af68f782eb4183668ae",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "Gemm1",
+      "template": "Gemm1|cores:0,1|splits:D0=2"
+    },
+    {
+      "assignment_id": "gemm_chain:Gemm1:5",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "caef63ce23b36449203c8c86bd4a1a76b6c0387337f993972fd72dc223acfd2a",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "bae7e4141546e7355f9e090638298c7f6a1b9f982b5314f9faa32a45ac5f1a69",
+        "bae7e4141546e7355f9e090638298c7f6a1b9f982b5314f9faa32a45ac5f1a69",
+        "bae7e4141546e7355f9e090638298c7f6a1b9f982b5314f9faa32a45ac5f1a69"
+      ],
+      "dag_class": "gemm_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "caef63ce23b36449203c8c86bd4a1a76b6c0387337f993972fd72dc223acfd2a",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "Gemm1",
+      "template": "Gemm1|cores:2,3|splits:D0=2"
+    },
+    {
+      "assignment_id": "gemm_chain:Gemm1:6",
+      "baseline_round_trip_exact": true,
+      "compiled_outcome": {
+        "problem_hash": "b28eaa908cff9f72db6506f2991b6337887a90fb88cb077be80a462b6aea12fa",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "e8fb5e9e753599dfcba10d0bfde84fc71860f102f2a51d4589b2ff310522b84b",
+        "e8fb5e9e753599dfcba10d0bfde84fc71860f102f2a51d4589b2ff310522b84b",
+        "e8fb5e9e753599dfcba10d0bfde84fc71860f102f2a51d4589b2ff310522b84b"
+      ],
+      "dag_class": "gemm_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "b28eaa908cff9f72db6506f2991b6337887a90fb88cb077be80a462b6aea12fa",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "Gemm1",
+      "template": "Gemm1|cores:0,1,2,3|splits:D0=4"
+    },
+    {
+      "assignment_id": "conv_chain:Conv0:0",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "f9c95ad2636a9eef5372f424a3aa744ee74d5aeacab15d220cf322d4631f6aec",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "f2c510174fb66577cc29bce4e4478749a7c5e06371be46c3e8f395eab4c46367",
+        "f2c510174fb66577cc29bce4e4478749a7c5e06371be46c3e8f395eab4c46367",
+        "f2c510174fb66577cc29bce4e4478749a7c5e06371be46c3e8f395eab4c46367"
+      ],
+      "dag_class": "conv_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "f9c95ad2636a9eef5372f424a3aa744ee74d5aeacab15d220cf322d4631f6aec",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "Conv0",
+      "template": "Conv0|cores:0|splits:none"
+    },
+    {
+      "assignment_id": "conv_chain:Conv0:1",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "73d784775c75cf5cc97f393da1da345a40b05ea87ff8b645b56e42e330b493b1",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "be8998d5c9f14f1d0628a8f28ba02a9fb9257b0d244758915451d0f1918048f5",
+        "be8998d5c9f14f1d0628a8f28ba02a9fb9257b0d244758915451d0f1918048f5",
+        "be8998d5c9f14f1d0628a8f28ba02a9fb9257b0d244758915451d0f1918048f5"
+      ],
+      "dag_class": "conv_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "73d784775c75cf5cc97f393da1da345a40b05ea87ff8b645b56e42e330b493b1",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "Conv0",
+      "template": "Conv0|cores:1|splits:none"
+    },
+    {
+      "assignment_id": "conv_chain:Conv0:2",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "ec83178da8934651d89a9e45daaf56d792c75347da76e979d00556de32e29e6c",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "1ae6ed1f849740dcd6037b26b0f52f076e9fe851ac1b3151bc1b5210d296dd28",
+        "1ae6ed1f849740dcd6037b26b0f52f076e9fe851ac1b3151bc1b5210d296dd28",
+        "1ae6ed1f849740dcd6037b26b0f52f076e9fe851ac1b3151bc1b5210d296dd28"
+      ],
+      "dag_class": "conv_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "ec83178da8934651d89a9e45daaf56d792c75347da76e979d00556de32e29e6c",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "Conv0",
+      "template": "Conv0|cores:2|splits:none"
+    },
+    {
+      "assignment_id": "conv_chain:Conv0:3",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "f503c0360a59bcec2e6ee6db2e6ed4cc553c9088b1e229ec84f2db3b860619da",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "83364aa9a0232eabd0046f9a62bbcf652a061964a6f8e38cda4371fa229295bb",
+        "83364aa9a0232eabd0046f9a62bbcf652a061964a6f8e38cda4371fa229295bb",
+        "83364aa9a0232eabd0046f9a62bbcf652a061964a6f8e38cda4371fa229295bb"
+      ],
+      "dag_class": "conv_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "f503c0360a59bcec2e6ee6db2e6ed4cc553c9088b1e229ec84f2db3b860619da",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "Conv0",
+      "template": "Conv0|cores:3|splits:none"
+    },
+    {
+      "assignment_id": "conv_chain:Conv0:4",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "2869dbedeaee0d5f0ff9e7e8023aa189257919b873b61914b94990c6381af38b",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "3e0dff0b4ba051952dcfccfdea228de7e04735908df91b5f863262d5e8315375",
+        "3e0dff0b4ba051952dcfccfdea228de7e04735908df91b5f863262d5e8315375",
+        "3e0dff0b4ba051952dcfccfdea228de7e04735908df91b5f863262d5e8315375"
+      ],
+      "dag_class": "conv_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "2869dbedeaee0d5f0ff9e7e8023aa189257919b873b61914b94990c6381af38b",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "Conv0",
+      "template": "Conv0|cores:0,1|splits:D0=2"
+    },
+    {
+      "assignment_id": "conv_chain:Conv0:5",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "099b7703c1489b78c7935a22127431b0d3291a5dcbb11e63569ad2204c970f5f",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "ed263b046d1d4a8b118be6239248ce7a731fad0748e3f4eee4f1bd16c4c23299",
+        "ed263b046d1d4a8b118be6239248ce7a731fad0748e3f4eee4f1bd16c4c23299",
+        "ed263b046d1d4a8b118be6239248ce7a731fad0748e3f4eee4f1bd16c4c23299"
+      ],
+      "dag_class": "conv_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "099b7703c1489b78c7935a22127431b0d3291a5dcbb11e63569ad2204c970f5f",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "Conv0",
+      "template": "Conv0|cores:2,3|splits:D0=2"
+    },
+    {
+      "assignment_id": "conv_chain:Conv0:6",
+      "baseline_round_trip_exact": true,
+      "compiled_outcome": {
+        "problem_hash": "887e03c75cc08761666cf716978a35147ed3526419aa21a17c5240a68ee21f03",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "927356db75460581ed83c5282dbcbf2e21bb0059f34d92f6e2af44ee0eb43d09",
+        "927356db75460581ed83c5282dbcbf2e21bb0059f34d92f6e2af44ee0eb43d09",
+        "927356db75460581ed83c5282dbcbf2e21bb0059f34d92f6e2af44ee0eb43d09"
+      ],
+      "dag_class": "conv_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "887e03c75cc08761666cf716978a35147ed3526419aa21a17c5240a68ee21f03",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "Conv0",
+      "template": "Conv0|cores:0,1,2,3|splits:D0=4"
+    },
+    {
+      "assignment_id": "conv_chain:Conv1:0",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "0f6fc1d175387783d571cb68aa1dfcf31f57dbdea022a14e3c780c2e8393d5ea",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "abd0683d321d794994d33301f22fd1709162481443130eeab6a02c5d12d27417",
+        "abd0683d321d794994d33301f22fd1709162481443130eeab6a02c5d12d27417",
+        "abd0683d321d794994d33301f22fd1709162481443130eeab6a02c5d12d27417"
+      ],
+      "dag_class": "conv_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "0f6fc1d175387783d571cb68aa1dfcf31f57dbdea022a14e3c780c2e8393d5ea",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "Conv1",
+      "template": "Conv1|cores:0|splits:none"
+    },
+    {
+      "assignment_id": "conv_chain:Conv1:1",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "b00e6c782cc14710bc205a3db1054559dd9543574248fc6479599bdc166d1f12",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "9a47c6a5c5872172a52ab68ec12e73e24295fb623691aca3c5dfff0eaf8aa037",
+        "9a47c6a5c5872172a52ab68ec12e73e24295fb623691aca3c5dfff0eaf8aa037",
+        "9a47c6a5c5872172a52ab68ec12e73e24295fb623691aca3c5dfff0eaf8aa037"
+      ],
+      "dag_class": "conv_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "b00e6c782cc14710bc205a3db1054559dd9543574248fc6479599bdc166d1f12",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "Conv1",
+      "template": "Conv1|cores:1|splits:none"
+    },
+    {
+      "assignment_id": "conv_chain:Conv1:2",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "adb1d1a3085b3f9efd046ee2efd92dd3f0ea8789b0922fca798e42e7a8f38f49",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "47cc3908e9e7a436cacdb28dd1a9278053aa20c64ea72a268d6598d09e0ad9bf",
+        "47cc3908e9e7a436cacdb28dd1a9278053aa20c64ea72a268d6598d09e0ad9bf",
+        "47cc3908e9e7a436cacdb28dd1a9278053aa20c64ea72a268d6598d09e0ad9bf"
+      ],
+      "dag_class": "conv_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "adb1d1a3085b3f9efd046ee2efd92dd3f0ea8789b0922fca798e42e7a8f38f49",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "Conv1",
+      "template": "Conv1|cores:2|splits:none"
+    },
+    {
+      "assignment_id": "conv_chain:Conv1:3",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "c34118f240daa45e34aa8c241a09b373e9b33723d99da190feee2aa26c544133",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "19851bde83a6a3f5cb0e68e0e8a561d904674cf025e01cb801742d11cc04c309",
+        "19851bde83a6a3f5cb0e68e0e8a561d904674cf025e01cb801742d11cc04c309",
+        "19851bde83a6a3f5cb0e68e0e8a561d904674cf025e01cb801742d11cc04c309"
+      ],
+      "dag_class": "conv_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "c34118f240daa45e34aa8c241a09b373e9b33723d99da190feee2aa26c544133",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "Conv1",
+      "template": "Conv1|cores:3|splits:none"
+    },
+    {
+      "assignment_id": "conv_chain:Conv1:4",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "c36e43bf48f536afce57473e89e0e90c267c0c4d484e55bcf79a7491c888dd71",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "11dd42dabb196b7877d61d4e64801515ff280040bd54771b55f4534a700629a0",
+        "11dd42dabb196b7877d61d4e64801515ff280040bd54771b55f4534a700629a0",
+        "11dd42dabb196b7877d61d4e64801515ff280040bd54771b55f4534a700629a0"
+      ],
+      "dag_class": "conv_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "c36e43bf48f536afce57473e89e0e90c267c0c4d484e55bcf79a7491c888dd71",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "Conv1",
+      "template": "Conv1|cores:0,1|splits:D0=2"
+    },
+    {
+      "assignment_id": "conv_chain:Conv1:5",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "31f03f52b5e976b3e03afa88401ded684ae2fba01b663f6dd89d9f3798c2687c",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "dd79a4ef6a398542f2ff776dd3c8db515a0f1e21ee3df5378ff235d1a691a02f",
+        "dd79a4ef6a398542f2ff776dd3c8db515a0f1e21ee3df5378ff235d1a691a02f",
+        "dd79a4ef6a398542f2ff776dd3c8db515a0f1e21ee3df5378ff235d1a691a02f"
+      ],
+      "dag_class": "conv_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "31f03f52b5e976b3e03afa88401ded684ae2fba01b663f6dd89d9f3798c2687c",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "Conv1",
+      "template": "Conv1|cores:2,3|splits:D0=2"
+    },
+    {
+      "assignment_id": "conv_chain:Conv1:6",
+      "baseline_round_trip_exact": true,
+      "compiled_outcome": {
+        "problem_hash": "887e03c75cc08761666cf716978a35147ed3526419aa21a17c5240a68ee21f03",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "6a2c823ed325d062c9381b4f3a40468a5a58ec9d60e00acaf0a5a4fb985cd38a",
+        "6a2c823ed325d062c9381b4f3a40468a5a58ec9d60e00acaf0a5a4fb985cd38a",
+        "6a2c823ed325d062c9381b4f3a40468a5a58ec9d60e00acaf0a5a4fb985cd38a"
+      ],
+      "dag_class": "conv_chain",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "887e03c75cc08761666cf716978a35147ed3526419aa21a17c5240a68ee21f03",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "Conv1",
+      "template": "Conv1|cores:0,1,2,3|splits:D0=4"
+    },
+    {
+      "assignment_id": "residual_diamond:A:0",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "c36abf4f80f0f13839fe08bcd15b12c8a6f5b02c0731eff7c6eca940c3661131",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "8bf6bd1335cff86bdfaf784fb240a42ed7ff276443f5cb2981623d492489ee85",
+        "8bf6bd1335cff86bdfaf784fb240a42ed7ff276443f5cb2981623d492489ee85",
+        "8bf6bd1335cff86bdfaf784fb240a42ed7ff276443f5cb2981623d492489ee85"
+      ],
+      "dag_class": "residual_diamond",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "c36abf4f80f0f13839fe08bcd15b12c8a6f5b02c0731eff7c6eca940c3661131",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:0|splits:none"
+    },
+    {
+      "assignment_id": "residual_diamond:A:1",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "82c46090bc0ec55b7b83a875f28252764e5b7745a91a8178e2f000631360909e",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "45acd93f1bf95d46e19a52dac7edf2663ead656a559ed8a8c8edefdc1f9133c2",
+        "45acd93f1bf95d46e19a52dac7edf2663ead656a559ed8a8c8edefdc1f9133c2",
+        "45acd93f1bf95d46e19a52dac7edf2663ead656a559ed8a8c8edefdc1f9133c2"
+      ],
+      "dag_class": "residual_diamond",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "82c46090bc0ec55b7b83a875f28252764e5b7745a91a8178e2f000631360909e",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:1|splits:none"
+    },
+    {
+      "assignment_id": "residual_diamond:A:2",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "8f61d2b616e72bf72ba9cbf327f2b328202680a141bfcce4a20e38fa0ac85b81",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "0bf8778fc9cab7b05a7fb1415c21ec09e5e1b50c0d116248119df9323a1bee61",
+        "0bf8778fc9cab7b05a7fb1415c21ec09e5e1b50c0d116248119df9323a1bee61",
+        "0bf8778fc9cab7b05a7fb1415c21ec09e5e1b50c0d116248119df9323a1bee61"
+      ],
+      "dag_class": "residual_diamond",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "8f61d2b616e72bf72ba9cbf327f2b328202680a141bfcce4a20e38fa0ac85b81",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:2|splits:none"
+    },
+    {
+      "assignment_id": "residual_diamond:A:3",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "c8482d5d51671b9e5f6e2ba91627e741a988f47987ee53431c020b23a67d9dba",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "63366bd8e4bd3c4be1edc95ae3d7f838a37b065d375c3536937872c534f37363",
+        "63366bd8e4bd3c4be1edc95ae3d7f838a37b065d375c3536937872c534f37363",
+        "63366bd8e4bd3c4be1edc95ae3d7f838a37b065d375c3536937872c534f37363"
+      ],
+      "dag_class": "residual_diamond",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "c8482d5d51671b9e5f6e2ba91627e741a988f47987ee53431c020b23a67d9dba",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:3|splits:none"
+    },
+    {
+      "assignment_id": "residual_diamond:A:4",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "failure_signature": "Shared-input demand has incompatible tensor-relevant tilings: A=((z0, 2),), Add=((z0, 4),)",
+        "reason": "SHARED_INPUT_TILING_INCOMPATIBLE",
+        "status": "UNSUPPORTED"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "2d8dfcd552061c64b36450cd3ea614582dbb1d1aa549c93eafd08e788a09c988",
+        "2d8dfcd552061c64b36450cd3ea614582dbb1d1aa549c93eafd08e788a09c988",
+        "2d8dfcd552061c64b36450cd3ea614582dbb1d1aa549c93eafd08e788a09c988"
+      ],
+      "dag_class": "residual_diamond",
+      "exact_executable": false,
+      "expected_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "failure_signature": "Shared-input demand has incompatible tensor-relevant tilings: A=((z0, 2),), Add=((z0, 4),)",
+        "reason": "SHARED_INPUT_TILING_INCOMPATIBLE",
+        "status": "UNSUPPORTED"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:0,1|splits:D0=2"
+    },
+    {
+      "assignment_id": "residual_diamond:A:5",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "failure_signature": "Shared-input demand has incompatible tensor-relevant tilings: A=((z0, 2),), Add=((z0, 4),)",
+        "reason": "SHARED_INPUT_TILING_INCOMPATIBLE",
+        "status": "UNSUPPORTED"
+      },
+      "compiled_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "d9b082660c391323cce17bef6db1bc93f42763660aa35c30334122285efc40a8",
+        "d9b082660c391323cce17bef6db1bc93f42763660aa35c30334122285efc40a8",
+        "d9b082660c391323cce17bef6db1bc93f42763660aa35c30334122285efc40a8"
+      ],
+      "dag_class": "residual_diamond",
+      "exact_executable": false,
+      "expected_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "failure_signature": "Shared-input demand has incompatible tensor-relevant tilings: A=((z0, 2),), Add=((z0, 4),)",
+        "reason": "SHARED_INPUT_TILING_INCOMPATIBLE",
+        "status": "UNSUPPORTED"
+      },
+      "reference_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:2,3|splits:D0=2"
+    },
+    {
+      "assignment_id": "residual_diamond:A:6",
+      "baseline_round_trip_exact": true,
+      "compiled_outcome": {
+        "problem_hash": "86d62b73b3121857fed620ac76c364d6d9c89d3911aa1e7303734ad458d208b9",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "5b620a798321cc0dd24d099b1122a1c2be56efcc1f78018ea18e6a2398f9f238",
+        "5b620a798321cc0dd24d099b1122a1c2be56efcc1f78018ea18e6a2398f9f238",
+        "5b620a798321cc0dd24d099b1122a1c2be56efcc1f78018ea18e6a2398f9f238"
+      ],
+      "dag_class": "residual_diamond",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "86d62b73b3121857fed620ac76c364d6d9c89d3911aa1e7303734ad458d208b9",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:0,1,2,3|splits:D0=4"
+    },
+    {
+      "assignment_id": "residual_diamond:Add:0",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "c35469acb74cd4b9bf7f9a5affd2a31cf54913ad64becea3a9443b8d90d6a57f",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "15111569e43004afa8afaf22e6f7cf66afc0664c823c2dd8786df7371188ee9e",
+        "15111569e43004afa8afaf22e6f7cf66afc0664c823c2dd8786df7371188ee9e",
+        "15111569e43004afa8afaf22e6f7cf66afc0664c823c2dd8786df7371188ee9e"
+      ],
+      "dag_class": "residual_diamond",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "c35469acb74cd4b9bf7f9a5affd2a31cf54913ad64becea3a9443b8d90d6a57f",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "Add",
+      "template": "Add|cores:0|splits:none"
+    },
+    {
+      "assignment_id": "residual_diamond:Add:1",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "63a84e54de2d88a318d08efbd7ce876b45d5851aceb791fe8043e7413bdc5343",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "b775e7af075299aae2580877dfc7369642b3772b8908bd0ff9969beaa101b0de",
+        "b775e7af075299aae2580877dfc7369642b3772b8908bd0ff9969beaa101b0de",
+        "b775e7af075299aae2580877dfc7369642b3772b8908bd0ff9969beaa101b0de"
+      ],
+      "dag_class": "residual_diamond",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "63a84e54de2d88a318d08efbd7ce876b45d5851aceb791fe8043e7413bdc5343",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "Add",
+      "template": "Add|cores:1|splits:none"
+    },
+    {
+      "assignment_id": "residual_diamond:Add:2",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "a237c8fe416b208f5f88f3d79958561c278cfa25606a357c753bd26f99ec0ae9",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "e8fbfbf13779e888f476ca0fb19c2402967e2e48dcafba3e5996d34c92d62607",
+        "e8fbfbf13779e888f476ca0fb19c2402967e2e48dcafba3e5996d34c92d62607",
+        "e8fbfbf13779e888f476ca0fb19c2402967e2e48dcafba3e5996d34c92d62607"
+      ],
+      "dag_class": "residual_diamond",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "a237c8fe416b208f5f88f3d79958561c278cfa25606a357c753bd26f99ec0ae9",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "Add",
+      "template": "Add|cores:2|splits:none"
+    },
+    {
+      "assignment_id": "residual_diamond:Add:3",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "5a82b855d124fe2f71a1f50e9ef5994e4cfc931e1e76adc82eb5b4addfff822d",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "9857cedeee1e0bdbd0906d31c9f2b13401bf4dc6f3a9580d682d490b7144f902",
+        "9857cedeee1e0bdbd0906d31c9f2b13401bf4dc6f3a9580d682d490b7144f902",
+        "9857cedeee1e0bdbd0906d31c9f2b13401bf4dc6f3a9580d682d490b7144f902"
+      ],
+      "dag_class": "residual_diamond",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "5a82b855d124fe2f71a1f50e9ef5994e4cfc931e1e76adc82eb5b4addfff822d",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "Add",
+      "template": "Add|cores:3|splits:none"
+    },
+    {
+      "assignment_id": "residual_diamond:Add:4",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "failure_signature": "Shared-input demand has incompatible tensor-relevant tilings: A=((z0, 4),), Add=((z0, 2),)",
+        "reason": "SHARED_INPUT_TILING_INCOMPATIBLE",
+        "status": "UNSUPPORTED"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "a4da154f729bcfc1e38a30caad4396c3860b7a4ce6297b0e5edddb9eb0596798",
+        "a4da154f729bcfc1e38a30caad4396c3860b7a4ce6297b0e5edddb9eb0596798",
+        "a4da154f729bcfc1e38a30caad4396c3860b7a4ce6297b0e5edddb9eb0596798"
+      ],
+      "dag_class": "residual_diamond",
+      "exact_executable": false,
+      "expected_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "failure_signature": "Shared-input demand has incompatible tensor-relevant tilings: A=((z0, 4),), Add=((z0, 2),)",
+        "reason": "SHARED_INPUT_TILING_INCOMPATIBLE",
+        "status": "UNSUPPORTED"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "Add",
+      "template": "Add|cores:0,1|splits:D0=2"
+    },
+    {
+      "assignment_id": "residual_diamond:Add:5",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "failure_signature": "Shared-input demand has incompatible tensor-relevant tilings: A=((z0, 4),), Add=((z0, 2),)",
+        "reason": "SHARED_INPUT_TILING_INCOMPATIBLE",
+        "status": "UNSUPPORTED"
+      },
+      "compiled_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "19edab5dd2b4751553d1b5e8d4664442dcefc2fcbbe17e14d5e36f857880ebf2",
+        "19edab5dd2b4751553d1b5e8d4664442dcefc2fcbbe17e14d5e36f857880ebf2",
+        "19edab5dd2b4751553d1b5e8d4664442dcefc2fcbbe17e14d5e36f857880ebf2"
+      ],
+      "dag_class": "residual_diamond",
+      "exact_executable": false,
+      "expected_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "failure_signature": "Shared-input demand has incompatible tensor-relevant tilings: A=((z0, 4),), Add=((z0, 2),)",
+        "reason": "SHARED_INPUT_TILING_INCOMPATIBLE",
+        "status": "UNSUPPORTED"
+      },
+      "reference_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "Add",
+      "template": "Add|cores:2,3|splits:D0=2"
+    },
+    {
+      "assignment_id": "residual_diamond:Add:6",
+      "baseline_round_trip_exact": true,
+      "compiled_outcome": {
+        "problem_hash": "86d62b73b3121857fed620ac76c364d6d9c89d3911aa1e7303734ad458d208b9",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "4826fd5b2852f6375dda6170924a893f4d0eb47068c23052d83c2816edb694e2",
+        "4826fd5b2852f6375dda6170924a893f4d0eb47068c23052d83c2816edb694e2",
+        "4826fd5b2852f6375dda6170924a893f4d0eb47068c23052d83c2816edb694e2"
+      ],
+      "dag_class": "residual_diamond",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "86d62b73b3121857fed620ac76c364d6d9c89d3911aa1e7303734ad458d208b9",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "Add",
+      "template": "Add|cores:0,1,2,3|splits:D0=4"
+    },
+    {
+      "assignment_id": "residual_diamond:B:0",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "79d9ce8fac000a56c7594ee439fa5db942364c0791bf4c135d4ce7e19b71ecdc",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "9f631c66003ccb16ad092a17192138cf3392b12562b1c46e1331d79aac5bb2ea",
+        "9f631c66003ccb16ad092a17192138cf3392b12562b1c46e1331d79aac5bb2ea",
+        "9f631c66003ccb16ad092a17192138cf3392b12562b1c46e1331d79aac5bb2ea"
+      ],
+      "dag_class": "residual_diamond",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "79d9ce8fac000a56c7594ee439fa5db942364c0791bf4c135d4ce7e19b71ecdc",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:0|splits:none"
+    },
+    {
+      "assignment_id": "residual_diamond:B:1",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "8af3eef2f31ff25c0210618c24385c5c14de0d2e85015456ab4bd7d3c52f5d48",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "e98b7efcff003166fd688c894768d9889bd8ceaa98211a71cdbddcf9cb280eda",
+        "e98b7efcff003166fd688c894768d9889bd8ceaa98211a71cdbddcf9cb280eda",
+        "e98b7efcff003166fd688c894768d9889bd8ceaa98211a71cdbddcf9cb280eda"
+      ],
+      "dag_class": "residual_diamond",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "8af3eef2f31ff25c0210618c24385c5c14de0d2e85015456ab4bd7d3c52f5d48",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:1|splits:none"
+    },
+    {
+      "assignment_id": "residual_diamond:B:2",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "091a4dd0bce2dda7e0b9250d8f1d33dee15fa49dd71bd3cecae13a69fa3387e6",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "a64808fa33c20f5b98b344711f3f5ba271aa856d0425c3194289932689f71382",
+        "a64808fa33c20f5b98b344711f3f5ba271aa856d0425c3194289932689f71382",
+        "a64808fa33c20f5b98b344711f3f5ba271aa856d0425c3194289932689f71382"
+      ],
+      "dag_class": "residual_diamond",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "091a4dd0bce2dda7e0b9250d8f1d33dee15fa49dd71bd3cecae13a69fa3387e6",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:2|splits:none"
+    },
+    {
+      "assignment_id": "residual_diamond:B:3",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "a326ee2cb9266570c7cc60712dce988da4f1d0edd8d34f60838e7b5920be77b8",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "463d3f28f71fe6248f413fb2cb995383b318c48d4941c01523a8b370e3416973",
+        "463d3f28f71fe6248f413fb2cb995383b318c48d4941c01523a8b370e3416973",
+        "463d3f28f71fe6248f413fb2cb995383b318c48d4941c01523a8b370e3416973"
+      ],
+      "dag_class": "residual_diamond",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "a326ee2cb9266570c7cc60712dce988da4f1d0edd8d34f60838e7b5920be77b8",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:3|splits:none"
+    },
+    {
+      "assignment_id": "residual_diamond:B:4",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "16deb2e5456bda8a2ff4b9ee59bbb9aa28fcbaf811e52db5e827344d755cf28d",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "f9dc473773c0f88a9cea0672bec947201d902d72f089cde14eb31851b011ced8",
+        "f9dc473773c0f88a9cea0672bec947201d902d72f089cde14eb31851b011ced8",
+        "f9dc473773c0f88a9cea0672bec947201d902d72f089cde14eb31851b011ced8"
+      ],
+      "dag_class": "residual_diamond",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "16deb2e5456bda8a2ff4b9ee59bbb9aa28fcbaf811e52db5e827344d755cf28d",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:0,1|splits:D0=2"
+    },
+    {
+      "assignment_id": "residual_diamond:B:5",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "89e4237b2f7caa41b3841a31647ea59d00310e878cee57c57310ea9d2fd43fcc",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "216cb5170021f6d2254846997ee5794463d225d9024ca33d4cc5f906e6c96fe4",
+        "216cb5170021f6d2254846997ee5794463d225d9024ca33d4cc5f906e6c96fe4",
+        "216cb5170021f6d2254846997ee5794463d225d9024ca33d4cc5f906e6c96fe4"
+      ],
+      "dag_class": "residual_diamond",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "89e4237b2f7caa41b3841a31647ea59d00310e878cee57c57310ea9d2fd43fcc",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:2,3|splits:D0=2"
+    },
+    {
+      "assignment_id": "residual_diamond:B:6",
+      "baseline_round_trip_exact": true,
+      "compiled_outcome": {
+        "problem_hash": "86d62b73b3121857fed620ac76c364d6d9c89d3911aa1e7303734ad458d208b9",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "13084bfe88ce018bfb45671baddfcbb814b035d7dbbce774535368579ee1e698",
+        "13084bfe88ce018bfb45671baddfcbb814b035d7dbbce774535368579ee1e698",
+        "13084bfe88ce018bfb45671baddfcbb814b035d7dbbce774535368579ee1e698"
+      ],
+      "dag_class": "residual_diamond",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "86d62b73b3121857fed620ac76c364d6d9c89d3911aa1e7303734ad458d208b9",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:0,1,2,3|splits:D0=4"
+    },
+    {
+      "assignment_id": "fork_join:A:0",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "36c7d1bab2908dd579cd7769e187ac02099c15581e60aeeaa035d4f04f47217f",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "f7585ece394b4bb41ff797ff39173040a12dfcc2d024602ccaf84f14b0599a9c",
+        "f7585ece394b4bb41ff797ff39173040a12dfcc2d024602ccaf84f14b0599a9c",
+        "f7585ece394b4bb41ff797ff39173040a12dfcc2d024602ccaf84f14b0599a9c"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "36c7d1bab2908dd579cd7769e187ac02099c15581e60aeeaa035d4f04f47217f",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:0|splits:none"
+    },
+    {
+      "assignment_id": "fork_join:A:1",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "e578b9861269109a91ed3caabca3d6ebdadb5b513a4ba8232800c13ca57a4b87",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "d553afa13e1dfec1b2c69906761317b95dd66680298b771b462811096022b6e2",
+        "d553afa13e1dfec1b2c69906761317b95dd66680298b771b462811096022b6e2",
+        "d553afa13e1dfec1b2c69906761317b95dd66680298b771b462811096022b6e2"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "e578b9861269109a91ed3caabca3d6ebdadb5b513a4ba8232800c13ca57a4b87",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:1|splits:none"
+    },
+    {
+      "assignment_id": "fork_join:A:2",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "05aeac467133255d8a6e4794762f91206c3626ab937202fb54b5e939de2a3cad",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "e472cd744f6b77a548a4acf0ecda5b510d112c94e28531879b14b0cf6d26afb0",
+        "e472cd744f6b77a548a4acf0ecda5b510d112c94e28531879b14b0cf6d26afb0",
+        "e472cd744f6b77a548a4acf0ecda5b510d112c94e28531879b14b0cf6d26afb0"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "05aeac467133255d8a6e4794762f91206c3626ab937202fb54b5e939de2a3cad",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:2|splits:none"
+    },
+    {
+      "assignment_id": "fork_join:A:3",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "8a4df7421bfc3fb2492358a37a3f1f5f79d6261708648a5f23b8935b7e37a183",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "baa6b2e0dfcf70898eaf548a10a0aaf1717c319c95396120fea69e3ae0040d84",
+        "baa6b2e0dfcf70898eaf548a10a0aaf1717c319c95396120fea69e3ae0040d84",
+        "baa6b2e0dfcf70898eaf548a10a0aaf1717c319c95396120fea69e3ae0040d84"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "8a4df7421bfc3fb2492358a37a3f1f5f79d6261708648a5f23b8935b7e37a183",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:3|splits:none"
+    },
+    {
+      "assignment_id": "fork_join:A:4",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "b7ee475c2f8aa91182ce982e072938022fefd1972fcff3bcc86a22aa4b3763e3",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "372463b8317648d29fe05df66b7189afc1a776a0deff6678d028f5eee9dd5e10",
+        "372463b8317648d29fe05df66b7189afc1a776a0deff6678d028f5eee9dd5e10",
+        "372463b8317648d29fe05df66b7189afc1a776a0deff6678d028f5eee9dd5e10"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "b7ee475c2f8aa91182ce982e072938022fefd1972fcff3bcc86a22aa4b3763e3",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:0,1|splits:D0=2"
+    },
+    {
+      "assignment_id": "fork_join:A:5",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "dc453363a4c97ce116e1d6371a6280105252f11d89273923e3bd727444f42a69",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "74e3141ca32e77ec447054d54161dbc03480ff6b93d55a66f07e033ad81600c6",
+        "74e3141ca32e77ec447054d54161dbc03480ff6b93d55a66f07e033ad81600c6",
+        "74e3141ca32e77ec447054d54161dbc03480ff6b93d55a66f07e033ad81600c6"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "dc453363a4c97ce116e1d6371a6280105252f11d89273923e3bd727444f42a69",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:2,3|splits:D0=2"
+    },
+    {
+      "assignment_id": "fork_join:A:6",
+      "baseline_round_trip_exact": true,
+      "compiled_outcome": {
+        "problem_hash": "1c8b934a987ff6ffc2829aa45eb73d0afa5ec6420228473d0ccfcd0ee82296f0",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "71b186f97138ade6510c4c7b99203e6ba90f93fe737d0f7086d03e424265c84f",
+        "71b186f97138ade6510c4c7b99203e6ba90f93fe737d0f7086d03e424265c84f",
+        "71b186f97138ade6510c4c7b99203e6ba90f93fe737d0f7086d03e424265c84f"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "1c8b934a987ff6ffc2829aa45eb73d0afa5ec6420228473d0ccfcd0ee82296f0",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "A",
+      "template": "A|cores:0,1,2,3|splits:D0=4"
+    },
+    {
+      "assignment_id": "fork_join:B:0",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "1d6785c79405358f105282afbd847748bb19c2233f89db242c594f47d1429927",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "bf18c3bddbf25b1aa9707a5f7b4a3da444acf9979ac9a3e962033d658a0b33ee",
+        "bf18c3bddbf25b1aa9707a5f7b4a3da444acf9979ac9a3e962033d658a0b33ee",
+        "bf18c3bddbf25b1aa9707a5f7b4a3da444acf9979ac9a3e962033d658a0b33ee"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "1d6785c79405358f105282afbd847748bb19c2233f89db242c594f47d1429927",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:0|splits:none"
+    },
+    {
+      "assignment_id": "fork_join:B:1",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "68ae175fe597b5538de37bd8a0789736103f803ee37895349cc06861fa60e8ab",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "37cbabd5ff2c38f9677874b8764389b9f401495b8fd0d730e2ad81dea41ca322",
+        "37cbabd5ff2c38f9677874b8764389b9f401495b8fd0d730e2ad81dea41ca322",
+        "37cbabd5ff2c38f9677874b8764389b9f401495b8fd0d730e2ad81dea41ca322"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "68ae175fe597b5538de37bd8a0789736103f803ee37895349cc06861fa60e8ab",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:1|splits:none"
+    },
+    {
+      "assignment_id": "fork_join:B:2",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "a2c7d4d7bdfe6c61d4bc7c50d27d98874c22e6b9f35bd3701f5229972b6d3cd6",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "5727b4d6cbcd511f78634cb6afd31f6705054440e3f72de9a0d0a84e43a1342b",
+        "5727b4d6cbcd511f78634cb6afd31f6705054440e3f72de9a0d0a84e43a1342b",
+        "5727b4d6cbcd511f78634cb6afd31f6705054440e3f72de9a0d0a84e43a1342b"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "a2c7d4d7bdfe6c61d4bc7c50d27d98874c22e6b9f35bd3701f5229972b6d3cd6",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:2|splits:none"
+    },
+    {
+      "assignment_id": "fork_join:B:3",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "2156f4b5103409e9b728323eef0e716b76edff9a7397b4e49ebf2d14ea506531",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "763b644f5c6218565f1dcda36f971b3971b3d5583359c0617327313442dd10fb",
+        "763b644f5c6218565f1dcda36f971b3971b3d5583359c0617327313442dd10fb",
+        "763b644f5c6218565f1dcda36f971b3971b3d5583359c0617327313442dd10fb"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "2156f4b5103409e9b728323eef0e716b76edff9a7397b4e49ebf2d14ea506531",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:3|splits:none"
+    },
+    {
+      "assignment_id": "fork_join:B:4",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "failure_signature": "Shared-input demand has incompatible tensor-relevant tilings: B=((z0, 2),), C=((z0, 4),)",
+        "reason": "SHARED_INPUT_TILING_INCOMPATIBLE",
+        "status": "UNSUPPORTED"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "0ee59965365ba7b19e91d72ece266af95a4a38ef32036a6476072b9d98a4ca26",
+        "0ee59965365ba7b19e91d72ece266af95a4a38ef32036a6476072b9d98a4ca26",
+        "0ee59965365ba7b19e91d72ece266af95a4a38ef32036a6476072b9d98a4ca26"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": false,
+      "expected_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "failure_signature": "Shared-input demand has incompatible tensor-relevant tilings: B=((z0, 2),), C=((z0, 4),)",
+        "reason": "SHARED_INPUT_TILING_INCOMPATIBLE",
+        "status": "UNSUPPORTED"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:0,1|splits:D0=2"
+    },
+    {
+      "assignment_id": "fork_join:B:5",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "failure_signature": "Shared-input demand has incompatible tensor-relevant tilings: B=((z0, 2),), C=((z0, 4),)",
+        "reason": "SHARED_INPUT_TILING_INCOMPATIBLE",
+        "status": "UNSUPPORTED"
+      },
+      "compiled_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "21e73f2bc1a2add86cf9eb372a79fa5157c0081da5ead6a6f05f0e4b4b0c16c5",
+        "21e73f2bc1a2add86cf9eb372a79fa5157c0081da5ead6a6f05f0e4b4b0c16c5",
+        "21e73f2bc1a2add86cf9eb372a79fa5157c0081da5ead6a6f05f0e4b4b0c16c5"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": false,
+      "expected_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "failure_signature": "Shared-input demand has incompatible tensor-relevant tilings: B=((z0, 2),), C=((z0, 4),)",
+        "reason": "SHARED_INPUT_TILING_INCOMPATIBLE",
+        "status": "UNSUPPORTED"
+      },
+      "reference_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:2,3|splits:D0=2"
+    },
+    {
+      "assignment_id": "fork_join:B:6",
+      "baseline_round_trip_exact": true,
+      "compiled_outcome": {
+        "problem_hash": "1c8b934a987ff6ffc2829aa45eb73d0afa5ec6420228473d0ccfcd0ee82296f0",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "ce4f58f4120eec9d19a4606c1b87065dbabd1c4a432ac8fc5e7660d869f5ee10",
+        "ce4f58f4120eec9d19a4606c1b87065dbabd1c4a432ac8fc5e7660d869f5ee10",
+        "ce4f58f4120eec9d19a4606c1b87065dbabd1c4a432ac8fc5e7660d869f5ee10"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "1c8b934a987ff6ffc2829aa45eb73d0afa5ec6420228473d0ccfcd0ee82296f0",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "B",
+      "template": "B|cores:0,1,2,3|splits:D0=4"
+    },
+    {
+      "assignment_id": "fork_join:C:0",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "26dfdca4599d35951eadd572ebe2ca7ec065582e8710e51ccce4f0971f8e97f7",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "b023b3a43a242470a90a861f60bd687ba10bebea7cf8c1fd3c878abc4cb7210d",
+        "b023b3a43a242470a90a861f60bd687ba10bebea7cf8c1fd3c878abc4cb7210d",
+        "b023b3a43a242470a90a861f60bd687ba10bebea7cf8c1fd3c878abc4cb7210d"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "26dfdca4599d35951eadd572ebe2ca7ec065582e8710e51ccce4f0971f8e97f7",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "C",
+      "template": "C|cores:0|splits:none"
+    },
+    {
+      "assignment_id": "fork_join:C:1",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "99d2977a56aae9f7b67e1291acb57062d925dc68691f063af128aac20f0bd0bf",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "0a3832d4065d62c59b6d611198f85c1203b3b42fbb96425350aeec0a0b7d8d20",
+        "0a3832d4065d62c59b6d611198f85c1203b3b42fbb96425350aeec0a0b7d8d20",
+        "0a3832d4065d62c59b6d611198f85c1203b3b42fbb96425350aeec0a0b7d8d20"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "99d2977a56aae9f7b67e1291acb57062d925dc68691f063af128aac20f0bd0bf",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "C",
+      "template": "C|cores:1|splits:none"
+    },
+    {
+      "assignment_id": "fork_join:C:2",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "1fd576d82a33d43b1ea21c6630092d2e2a6beec21cd4ad25349559cfbac21fd0",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "8d50c9825a499d00180fb74ad680b83ef24df4dae8c9b4321ddb203e5eb4f1f4",
+        "8d50c9825a499d00180fb74ad680b83ef24df4dae8c9b4321ddb203e5eb4f1f4",
+        "8d50c9825a499d00180fb74ad680b83ef24df4dae8c9b4321ddb203e5eb4f1f4"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "1fd576d82a33d43b1ea21c6630092d2e2a6beec21cd4ad25349559cfbac21fd0",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "C",
+      "template": "C|cores:2|splits:none"
+    },
+    {
+      "assignment_id": "fork_join:C:3",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "d84f4cba4bb899e8c97cec3833e31af10d217f81f184407867d5c36dc61f225e",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "1000dfeaba17f027cda4f1c32a22e99a706a643cdabb635aec403e520139287f",
+        "1000dfeaba17f027cda4f1c32a22e99a706a643cdabb635aec403e520139287f",
+        "1000dfeaba17f027cda4f1c32a22e99a706a643cdabb635aec403e520139287f"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "d84f4cba4bb899e8c97cec3833e31af10d217f81f184407867d5c36dc61f225e",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "C",
+      "template": "C|cores:3|splits:none"
+    },
+    {
+      "assignment_id": "fork_join:C:4",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "failure_signature": "Shared-input demand has incompatible tensor-relevant tilings: B=((z0, 4),), C=((z0, 2),)",
+        "reason": "SHARED_INPUT_TILING_INCOMPATIBLE",
+        "status": "UNSUPPORTED"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "e55c96719a2f4696d29fbc28b0ebd5d15ed489adf3fcb42520b0522f56d7598e",
+        "e55c96719a2f4696d29fbc28b0ebd5d15ed489adf3fcb42520b0522f56d7598e",
+        "e55c96719a2f4696d29fbc28b0ebd5d15ed489adf3fcb42520b0522f56d7598e"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": false,
+      "expected_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "failure_signature": "Shared-input demand has incompatible tensor-relevant tilings: B=((z0, 4),), C=((z0, 2),)",
+        "reason": "SHARED_INPUT_TILING_INCOMPATIBLE",
+        "status": "UNSUPPORTED"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "C",
+      "template": "C|cores:0,1|splits:D0=2"
+    },
+    {
+      "assignment_id": "fork_join:C:5",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "failure_signature": "Shared-input demand has incompatible tensor-relevant tilings: B=((z0, 4),), C=((z0, 2),)",
+        "reason": "SHARED_INPUT_TILING_INCOMPATIBLE",
+        "status": "UNSUPPORTED"
+      },
+      "compiled_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "7a4694b96c83fd63f012b94b00f93c03a15e95034d7af840da268b62245954fc",
+        "7a4694b96c83fd63f012b94b00f93c03a15e95034d7af840da268b62245954fc",
+        "7a4694b96c83fd63f012b94b00f93c03a15e95034d7af840da268b62245954fc"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": false,
+      "expected_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "failure_signature": "Shared-input demand has incompatible tensor-relevant tilings: B=((z0, 4),), C=((z0, 2),)",
+        "reason": "SHARED_INPUT_TILING_INCOMPATIBLE",
+        "status": "UNSUPPORTED"
+      },
+      "reference_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "C",
+      "template": "C|cores:2,3|splits:D0=2"
+    },
+    {
+      "assignment_id": "fork_join:C:6",
+      "baseline_round_trip_exact": true,
+      "compiled_outcome": {
+        "problem_hash": "1c8b934a987ff6ffc2829aa45eb73d0afa5ec6420228473d0ccfcd0ee82296f0",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "9067c3f86508e32e7bc31df7aab210503d821ff2616245f3526febe7df89fafe",
+        "9067c3f86508e32e7bc31df7aab210503d821ff2616245f3526febe7df89fafe",
+        "9067c3f86508e32e7bc31df7aab210503d821ff2616245f3526febe7df89fafe"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "1c8b934a987ff6ffc2829aa45eb73d0afa5ec6420228473d0ccfcd0ee82296f0",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "C",
+      "template": "C|cores:0,1,2,3|splits:D0=4"
+    },
+    {
+      "assignment_id": "fork_join:Join:0",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "17824316116a6c8acc9abc1cecb396f9faec35b81514ce194d6d30ab3119fbe0",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "1f0f057e6cb6c649afe40fa3796936f93b9a9dc691d59c0505d0441ef87940a9",
+        "1f0f057e6cb6c649afe40fa3796936f93b9a9dc691d59c0505d0441ef87940a9",
+        "1f0f057e6cb6c649afe40fa3796936f93b9a9dc691d59c0505d0441ef87940a9"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "17824316116a6c8acc9abc1cecb396f9faec35b81514ce194d6d30ab3119fbe0",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "Join",
+      "template": "Join|cores:0|splits:none"
+    },
+    {
+      "assignment_id": "fork_join:Join:1",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "9ff800cb7176cb53f4fad5571baa5cb31e5737e1941dbefbcba7c955b25afbd4",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "ebbbb053c8240a7198b533fe8029d0c1a28978233acd59b4bb44d8d2ebecc733",
+        "ebbbb053c8240a7198b533fe8029d0c1a28978233acd59b4bb44d8d2ebecc733",
+        "ebbbb053c8240a7198b533fe8029d0c1a28978233acd59b4bb44d8d2ebecc733"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "9ff800cb7176cb53f4fad5571baa5cb31e5737e1941dbefbcba7c955b25afbd4",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          1
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "Join",
+      "template": "Join|cores:1|splits:none"
+    },
+    {
+      "assignment_id": "fork_join:Join:2",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "0676c3055a88df6ae4dabc9a48a23a35f253f8d27c1652f1a8751391c95203da",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "7d049183d1cb329ca37b84692f44ddb28dd887012458ba262a140ceed25cd58f",
+        "7d049183d1cb329ca37b84692f44ddb28dd887012458ba262a140ceed25cd58f",
+        "7d049183d1cb329ca37b84692f44ddb28dd887012458ba262a140ceed25cd58f"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "0676c3055a88df6ae4dabc9a48a23a35f253f8d27c1652f1a8751391c95203da",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "Join",
+      "template": "Join|cores:2|splits:none"
+    },
+    {
+      "assignment_id": "fork_join:Join:3",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "cc56bb4de91e55c7bd527023a442e21da414e3d9cafcac5bff68c1d6d5495522",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "d54d12df9d9a799fcbec9011a1b8317c2fdecd73eb3644fc6bd5555733abe355",
+        "d54d12df9d9a799fcbec9011a1b8317c2fdecd73eb3644fc6bd5555733abe355",
+        "d54d12df9d9a799fcbec9011a1b8317c2fdecd73eb3644fc6bd5555733abe355"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "cc56bb4de91e55c7bd527023a442e21da414e3d9cafcac5bff68c1d6d5495522",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          3
+        ],
+        "tiling": []
+      },
+      "silent_relaxations": 0,
+      "target": "Join",
+      "template": "Join|cores:3|splits:none"
+    },
+    {
+      "assignment_id": "fork_join:Join:4",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "18b9d62082b850c699352345a6a023f4f21f2b7f7da87de3f70fce8d7cdf5397",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "f9cf06bca2167b67a57c8dcf8da8286177b482d88fd7335cfbecc105a6cedbb3",
+        "f9cf06bca2167b67a57c8dcf8da8286177b482d88fd7335cfbecc105a6cedbb3",
+        "f9cf06bca2167b67a57c8dcf8da8286177b482d88fd7335cfbecc105a6cedbb3"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "18b9d62082b850c699352345a6a023f4f21f2b7f7da87de3f70fce8d7cdf5397",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "Join",
+      "template": "Join|cores:0,1|splits:D0=2"
+    },
+    {
+      "assignment_id": "fork_join:Join:5",
+      "baseline_round_trip_exact": null,
+      "compiled_outcome": {
+        "problem_hash": "03a6416b08c6b6d4295a7603ffa0e0e58f948e48841b1f1b477cd7443f5f8a93",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "48e2827683380d980be7df5064fd8430735a74cdd9dda0ec16e42d3a4cd8bebe",
+        "48e2827683380d980be7df5064fd8430735a74cdd9dda0ec16e42d3a4cd8bebe",
+        "48e2827683380d980be7df5064fd8430735a74cdd9dda0ec16e42d3a4cd8bebe"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "03a6416b08c6b6d4295a7603ffa0e0e58f948e48841b1f1b477cd7443f5f8a93",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=2"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "Join",
+      "template": "Join|cores:2,3|splits:D0=2"
+    },
+    {
+      "assignment_id": "fork_join:Join:6",
+      "baseline_round_trip_exact": true,
+      "compiled_outcome": {
+        "problem_hash": "1c8b934a987ff6ffc2829aa45eb73d0afa5ec6420228473d0ccfcd0ee82296f0",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "compiled_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "compiler_hashes": [
+        "7a34cb1058c79faa92cca5a0bcafe1d0ac83f560a791dbbccaf7b3cb02832bcf",
+        "7a34cb1058c79faa92cca5a0bcafe1d0ac83f560a791dbbccaf7b3cb02832bcf",
+        "7a34cb1058c79faa92cca5a0bcafe1d0ac83f560a791dbbccaf7b3cb02832bcf"
+      ],
+      "dag_class": "fork_join",
+      "exact_executable": true,
+      "expected_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "paired_candidate_set_exact": true,
+      "reference_outcome": {
+        "problem_hash": "1c8b934a987ff6ffc2829aa45eb73d0afa5ec6420228473d0ccfcd0ee82296f0",
+        "status": "EXACT_EXECUTABLE"
+      },
+      "reference_pair": {
+        "cores": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tiling": [
+          "tiling:d0=4"
+        ]
+      },
+      "silent_relaxations": 0,
+      "target": "Join",
+      "template": "Join|cores:0,1,2,3|splits:D0=4"
+    }
+  ],
+  "contract": {
+    "allowed_unsupported_reasons": [
+      "SHARED_INPUT_TILING_INCOMPATIBLE"
+    ],
+    "assignment_policy": "select each target operator and each paired template exactly once; all other operators retain baseline",
+    "compile_repetitions": 3,
+    "contract": "gate1a-v3-operator-template-compilation-faithfulness",
+    "dag_classes": {
+      "chain": 3,
+      "conv_chain": 2,
+      "edge": 2,
+      "fork_join": 4,
+      "gemm_chain": 2,
+      "residual_diamond": 3
+    },
+    "excluded_claims": [
+      "real_workload_template_coverage",
+      "all_5873_potential_states_executable",
+      "multi_operator_assignment_feasibility",
+      "latency_improvement",
+      "factor_coupling",
+      "VE_scalability"
+    ],
+    "expected_assignment_count": 112,
+    "expected_baseline_round_trip_count": 16,
+    "expected_exact_executable_count": 104,
+    "expected_unsupported_assignments": [
+      "fork_join:B:4",
+      "fork_join:B:5",
+      "fork_join:C:4",
+      "fork_join:C:5",
+      "residual_diamond:A:4",
+      "residual_diamond:A:5",
+      "residual_diamond:Add:4",
+      "residual_diamond:Add:5"
+    ],
+    "expected_unsupported_reason_counts": {
+      "SHARED_INPUT_TILING_INCOMPATIBLE": 8
+    },
+    "hardware": "stream/inputs/examples/hardware/tpu_like_quad_core.yaml",
+    "max_workers": 8,
+    "pass_criteria": {
+      "assignment_denominator_complete": true,
+      "baseline_round_trip_exact": true,
+      "compiled_reference_outcome_exact": true,
+      "compiler_deterministic": true,
+      "downstream_serial_parallel_replay_exact": true,
+      "exact_executable_count_matches": true,
+      "nontrivial_exact_subset_every_dag": true,
+      "paired_candidate_set_exact": true,
+      "parallel_worker_count_exact": true,
+      "silent_relaxation_count": 0,
+      "source_gate_hash_matches": true,
+      "source_identified": true,
+      "static_review_scope_match": true,
+      "unexpected_preparation_failure_count": 0,
+      "unsupported_assignment_set_exact": true,
+      "unsupported_reason_counts_exact": true,
+      "unsupported_reasons_registered": true
+    },
+    "reference_pipeline": "independently construct the selected singleton NodeMapping, then run unchanged KernelState, TilingGeneration, transfer construction, option generation, and timeslot preparation",
+    "source_gate": {
+      "artifact": "artifacts/gate2e-a/report.json",
+      "required_evidence_class": "POTENTIAL_ONLY",
+      "required_verdict": "DISCOVERY_PASS",
+      "sha256": "sha256:4fc553a1ccf04377261aa48103078942f4db595e03df8fe594e3a244aab8ce49"
+    },
+    "static_review": {
+      "base_commit": "a07d510e2fb70fb4b448c55eac192c875e22a0a8",
+      "expected_changed_paths": [
+        "scripts/run_operator_template_faithfulness.py",
+        "stream/stages/generation/operator_template_compilation.py",
+        "stream/structural/contracts/gate1a_operator_template_v3.json",
+        "stream/structural/gate1a_cases.py",
+        "stream/structural/operator_template_contract.py",
+        "stream/structural/operator_template_faithfulness.py",
+        "tests/unit/structural/test_operator_template_contract.py",
+        "tests/unit/structural/test_operator_template_faithfulness.py"
+      ]
+    },
+    "template_family": [
+      {
+        "core_ids": [
+          0
+        ],
+        "splits": []
+      },
+      {
+        "core_ids": [
+          1
+        ],
+        "splits": []
+      },
+      {
+        "core_ids": [
+          2
+        ],
+        "splits": []
+      },
+      {
+        "core_ids": [
+          3
+        ],
+        "splits": []
+      },
+      {
+        "core_ids": [
+          0,
+          1
+        ],
+        "splits": [
+          [
+            0,
+            2
+          ]
+        ]
+      },
+      {
+        "core_ids": [
+          2,
+          3
+        ],
+        "splits": [
+          [
+            0,
+            2
+          ]
+        ]
+      },
+      {
+        "core_ids": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "splits": [
+          [
+            0,
+            4
+          ]
+        ]
+      }
+    ],
+    "version": 3
+  },
+  "criteria": {
+    "assignment_denominator_complete": true,
+    "baseline_round_trip_exact": true,
+    "compiled_reference_outcome_exact": true,
+    "compiler_deterministic": true,
+    "downstream_serial_parallel_replay_exact": true,
+    "exact_executable_count_matches": true,
+    "nontrivial_exact_subset_every_dag": true,
+    "paired_candidate_set_exact": true,
+    "parallel_worker_count_exact": true,
+    "silent_relaxation_count": true,
+    "source_gate_hash_matches": true,
+    "source_identified": true,
+    "static_review_scope_match": true,
+    "unexpected_preparation_failure_count": true,
+    "unsupported_assignment_set_exact": true,
+    "unsupported_reason_counts_exact": true,
+    "unsupported_reasons_registered": true
+  },
+  "environment": {
+    "host": "eex004",
+    "packages": {
+      "onnx": "1.21.0",
+      "ortools": "9.15.6755",
+      "stream-dse": "1.14.1",
+      "zigzag-dse": "3.8.5"
+    },
+    "python": "3.12.11 (main, Sep 30 2025, 00:40:22) [GCC 12.2.0]"
+  },
+  "evidence_class": "MICRO_EXACT_PRE_TILING_COMPILER",
+  "execution": {
+    "assignment_count": 112,
+    "serial_parallel_replay_exact": true,
+    "serial_replay_worker_count": 1,
+    "tta_solve_invoked": false,
+    "wall_seconds": 21.943007,
+    "worker_count": 8
+  },
+  "observations": {
+    "assignment_denominator_complete": true,
+    "baseline_round_trip_exact": true,
+    "compiled_reference_outcome_exact": true,
+    "compiler_deterministic": true,
+    "downstream_serial_parallel_replay_exact": true,
+    "exact_executable_count_matches": true,
+    "nontrivial_exact_subset_every_dag": true,
+    "paired_candidate_set_exact": true,
+    "parallel_worker_count_exact": true,
+    "silent_relaxation_count": 0,
+    "source_gate_hash_matches": true,
+    "source_identified": true,
+    "static_review_scope_match": true,
+    "unexpected_preparation_failure_count": 0,
+    "unsupported_assignment_set_exact": true,
+    "unsupported_reason_counts_exact": true,
+    "unsupported_reasons_registered": true
+  },
+  "source": {
+    "clean": true,
+    "commit": "102556861e679e50575f73f61c2e503573e2a354",
+    "dirty_paths": [],
+    "expected_commit_matches_head": true,
+    "git_root": "/workspace",
+    "head": "102556861e679e50575f73f61c2e503573e2a354",
+    "identified": true,
+    "output_outside_checkout": true,
+    "snapshot_digest": "c6f2a485db241616e57aabf576a6787cce42622f750a9b53fb71731bfc2bcd21",
+    "stable_during_run": true
+  },
+  "source_gate": {
+    "evidence_class": "POTENTIAL_ONLY",
+    "hash_matches": true,
+    "path": "artifacts/gate2e-a/report.json",
+    "sha256": "sha256:4fc553a1ccf04377261aa48103078942f4db595e03df8fe594e3a244aab8ce49",
+    "verdict": "DISCOVERY_PASS"
+  },
+  "static_review": {
+    "changed_paths": [
+      "scripts/run_operator_template_faithfulness.py",
+      "stream/stages/generation/operator_template_compilation.py",
+      "stream/structural/contracts/gate1a_operator_template_v3.json",
+      "stream/structural/gate1a_cases.py",
+      "stream/structural/operator_template_contract.py",
+      "stream/structural/operator_template_faithfulness.py",
+      "tests/unit/structural/test_operator_template_contract.py",
+      "tests/unit/structural/test_operator_template_faithfulness.py"
+    ],
+    "expected_changed_paths": [
+      "scripts/run_operator_template_faithfulness.py",
+      "stream/stages/generation/operator_template_compilation.py",
+      "stream/structural/contracts/gate1a_operator_template_v3.json",
+      "stream/structural/gate1a_cases.py",
+      "stream/structural/operator_template_contract.py",
+      "stream/structural/operator_template_faithfulness.py",
+      "tests/unit/structural/test_operator_template_contract.py",
+      "tests/unit/structural/test_operator_template_faithfulness.py"
+    ],
+    "scope_match": true
+  },
+  "summary": {
+    "assignment_count": 112,
+    "baseline_round_trip_check_count": 16,
+    "baseline_round_trip_exact_count": 16,
+    "compiled_reference_outcome_exact_count": 112,
+    "compiler_deterministic_count": 112,
+    "exact_executable_count": 104,
+    "exact_executable_coverage": 0.9285714285714286,
+    "paired_candidate_set_exact_count": 112,
+    "preparation_failure_count": 0,
+    "silent_relaxation_count": 0,
+    "unsupported_reason_counts": {
+      "SHARED_INPUT_TILING_INCOMPATIBLE": 8
+    }
+  },
+  "verdict": "NARROW"
+}
