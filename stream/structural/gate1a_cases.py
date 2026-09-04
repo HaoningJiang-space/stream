@@ -40,6 +40,18 @@ def build_tensor_restriction_scheduler(
     return _build_scheduler(dag_class, _TENSOR_RESTRICTION_HARDWARE, backend)
 
 
+def build_gate1a_workload(dag_class: str) -> Workload:
+    """Return a fresh deterministic micro workload for compiler conformance gates."""
+
+    return _workload(dag_class)
+
+
+def load_gate1a_accelerator(hardware: str = _HARDWARE):
+    """Load the cached deterministic Gate 1A accelerator."""
+
+    return _accelerator(hardware)
+
+
 def _build_scheduler(dag_class: str, hardware: str, backend: str) -> SteadyStateScheduler:
     """Build one deterministic dense-affine scheduler case."""
 

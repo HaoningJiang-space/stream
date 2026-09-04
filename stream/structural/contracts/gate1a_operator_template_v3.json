@@ -1,0 +1,91 @@
+{
+  "contract": "gate1a-v3-operator-template-compilation-faithfulness",
+  "version": 3,
+  "source_gate": {
+    "artifact": "artifacts/gate2e-a/report.json",
+    "sha256": "sha256:4fc553a1ccf04377261aa48103078942f4db595e03df8fe594e3a244aab8ce49",
+    "required_verdict": "DISCOVERY_PASS",
+    "required_evidence_class": "POTENTIAL_ONLY"
+  },
+  "dag_classes": {
+    "edge": 2,
+    "chain": 3,
+    "gemm_chain": 2,
+    "conv_chain": 2,
+    "residual_diamond": 3,
+    "fork_join": 4
+  },
+  "template_family": [
+    {"core_ids": [0], "splits": []},
+    {"core_ids": [1], "splits": []},
+    {"core_ids": [2], "splits": []},
+    {"core_ids": [3], "splits": []},
+    {"core_ids": [0, 1], "splits": [[0, 2]]},
+    {"core_ids": [2, 3], "splits": [[0, 2]]},
+    {"core_ids": [0, 1, 2, 3], "splits": [[0, 4]]}
+  ],
+  "assignment_policy": "select each target operator and each paired template exactly once; all other operators retain baseline",
+  "reference_pipeline": "independently construct the selected singleton NodeMapping, then run unchanged KernelState, TilingGeneration, transfer construction, option generation, and timeslot preparation",
+  "compile_repetitions": 3,
+  "expected_assignment_count": 112,
+  "expected_baseline_round_trip_count": 16,
+  "expected_exact_executable_count": 104,
+  "expected_unsupported_assignments": [
+    "fork_join:B:4",
+    "fork_join:B:5",
+    "fork_join:C:4",
+    "fork_join:C:5",
+    "residual_diamond:A:4",
+    "residual_diamond:A:5",
+    "residual_diamond:Add:4",
+    "residual_diamond:Add:5"
+  ],
+  "expected_unsupported_reason_counts": {
+    "SHARED_INPUT_TILING_INCOMPATIBLE": 8
+  },
+  "max_workers": 8,
+  "allowed_unsupported_reasons": [
+    "SHARED_INPUT_TILING_INCOMPATIBLE"
+  ],
+  "hardware": "stream/inputs/examples/hardware/tpu_like_quad_core.yaml",
+  "static_review": {
+    "base_commit": "a07d510e2fb70fb4b448c55eac192c875e22a0a8",
+    "expected_changed_paths": [
+      "scripts/run_operator_template_faithfulness.py",
+      "stream/stages/generation/operator_template_compilation.py",
+      "stream/structural/contracts/gate1a_operator_template_v3.json",
+      "stream/structural/gate1a_cases.py",
+      "stream/structural/operator_template_contract.py",
+      "stream/structural/operator_template_faithfulness.py",
+      "tests/unit/structural/test_operator_template_contract.py",
+      "tests/unit/structural/test_operator_template_faithfulness.py"
+    ]
+  },
+  "pass_criteria": {
+    "source_gate_hash_matches": true,
+    "source_identified": true,
+    "static_review_scope_match": true,
+    "assignment_denominator_complete": true,
+    "paired_candidate_set_exact": true,
+    "compiled_reference_outcome_exact": true,
+    "parallel_worker_count_exact": true,
+    "downstream_serial_parallel_replay_exact": true,
+    "compiler_deterministic": true,
+    "baseline_round_trip_exact": true,
+    "nontrivial_exact_subset_every_dag": true,
+    "unsupported_reasons_registered": true,
+    "unsupported_assignment_set_exact": true,
+    "unsupported_reason_counts_exact": true,
+    "exact_executable_count_matches": true,
+    "unexpected_preparation_failure_count": 0,
+    "silent_relaxation_count": 0
+  },
+  "excluded_claims": [
+    "real_workload_template_coverage",
+    "all_5873_potential_states_executable",
+    "multi_operator_assignment_feasibility",
+    "latency_improvement",
+    "factor_coupling",
+    "VE_scalability"
+  ]
+}
