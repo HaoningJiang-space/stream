@@ -1,0 +1,68 @@
+{
+  "contract": "gate1b-structural-predictive-value",
+  "version": 1,
+  "source_contract": {
+    "name": "gate1a-minimal-tensor-restriction",
+    "version": 2,
+    "artifact": "artifacts/gate1a-v2/report.json",
+    "required_verdict": "PASS"
+  },
+  "dag_classes": [
+    "edge",
+    "chain",
+    "gemm_chain",
+    "conv_chain",
+    "residual_diamond",
+    "fork_join"
+  ],
+  "case_specs": {
+    "edge": {"tensor_elements": 8192, "compute_cycles": [7, 9]},
+    "chain": {"tensor_elements": 16384, "compute_cycles": [5, 8, 11]},
+    "gemm_chain": {"tensor_elements": 32768, "compute_cycles": [20, 24]},
+    "conv_chain": {"tensor_elements": 24576, "compute_cycles": [14, 18]},
+    "residual_diamond": {"tensor_elements": 49152, "compute_cycles": [8, 11, 5]},
+    "fork_join": {"tensor_elements": 65536, "compute_cycles": [6, 9, 10, 7]}
+  },
+  "candidate_space": {
+    "literal_types": ["tensor_placement", "transfer_path"],
+    "staging_tensor_selector": "all_transfer_produced_tensors_with_multiple_placements_and_two_or_more_adjacent_transfers",
+    "placement_domain": "all_singleton_baseline_placement_choices",
+    "path_domain": "all_singleton_adjacent_paths_compatible_with_the_selected_placement",
+    "composition": "cartesian_product_over_three_distinct_staging_tensors",
+    "required_staging_tensors_per_class": 3,
+    "required_candidates_per_class": 64
+  },
+  "structural_objective": {
+    "name": "total_link_service_cycles",
+    "direction": "minimize",
+    "definition": "sum_over_transfer_plan_links(ceil(tensor_input_bits / (link_bandwidth_bits_per_cycle * parallel_chains)))",
+    "forbidden_inputs": ["tetra_solution", "tetra_latency", "timeslots", "reuse_choice", "solver_objective"]
+  },
+  "metrics": {
+    "top_n": [1, 4, 8, 16],
+    "tetra_top_k": [1, 5],
+    "ranking_tiebreaker": "canonical_candidate_id",
+    "recall_tie_policy": "latency_cutoff_expansion",
+    "report_spearman": true
+  },
+  "pass_criteria": {
+    "evaluation_coverage": 1.0,
+    "recall_at_16_tetra_top_5_min": 0.8,
+    "regret_at_16_max": 0.05,
+    "minimum_passing_dag_classes": 5,
+    "require_candidate_count_greater_than_max_top_n": true,
+    "require_baseline_optimal_status": true,
+    "require_all_candidate_statuses_optimal": true
+  },
+  "evaluation": {
+    "backend": "ORTOOLS_GSCIP",
+    "minimum_ortools_version": "9.15",
+    "accepted_status": "OPTIMAL",
+    "timeslot_policy": "resource_aware",
+    "constraints": ["memory_capacity", "object_fifo_depth", "buffer_descriptors", "dma_channels", "pipelining"],
+    "time_limit_s": null,
+    "solver_params": {},
+    "baseline_in_final_candidate_set": true
+  },
+  "excluded": ["partial", "streaming", "exact_reuse", "layout", "ve", "a_star", "beam", "lns"]
+}
