@@ -249,6 +249,9 @@ def _run_assignment(dag_class, targets, template_indices, output_root, accelerat
         library=library,
     )
     reference_mapping = _direct_reference_mapping_for_templates(workload, baseline, templates)
+    reference_mapping_is_baseline = canonical_mapping_manifest(reference_mapping) == canonical_mapping_manifest(
+        baseline
+    )
     reference_context = _run_tiling_pipeline(workload, reference_mapping, output_root / "reference")
     compilation = compiled_context.get("operator_template_compilation")
     if compilation is None:
@@ -272,11 +275,7 @@ def _run_assignment(dag_class, targets, template_indices, output_root, accelerat
     )
     baseline_round_trip = None
     if templates == baseline_templates:
-        baseline_round_trip = (
-            canonical_mapping_manifest(reference_mapping) == canonical_mapping_manifest(baseline)
-            and outcome_exact
-            and exact_executable
-        )
+        baseline_round_trip = reference_mapping_is_baseline and outcome_exact and exact_executable
     return {
         "assignment_id": assignment_id,
         "dag_class": dag_class,

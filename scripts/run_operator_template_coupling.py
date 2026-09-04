@@ -34,7 +34,7 @@ def main() -> None:
     summary = (
         f"Gate 1A-v4: {report['verdict']}/{report['classification']}; "
         f"assignments={report['summary']['assignment_count']}; "
-        f"executable={report['summary']['exact_executable_count']}\n"
+        f"exact-prepared={report['summary']['exact_executable_count']}\n"
     )
     stdout_text = stdout.getvalue() + summary
     stderr_text = stderr.getvalue()

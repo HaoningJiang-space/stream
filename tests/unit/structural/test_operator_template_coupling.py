@@ -60,6 +60,21 @@ def test_mismatched_nonempty_splits_remain_explicitly_unsupported(tmp_path):
     assert result["exact_executable"] is False
 
 
+def test_joint_baseline_round_trip_is_compared_before_downstream_mutation(tmp_path):
+    contract = load_operator_template_coupling_contract()
+    result = _run_assignment(
+        "fork_join",
+        ("B", "C"),
+        (6, 6),
+        tmp_path,
+        load_gate1a_accelerator(contract["hardware"]),
+        contract,
+    )
+
+    assert result["baseline_round_trip_exact"] is True
+    assert result["exact_executable"] is True
+
+
 def test_forbidden_cross_witness_proves_relation_is_not_cartesian():
     coupled_pairs = {"fork_join": ("B", "C")}
     results = [
