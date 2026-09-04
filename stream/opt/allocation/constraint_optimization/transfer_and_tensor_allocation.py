@@ -37,6 +37,10 @@ from stream.opt.allocation.constraint_optimization.context import (
     TransferAndTensorContext,
     build_transfer_context,
 )
+from stream.opt.allocation.constraint_optimization.tensor_restriction import (
+    TensorRestriction,
+    restrict_option_domains,
+)
 from stream.opt.allocation.constraint_optimization.timeslot_allocation import (
     _resource_key,
 )
@@ -119,6 +123,7 @@ class TransferAndTensorAllocator:
         context: TransferAndTensorContext | None = None,
         backend: str = "ORTOOLS_GSCIP",
         constraint_selection: ConstraintSelection | None = None,
+        tensor_restrictions: tuple[TensorRestriction, ...] = (),
     ):
         self.workload = workload
         self.slot_of = timeslots
@@ -135,6 +140,7 @@ class TransferAndTensorAllocator:
         self.output_path = output_path
         self.backend_str = backend
         self.constraint_selection = constraint_selection or ConstraintSelection()
+        self.tensor_restrictions = tensor_restrictions
 
         self.max_slot = max(timeslots.values()) if timeslots else 0
         self.big_m = big_m or len(workload.nodes()) + 5
@@ -155,6 +161,16 @@ class TransferAndTensorAllocator:
         self.possible_transfer_allocations: dict[TransferNode, tuple[MulticastPathPlan, ...]] = {}
 
         self._init_option_sets()
+        if self.tensor_restrictions:
+            self.possible_tensor_allocations, self.possible_transfer_allocations = restrict_option_domains(
+                self.possible_tensor_allocations,
+                self.possible_transfer_allocations,
+                self.tensor_restrictions,
+            )
+            self.tensor_fixed = [
+                tensor for tensor in self.tensors if len(self.possible_tensor_allocations[tensor]) == 1
+            ]
+            self.tensor_var = [tensor for tensor in self.tensors if len(self.possible_tensor_allocations[tensor]) > 1]
 
         # ------------------- optimization model ---------------------- #
         self.model: SolverModel = create_solver(SolverBackend[self.backend_str], "transfer_tensor_alloc")

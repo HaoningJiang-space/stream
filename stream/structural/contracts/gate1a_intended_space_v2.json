@@ -1,0 +1,30 @@
+{
+  "contract": "gate1a-minimal-tensor-restriction",
+  "version": 2,
+  "classification": ["EXACT", "UNSUPPORTED"],
+  "dag_classes": [
+    "edge",
+    "chain",
+    "gemm_chain",
+    "conv_chain",
+    "residual_diamond",
+    "fork_join"
+  ],
+  "exact_tensor_literals": ["tensor_placement", "transfer_path"],
+  "unsupported_literals": ["partial", "streaming", "exact_reuse", "layout"],
+  "target_selector": "first_topological_transfer_staging_tensor_with_multiple_placements",
+  "allowed_placement_index_sets": [[0], [1], [2], [3], [0, 1], [2, 3]],
+  "adjacent_transfer_policy": "all",
+  "minimum_baseline_placement_options": 4,
+  "minimum_baseline_path_options": 4,
+  "minimum_deterministic_assignments": 1000,
+  "assignment_id_pattern": "gate1a-v2-{index:04d}",
+  "compile_repetitions": 3,
+  "solver": {
+    "backend": "ORTOOLS_GSCIP",
+    "accepted_status": "OPTIMAL",
+    "enumeration_limit": 10000,
+    "time_limit_s": null,
+    "seed": null
+  }
+}

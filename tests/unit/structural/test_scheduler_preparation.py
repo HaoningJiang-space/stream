@@ -7,6 +7,7 @@ import pytest
 
 from stream.cost_model.steady_state_scheduler import PreparedScheduleProblem, SteadyStateScheduler
 from stream.mapping.mapping import Mapping
+from stream.opt.allocation.constraint_optimization.tensor_restriction import TensorRestriction
 
 
 def _scheduler() -> SteadyStateScheduler:
@@ -72,7 +73,8 @@ def test_build_tta_passes_prepared_objects_without_reconstruction(monkeypatch):
     scheduler.ssis = {}
     timeslots = {MagicMock(): 0}
     multiplicities = {MagicMock(): 3}
-    prepared = PreparedScheduleProblem(timeslots, multiplicities, scheduler.mapping)
+    restrictions = (TensorRestriction("T", frozenset({"cores:0"})),)
+    prepared = PreparedScheduleProblem(timeslots, multiplicities, scheduler.mapping, restrictions)
     captured = {}
 
     def allocator(workload, slot_of, **kwargs):
@@ -86,6 +88,7 @@ def test_build_tta_passes_prepared_objects_without_reconstruction(monkeypatch):
     assert captured["slot_of"] is timeslots
     assert captured["multiplicities"] is multiplicities
     assert captured["mapping"] is prepared.mapping
+    assert captured["tensor_restrictions"] is restrictions
 
 
 def test_build_tta_rejects_a_stale_mapping():

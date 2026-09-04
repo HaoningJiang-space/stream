@@ -21,6 +21,10 @@ from xdsl.ir.affine import AffineMap
 from stream.cost_model.communication_manager import MulticastPathPlan
 from stream.hardware.architecture.core import Core
 from stream.mapping.mapping import Mapping, NodeMapping
+from stream.opt.allocation.constraint_optimization.tensor_restriction import (
+    tensor_placement_key,
+    transfer_plan_key,
+)
 from stream.workload.node import ComputationNode, TransferNode
 
 
@@ -245,7 +249,7 @@ def compile_structural_assignment(
 
 
 def core_group_key(group: tuple[Core, ...]) -> str:
-    return "cores:" + ",".join(str(core.id) for core in group)
+    return tensor_placement_key(group)
 
 
 def tiling_key(tiling: tuple[tuple[Any, int], ...]) -> str:
@@ -253,26 +257,7 @@ def tiling_key(tiling: tuple[tuple[Any, int], ...]) -> str:
 
 
 def path_key(path: MulticastPathPlan) -> str:
-    # Preserve every dataclass field, including link order.  This is a semantic
-    # identity key, not merely a route-equivalence approximation.
-    return json.dumps(
-        {
-            "sources": [_resource_id(core) for core in path.sources],
-            "targets": [_resource_id(core) for core in path.targets],
-            "total_hops_objective": path.total_hops_objective,
-            "links": [(_resource_id(link.sender), _resource_id(link.receiver)) for link in path.links_used],
-        },
-        sort_keys=True,
-        separators=(",", ":"),
-    )
-
-
-def _resource_id(resource: Any) -> str:
-    if isinstance(resource, str):
-        return f"str:{resource}"
-    if hasattr(resource, "id"):
-        return f"{type(resource).__name__}:{resource.id}"
-    raise TypeError(f"unsupported path endpoint type: {type(resource).__name__}")
+    return transfer_plan_key(path)
 
 
 def compile_pre_transfer(
@@ -288,9 +273,7 @@ def compile_pre_transfer(
     classifications: list[LiteralClassification] = []
     for literal in literals:
         if literal.kind is LiteralKind.HARDWARE_ZONE:
-            matches = _matching_options(
-                compiled, literal, "resource_allocation", core_group_key, ComputationNode
-            )
+            matches = _matching_options(compiled, literal, "resource_allocation", core_group_key, ComputationNode)
             if len(matches) != 1:
                 classifications.append(_unsupported(literal))
                 continue

@@ -21,13 +21,30 @@ from stream.workload.tensor import Tensor
 from stream.workload.workload import Workload
 
 _HARDWARE = "stream/inputs/examples/hardware/tpu_like_quad_core.yaml"
+_TENSOR_RESTRICTION_HARDWARE = "stream/inputs/examples/hardware/tpu_v7_ironwood.yaml"
 
 
 def build_gate1a_scheduler(dag_class: str, *, backend: str = "ORTOOLS_GSCIP") -> SteadyStateScheduler:
     """Build a fresh real scheduler without invoking ZigZag or TTA."""
 
+    return _build_scheduler(dag_class, _HARDWARE, backend)
+
+
+def build_tensor_restriction_scheduler(
+    dag_class: str,
+    *,
+    backend: str = "ORTOOLS_GSCIP",
+) -> SteadyStateScheduler:
+    """Build a Gate 1A-v2 case with real non-singleton staging choices."""
+
+    return _build_scheduler(dag_class, _TENSOR_RESTRICTION_HARDWARE, backend)
+
+
+def _build_scheduler(dag_class: str, hardware: str, backend: str) -> SteadyStateScheduler:
+    """Build one deterministic dense-affine scheduler case."""
+
     workload = _workload(dag_class)
-    accelerator = _accelerator()
+    accelerator = _accelerator(hardware)
     compute_core = next(core for core in accelerator.core_list if core.type == "compute")
     local_dim = LayerDim(position=0, prefix="d")
     mapping = Mapping()
@@ -52,11 +69,11 @@ def build_gate1a_scheduler(dag_class: str, *, backend: str = "ORTOOLS_GSCIP") ->
     )
 
 
-@lru_cache(maxsize=1)
-def _accelerator():
-    with open(_HARDWARE) as file:
+@lru_cache(maxsize=2)
+def _accelerator(hardware: str):
+    with open(hardware) as file:
         data = yaml.safe_load(file)
-    validator = AcceleratorValidator(data, _HARDWARE)
+    validator = AcceleratorValidator(data, hardware)
     validator.validate()
     return AcceleratorFactory(validator.normalized_data).create()
 

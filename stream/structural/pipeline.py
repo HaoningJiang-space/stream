@@ -3,13 +3,18 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, fields, is_dataclass, replace
+from dataclasses import asdict, dataclass, fields, is_dataclass, replace
 from enum import Enum
 from hashlib import sha256
 from typing import Any
 
 from stream.cost_model.core_cost_lut import CoreCostLUT
 from stream.cost_model.steady_state_scheduler import PreparedScheduleProblem, SteadyStateScheduler
+from stream.opt.allocation.constraint_optimization.tensor_restriction import (
+    TensorRestriction,
+    apply_tensor_restrictions_to_mapping,
+    restriction_manifest,
+)
 from stream.opt.allocation.constraint_optimization.transfer_and_tensor_allocation import TransferAndTensorAllocator
 from stream.structural.stream_contract import (
     CompiledStructuralAssignment,
@@ -19,6 +24,7 @@ from stream.structural.stream_contract import (
     LiteralKind,
     PipelineSemanticManifest,
     StructuralMappingContract,
+    canonical_mapping_manifest,
     compile_structural_assignment,
     core_group_key,
     tiling_key,
@@ -47,6 +53,44 @@ class PreparedStructuralProblem:
             raise RuntimeError("TTA did not receive the compiled mapping object")
         if tta.slot_of != self.timeslots:
             raise RuntimeError("TTA did not receive the compiled timeslots")
+        return tta
+
+
+@dataclass(frozen=True, slots=True)
+class PreparedTensorRestrictedProblem:
+    """A production STREAM problem carrying exact tensor/path domain restrictions."""
+
+    scheduler: SteadyStateScheduler
+    restrictions: tuple[TensorRestriction, ...]
+    schedule_problem: PreparedScheduleProblem
+    pipeline_manifest: PipelineSemanticManifest
+
+    @property
+    def timeslots(self) -> dict[Node, int]:
+        return self.schedule_problem.timeslots
+
+    @property
+    def restriction_manifest(self) -> tuple[dict, ...]:
+        return restriction_manifest(self.restrictions)
+
+    @property
+    def problem_manifest(self) -> dict[str, Any]:
+        return {
+            "mapping": canonical_mapping_manifest(self.schedule_problem.mapping),
+            "pipeline": asdict(self.pipeline_manifest),
+            "restrictions": self.restriction_manifest,
+        }
+
+    @property
+    def problem_hash(self) -> str:
+        return _digest(self.problem_manifest)
+
+    def build_tta(self) -> TransferAndTensorAllocator:
+        tta = self.scheduler.build_tta(self.schedule_problem)
+        if tta.mapping is not self.schedule_problem.mapping:
+            raise RuntimeError("TTA did not receive the tensor-restricted mapping object")
+        if tta.tensor_restrictions is not self.restrictions:
+            raise RuntimeError("TTA did not receive the exact tensor restriction contract")
         return tta
 
 
@@ -91,6 +135,28 @@ def prepare_structural_problem(
     scheduler.mapping = compilation.mapping
     schedule_problem = replace(schedule_problem, mapping=compilation.mapping)
     return PreparedStructuralProblem(scheduler, compilation, schedule_problem)
+
+
+def prepare_tensor_restricted_problem(
+    scheduler: SteadyStateScheduler,
+    restrictions: tuple[TensorRestriction, ...],
+    eval_config: Gate1AEvalConfig,
+) -> PreparedTensorRestrictedProblem:
+    """Apply path restrictions before timeslots and all restrictions before TTA variables."""
+
+    _validate_eval_config(scheduler, eval_config)
+
+    def apply_paths(mapping):
+        return apply_tensor_restrictions_to_mapping(mapping, restrictions)
+
+    schedule_problem = scheduler.prepare_problem(post_mapping_transform=apply_paths)
+    schedule_problem = replace(schedule_problem, tensor_restrictions=restrictions)
+    return PreparedTensorRestrictedProblem(
+        scheduler,
+        restrictions,
+        schedule_problem,
+        _pipeline_manifest(scheduler, schedule_problem, eval_config),
+    )
 
 
 def _canonical_pre_expectations(
@@ -313,19 +379,18 @@ def _candidate_correlations(
         resources = (
             tuple(path_key(option) for option in node_mapping.resource_allocation)
             if isinstance(node, TransferNode)
-            else tuple(
-                ",".join(str(core.id) for core in option) for option in node_mapping.resource_allocation
-            )
+            else tuple(",".join(str(core.id) for core in option) for option in node_mapping.resource_allocation)
         )
+        tilings = tuple(
+            ",".join(f"{dim}={factor}" for dim, factor in option) for option in node_mapping.inter_core_tiling
+        )
+        memories = tuple(",".join(str(core.id) for core in option) for option in node_mapping.memory_allocation)
         rows.append(
             (
                 _entity_id(node),
                 resources,
-                tuple(
-                    ",".join(f"{dim}={factor}" for dim, factor in option)
-                    for option in node_mapping.inter_core_tiling
-                ),
-                tuple(",".join(str(core.id) for core in option) for option in node_mapping.memory_allocation),
+                tilings,
+                memories,
             )
         )
     return tuple(sorted(rows))
@@ -360,10 +425,8 @@ def _canonical_json_value(value: Any) -> Any:  # noqa: PLR0911
     if isinstance(value, Enum):
         return value.name
     if isinstance(value, dict):
-        return {
-            str(key): _canonical_json_value(item)
-            for key, item in sorted(value.items(), key=lambda pair: str(pair[0]))
-        }
+        items = sorted(value.items(), key=lambda pair: str(pair[0]))
+        return {str(key): _canonical_json_value(item) for key, item in items}
     if isinstance(value, tuple | list):
         return [_canonical_json_value(item) for item in value]
     if isinstance(value, set | frozenset):

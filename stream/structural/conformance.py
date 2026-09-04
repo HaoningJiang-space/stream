@@ -60,9 +60,7 @@ class AssignmentAudit:
 
     @property
     def exact_literal_ids(self) -> frozenset[str]:
-        return frozenset(
-            item.literal_id for item in self.classifications if item.status is CompileStatus.EXACT
-        )
+        return frozenset(item.literal_id for item in self.classifications if item.status is CompileStatus.EXACT)
 
     @property
     def candidate_keys(self) -> frozenset[str]:
@@ -156,21 +154,14 @@ class Gate1ACensus:
             and all(
                 audit.dag_class in valid_dags
                 and audit.evidence_complete
-                and {
-                    item.literal_id.rsplit(".", 1)[-1] for item in audit.classifications
-                }
-                == required_literal_kinds
+                and {item.literal_id.rsplit(".", 1)[-1] for item in audit.classifications} == required_literal_kinds
                 for audit in self.audits
             )
         )
 
     @property
     def false_exact(self) -> int:
-        return sum(
-            not audit.exact
-            for assignment in self.audits
-            for audit in assignment.candidate_audits
-        )
+        return sum(not audit.exact for assignment in self.audits for audit in assignment.candidate_audits)
 
     @property
     def coverage(self) -> float:
@@ -376,6 +367,10 @@ def enumerate_tta_semantic_solutions(
             raise RuntimeError(f"feasible-set enumeration ended with {status}")
         selected = []
         projection = list(fixed_literals)
+        for tensor in tta.tensor_fixed:
+            projection.append(
+                (f"tensor:{tensor.name}", _reference_core_choice(tta.possible_tensor_allocations[tensor][0]))
+            )
         for (tensor, choice), variable in tta.x_tensor_choice.items():
             if variable.X > tta.VAR_THRESHOLD:
                 selected.append(variable)
@@ -442,7 +437,13 @@ def reference_path_key(path) -> str:
             "targets": [_reference_resource_id(core) for core in path.targets],
             "total_hops_objective": path.total_hops_objective,
             "links": [
-                (_reference_resource_id(link.sender), _reference_resource_id(link.receiver))
+                {
+                    "sender": _reference_resource_id(link.sender),
+                    "receiver": _reference_resource_id(link.receiver),
+                    "bandwidth": link.bandwidth,
+                    "unit_energy_cost": link.unit_energy_cost,
+                    "bidirectional": link.bidirectional,
+                }
                 for link in path.links_used
             ],
         },

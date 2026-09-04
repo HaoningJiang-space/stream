@@ -16,6 +16,7 @@ from stream.hardware.architecture.accelerator import Accelerator
 from stream.hardware.architecture.core import Core
 from stream.mapping.mapping import Mapping
 from stream.opt.allocation.constraint_optimization.context import build_transfer_context
+from stream.opt.allocation.constraint_optimization.tensor_restriction import TensorRestriction
 from stream.opt.allocation.constraint_optimization.transfer_and_tensor_allocation import (
     MemoryAlloc,
     TensorDepths,
@@ -79,6 +80,7 @@ class PreparedScheduleProblem:
     timeslots: dict[Node, int]
     multiplicities: dict[ComputationNode, int]
     mapping: Mapping
+    tensor_restrictions: tuple[TensorRestriction, ...] = ()
 
 
 def largest_divisor_leq(n: int, cap: int) -> int:
@@ -344,6 +346,7 @@ class SteadyStateScheduler:
             output_path=self.output_path,
             backend=self.backend,
             constraint_selection=self.constraint_selection,
+            tensor_restrictions=prepared.tensor_restrictions,
         )
 
     def run(self) -> Workload:
