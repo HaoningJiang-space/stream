@@ -33,6 +33,8 @@ from stream.structural.operator_template_faithfulness import (
 from stream.structural.stream_contract import canonical_mapping_manifest
 
 _CONTRACT_VERSION = 4
+_FACTOR_ARITY = 2
+_MIN_COMPILE_REPETITIONS = 2
 _RUNNER = Path("scripts/run_operator_template_coupling.py")
 
 
@@ -448,7 +450,10 @@ def _validate_contract(contract: dict[str, Any]) -> None:
     templates = [json.dumps(item, sort_keys=True, separators=(",", ":")) for item in contract["template_family"]]
     if not templates or len(templates) != len(set(templates)):
         raise OperatorTemplateCouplingError("template family must be non-empty and unique")
-    if any(len(targets) != 2 or len(set(targets)) != 2 for targets in contract["coupled_pairs"].values()):
+    if any(
+        len(targets) != _FACTOR_ARITY or len(set(targets)) != _FACTOR_ARITY
+        for targets in contract["coupled_pairs"].values()
+    ):
         raise OperatorTemplateCouplingError("each coupled factor must name exactly two distinct targets")
     assignment_count = len(contract["coupled_pairs"]) * len(templates) ** 2
     if assignment_count != contract["expected_assignment_count"]:
@@ -462,7 +467,7 @@ def _validate_contract(contract: dict[str, Any]) -> None:
         raise OperatorTemplateCouplingError("executable and unsupported counts do not cover the denominator")
     if contract["expected_baseline_round_trip_count"] != len(contract["coupled_pairs"]):
         raise OperatorTemplateCouplingError("baseline checks must cover every coupled factor")
-    if contract["compile_repetitions"] < 2 or contract["max_workers"] <= 1:
+    if contract["compile_repetitions"] < _MIN_COMPILE_REPETITIONS or contract["max_workers"] <= 1:
         raise OperatorTemplateCouplingError("repetition and worker counts must be nontrivial")
     expected_criteria = {
         "source_gate_hash_matches",
