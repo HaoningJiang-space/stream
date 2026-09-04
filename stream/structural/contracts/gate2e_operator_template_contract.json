@@ -1,0 +1,61 @@
+{
+  "contract": "gate2e-a-operator-template-opportunity-census",
+  "version": 1,
+  "design_status": "gate2d-result-informed potential-only census",
+  "source_gates": {
+    "gate2a": {
+      "artifact": "artifacts/gate2a/report.json",
+      "sha256": "sha256:d2473721f8e9d4796db5db7797ddf7c0099e82d4788ab4d081fe9b6a218aa145",
+      "required_verdict": "PASS"
+    },
+    "gate2d": {
+      "artifact": "artifacts/gate2d/report.json",
+      "sha256": "sha256:e2cd18d960ab8983b2ea7c6047374468264d6daf98b9ea410d202af30b361665",
+      "required_verdict": "FAIL",
+      "required_failed_criteria": [
+        "expanded_controlled_logical_bits_ratio",
+        "expanded_path_nondegenerate_tensor_ratio",
+        "strict_path_domain_expansion"
+      ]
+    },
+    "required_workloads": ["swiglu", "fsrcnn", "resnet18", "attention_head"]
+  },
+  "template_rules": {
+    "split_dimensions": "all local iteration dimensions referenced by output affine maps",
+    "split_factors": "positive divisors of the dimension extent",
+    "reduction_axis_split": false,
+    "core_pool": "the single baseline computation allocation",
+    "core_count": "product of split factors, constrained to divide the baseline pool size",
+    "core_group_template": "non-overlapping contiguous chunks of the sorted baseline pool",
+    "baseline_retention": "mandatory but excluded from opportunity counts until semantic equivalence is proven"
+  },
+  "static_review": {
+    "base_commit": "ebe98d04637c2ccecc656cd0b4500d6242e21a51",
+    "expected_changed_paths": [
+      "scripts/run_operator_template_census.py",
+      "stream/structural/contracts/gate2e_operator_template_contract.json",
+      "stream/structural/operator_template_census.py",
+      "tests/unit/structural/test_operator_template_census.py"
+    ]
+  },
+  "pass_criteria": {
+    "source_identified": true,
+    "static_review_scope_match": true,
+    "source_gate_hashes_match": true,
+    "workload_denominator_match": true,
+    "baseline_compute_domains_singleton": true,
+    "candidate_templates_unique": true,
+    "operator_nondegenerate_ratio": 1.0,
+    "workloads_with_potential_coupling_ratio": 1.0,
+    "minimum_workload_max_group_log10_space": 6.0
+  },
+  "excluded_claims": [
+    "STREAM_compiler_exactness",
+    "TilingGeneration_acceptance",
+    "transfer_lifting_validity",
+    "TTA_feasibility",
+    "latency_improvement",
+    "factor_coupling_exactness",
+    "VE_scalability"
+  ]
+}
