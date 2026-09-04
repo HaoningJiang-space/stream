@@ -1,5 +1,5 @@
 from stream.structural.direct_cost import assert_factor_accounting
-from tests.unit.structural._cases import six_cases
+from stream.structural.micro_dags import six_cases
 
 
 def test_fork_join_factor_accounting_for_all_assignments():

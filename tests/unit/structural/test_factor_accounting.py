@@ -2,24 +2,25 @@ import pytest
 
 from stream.structural.direct_cost import assert_factor_accounting
 from stream.structural.factors import FactorGraph, OwnedEventFactor, PhysicalEvent, Variable
-from tests.unit.structural._cases import build_case
+from stream.structural.micro_dags import random_micro_dag
 
 
 def test_every_assignment_has_identical_direct_and_factor_events():
-    case = build_case((("t_a", "A", ("B", "C", "D")),))
+    case = random_micro_dag("fork_join", 11)
 
     for assignment in case.graph.assignments():
         assert_factor_accounting(case.graph, assignment, case.direct_events)
 
 
 def test_shared_materialization_is_owned_once_for_fanout():
-    case = build_case((("t_a", "A", ("B", "C", "D")),))
+    case = random_micro_dag("fork_join", 11)
     assignment = next(
         assignment
         for assignment in case.graph.assignments()
         if assignment["q:t_a"].materialization.value == "full"
         and assignment["q:t_a"].fragments[0].layout == assignment["A"].output_layout
         and assignment["d:t_a"].kind == "shared"
+        and case.direct_events(assignment) is not None
     )
     events = case.graph.factorized_events(assignment)
 

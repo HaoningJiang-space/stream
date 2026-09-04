@@ -4,7 +4,7 @@ from stream.structural.canonicalize import canonical_assignment
 from stream.structural.direct_cost import direct_cost
 from stream.structural.elimination import variable_elimination
 from stream.structural.exhaustive import exhaustive_minimize
-from tests.unit.structural._cases import six_cases
+from stream.structural.micro_dags import six_cases
 
 
 @pytest.mark.parametrize("case_name", tuple(six_cases()))
