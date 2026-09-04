@@ -49,3 +49,16 @@ d2473721f8e9d4796db5db7797ddf7c0099e82d4788ab4d081fe9b6a218aa145
 This result establishes deterministic production-path lifting validity for the frozen Gate 2A
 workload and environment contract. It does not establish tensor-decision opportunity, factor
 coupling, VE scalability, TETRA latency benefit, or any Gate 2B/2C/2D result.
+
+## Runner Performance Update
+
+Commit `f160e7bd31cd7f1cbcc5635c9543220842ef76a6` parallelizes the eight independent preparation
+attempts without changing the frozen workload, repeat count, hash seeds, or preparation path. On
+the same eex004 runtime, total wall time decreased from 135.12 seconds to 30.21 seconds (4.47x),
+while the four workload semantic hashes remained bit-identical and Gate 2A passed again. The
+optimized report records eight workers and 27.15 seconds in the preparation section.
+
+The runner now also fails source identification when the imported Gate module is outside the clean
+checkout. Formal invocations therefore set `PYTHONPATH=/workspace`. The earlier accepted run's
+editable-install module and clean-checkout module had identical SHA-256 digests, but the new check
+prevents a future byte mismatch from being silently accepted.

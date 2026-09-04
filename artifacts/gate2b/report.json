@@ -1,0 +1,1856 @@
+{
+  "contract": {
+    "classification": {
+      "FAIL": "the frozen portfolio contains no nondegenerate tensor",
+      "NARROW": "some nondegenerate tensor opportunity exists, but a workload has none or all variation is placement-only",
+      "PASS": "every workload has a nondegenerate tensor and the frozen portfolio contains an independent path choice"
+    },
+    "contract": "gate2b-real-workload-opportunity-census",
+    "decision_space": {
+      "concrete_assignment": "one compatible staging placement and one path choice for every adjacent transfer",
+      "eligible_tensor": "transfer-produced tensor with two or more adjacent transfers",
+      "naive_space": "cartesian product of eligible tensor assignment domains; reported only as a census, not as a coupling claim",
+      "nondegenerate_tensor": "concrete assignment domain size greater than one",
+      "path_nondegenerate": "more than one compatible adjacent-path tuple for at least one fixed placement",
+      "placement_nondegenerate": "more than one compatible staging placement"
+    },
+    "excluded_claims": [
+      "factor_coupling",
+      "variable_elimination_scalability",
+      "physical_traffic_volume",
+      "TETRA_latency_improvement",
+      "capacity_or_contention_interaction"
+    ],
+    "metrics": [
+      "eligible_tensor_count",
+      "nondegenerate_tensor_count",
+      "placement_nondegenerate_count",
+      "path_nondegenerate_count",
+      "domain_size_histogram",
+      "naive_assignment_space",
+      "eligible_logical_bits",
+      "controlled_logical_bits",
+      "controlled_logical_bits_ratio",
+      "eligible_logical_edge_bits",
+      "controlled_logical_edge_bits"
+    ],
+    "source_gate": {
+      "artifact": "artifacts/gate2a/report.json",
+      "name": "Gate 2A Real-Workload Production Lifting Validity",
+      "required_verdict": "PASS",
+      "required_workloads": [
+        "swiglu",
+        "fsrcnn",
+        "resnet18",
+        "attention_head"
+      ],
+      "sha256": "sha256:d2473721f8e9d4796db5db7797ddf7c0099e82d4788ab4d081fe9b6a218aa145",
+      "version": "gate2a-v1"
+    },
+    "version": 1
+  },
+  "generated_at": "2026-09-04T19:37:18.605438+00:00",
+  "limitations": [
+    "NO_INDEPENDENT_PATH_CHOICE"
+  ],
+  "opportunity_class": "PLACEMENT_ONLY",
+  "source_gate": {
+    "path": "artifacts/gate2a/report.json",
+    "sha256": "sha256:d2473721f8e9d4796db5db7797ddf7c0099e82d4788ab4d081fe9b6a218aa145",
+    "source_commit": "fdce77dffa545b21fa14472cefcf156f526931ed",
+    "verdict": "PASS",
+    "workload_semantic_hashes": {
+      "attention_head": "d990b21d7f11190d0c2b76f454e77f291ab83fdf5eca8fd664e80f3b274cf59f",
+      "fsrcnn": "68e5c8bde3056503e1fbd290ee4c0d023b6fc42f529ca6835ac36c8bbb24ef2e",
+      "resnet18": "c08d9d2a41dbdcd226922f92423b25c5b81ad0c6793367c8ff9ccf667b1e00be",
+      "swiglu": "5f4a4c7cf1616920ed8b16d43a02b4fe3337d858f1ea8ba897a97f7d0b0430bd"
+    }
+  },
+  "summary": {
+    "controlled_logical_bits": 19027360,
+    "controlled_logical_bits_ratio": 0.023066978439384225,
+    "controlled_logical_edge_bits": 38054720,
+    "controlled_logical_edge_bits_ratio": 0.023066978439384225,
+    "domain_size_histogram": {
+      "1": 48,
+      "5": 17
+    },
+    "eligible_logical_bits": 824874400,
+    "eligible_logical_edge_bits": 1649748800,
+    "eligible_tensor_count": 65,
+    "largest_workload_assignment_space": {
+      "size": "390625",
+      "workload": "fsrcnn"
+    },
+    "nondegenerate_tensor_count": 17,
+    "nondegenerate_tensor_ratio": 0.26153846153846155,
+    "path_nondegenerate_count": 0,
+    "placement_nondegenerate_count": 17,
+    "workload_count": 4,
+    "workloads_with_nondegenerate_tensor": 4
+  },
+  "verdict": "NARROW",
+  "workloads": {
+    "attention_head": {
+      "family": "attention_fork_join",
+      "opportunity": {
+        "controlled_logical_bits": 1048576,
+        "controlled_logical_bits_ratio": 0.25806451612903225,
+        "controlled_logical_edge_bits": 2097152,
+        "controlled_logical_edge_bits_ratio": 0.25806451612903225,
+        "domain_size_histogram": {
+          "1": 6,
+          "5": 2
+        },
+        "eligible_logical_bits": 4063232,
+        "eligible_logical_edge_bits": 8126464,
+        "eligible_tensor_count": 8,
+        "naive_assignment_space": "25",
+        "naive_assignment_space_log10": 1.3979400086720377,
+        "nondegenerate_tensor_count": 2,
+        "nondegenerate_tensor_ratio": 0.25,
+        "path_nondegenerate_count": 0,
+        "placement_nondegenerate_count": 2
+      },
+      "semantic_hash": "d990b21d7f11190d0c2b76f454e77f291ab83fdf5eca8fd664e80f3b274cf59f",
+      "tensors": [
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 16,
+          "group": 0,
+          "logical_bits": 1048576,
+          "logical_edge_bits": 2097152,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "model_input",
+          "shape": [
+            128,
+            512
+          ],
+          "tensor": "I_1",
+          "variable_id": "group-0:I_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 16,
+          "group": 0,
+          "logical_bits": 131072,
+          "logical_edge_bits": 262144,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "activation",
+          "shape": [
+            128,
+            64
+          ],
+          "tensor": "K_2",
+          "variable_id": "group-0:K_2"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 5,
+          "baseline_placement_count": 5,
+          "compatible_placement_count": 5,
+          "element_bitwidth": 16,
+          "group": 0,
+          "logical_bits": 524288,
+          "logical_edge_bits": 1048576,
+          "nondegenerate": true,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "placement_nondegenerate": true,
+          "provenance": "model_input",
+          "shape": [
+            512,
+            64
+          ],
+          "tensor": "wK_1",
+          "variable_id": "group-0:wK_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 16,
+          "group": 1,
+          "logical_bits": 1048576,
+          "logical_edge_bits": 2097152,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "model_input",
+          "shape": [
+            128,
+            512
+          ],
+          "tensor": "I_1",
+          "variable_id": "group-1:I_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 16,
+          "group": 1,
+          "logical_bits": 131072,
+          "logical_edge_bits": 262144,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "fused_intermediate",
+          "shape": [
+            64,
+            128
+          ],
+          "tensor": "Kt_1",
+          "variable_id": "group-1:Kt_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 16,
+          "group": 1,
+          "logical_bits": 131072,
+          "logical_edge_bits": 262144,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "activation",
+          "shape": [
+            128,
+            64
+          ],
+          "tensor": "Y_2",
+          "variable_id": "group-1:Y_2"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 5,
+          "baseline_placement_count": 5,
+          "compatible_placement_count": 5,
+          "element_bitwidth": 16,
+          "group": 1,
+          "logical_bits": 524288,
+          "logical_edge_bits": 1048576,
+          "nondegenerate": true,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "placement_nondegenerate": true,
+          "provenance": "model_input",
+          "shape": [
+            512,
+            64
+          ],
+          "tensor": "wQ_1",
+          "variable_id": "group-1:wQ_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 16,
+          "group": 1,
+          "logical_bits": 524288,
+          "logical_edge_bits": 1048576,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "model_input",
+          "shape": [
+            512,
+            64
+          ],
+          "tensor": "wV_1",
+          "variable_id": "group-1:wV_1"
+        }
+      ]
+    },
+    "fsrcnn": {
+      "family": "sequential_cnn",
+      "opportunity": {
+        "controlled_logical_bits": 1080736,
+        "controlled_logical_bits_ratio": 0.03154665772441487,
+        "controlled_logical_edge_bits": 2161472,
+        "controlled_logical_edge_bits_ratio": 0.03154665772441487,
+        "domain_size_histogram": {
+          "1": 1,
+          "5": 8
+        },
+        "eligible_logical_bits": 34258336,
+        "eligible_logical_edge_bits": 68516672,
+        "eligible_tensor_count": 9,
+        "naive_assignment_space": "390625",
+        "naive_assignment_space_log10": 5.591760034688151,
+        "nondegenerate_tensor_count": 8,
+        "nondegenerate_tensor_ratio": 0.8888888888888888,
+        "path_nondegenerate_count": 0,
+        "placement_nondegenerate_count": 8
+      },
+      "semantic_hash": "68e5c8bde3056503e1fbd290ee4c0d023b6fc42f529ca6835ac36c8bbb24ef2e",
+      "tensors": [
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 5,
+          "baseline_placement_count": 5,
+          "compatible_placement_count": 5,
+          "element_bitwidth": 8,
+          "group": 0,
+          "logical_bits": 1048832,
+          "logical_edge_bits": 2097664,
+          "nondegenerate": true,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "placement_nondegenerate": true,
+          "provenance": "model_input",
+          "shape": [
+            1,
+            1,
+            272,
+            482
+          ],
+          "tensor": "input_1",
+          "variable_id": "group-0:input_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 8,
+          "group": 0,
+          "logical_bits": 33177600,
+          "logical_edge_bits": 66355200,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "activation",
+          "shape": [
+            1,
+            8,
+            540,
+            960
+          ],
+          "tensor": "output_2.__stream1",
+          "variable_id": "group-0:output_2.__stream1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 5,
+          "baseline_placement_count": 5,
+          "compatible_placement_count": 5,
+          "element_bitwidth": 8,
+          "group": 0,
+          "logical_bits": 5600,
+          "logical_edge_bits": 11200,
+          "nondegenerate": true,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "placement_nondegenerate": true,
+          "provenance": "constant",
+          "shape": [
+            28,
+            1,
+            5,
+            5
+          ],
+          "tensor": "weights_0_1",
+          "variable_id": "group-0:weights_0_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 5,
+          "baseline_placement_count": 5,
+          "compatible_placement_count": 5,
+          "element_bitwidth": 8,
+          "group": 0,
+          "logical_bits": 1344,
+          "logical_edge_bits": 2688,
+          "nondegenerate": true,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "placement_nondegenerate": true,
+          "provenance": "constant",
+          "shape": [
+            6,
+            28,
+            1,
+            1
+          ],
+          "tensor": "weights_1_1",
+          "variable_id": "group-0:weights_1_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 5,
+          "baseline_placement_count": 5,
+          "compatible_placement_count": 5,
+          "element_bitwidth": 8,
+          "group": 0,
+          "logical_bits": 5184,
+          "logical_edge_bits": 10368,
+          "nondegenerate": true,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "placement_nondegenerate": true,
+          "provenance": "constant",
+          "shape": [
+            12,
+            6,
+            3,
+            3
+          ],
+          "tensor": "weights_2_1",
+          "variable_id": "group-0:weights_2_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 5,
+          "baseline_placement_count": 5,
+          "compatible_placement_count": 5,
+          "element_bitwidth": 8,
+          "group": 0,
+          "logical_bits": 5184,
+          "logical_edge_bits": 10368,
+          "nondegenerate": true,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "placement_nondegenerate": true,
+          "provenance": "constant",
+          "shape": [
+            6,
+            12,
+            3,
+            3
+          ],
+          "tensor": "weights_4_1",
+          "variable_id": "group-0:weights_4_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 5,
+          "baseline_placement_count": 5,
+          "compatible_placement_count": 5,
+          "element_bitwidth": 8,
+          "group": 0,
+          "logical_bits": 5184,
+          "logical_edge_bits": 10368,
+          "nondegenerate": true,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "placement_nondegenerate": true,
+          "provenance": "constant",
+          "shape": [
+            12,
+            6,
+            3,
+            3
+          ],
+          "tensor": "weights_5_1",
+          "variable_id": "group-0:weights_5_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 5,
+          "baseline_placement_count": 5,
+          "compatible_placement_count": 5,
+          "element_bitwidth": 8,
+          "group": 0,
+          "logical_bits": 1344,
+          "logical_edge_bits": 2688,
+          "nondegenerate": true,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "placement_nondegenerate": true,
+          "provenance": "constant",
+          "shape": [
+            14,
+            12,
+            1,
+            1
+          ],
+          "tensor": "weights_6_1",
+          "variable_id": "group-0:weights_6_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 5,
+          "baseline_placement_count": 5,
+          "compatible_placement_count": 5,
+          "element_bitwidth": 8,
+          "group": 0,
+          "logical_bits": 8064,
+          "logical_edge_bits": 16128,
+          "nondegenerate": true,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "placement_nondegenerate": true,
+          "provenance": "constant",
+          "shape": [
+            8,
+            14,
+            3,
+            3
+          ],
+          "tensor": "weights_7_1",
+          "variable_id": "group-0:weights_7_1"
+        }
+      ]
+    },
+    "resnet18": {
+      "family": "residual_cnn",
+      "opportunity": {
+        "controlled_logical_bits": 16373760,
+        "controlled_logical_bits_ratio": 0.037936483081609705,
+        "controlled_logical_edge_bits": 32747520,
+        "controlled_logical_edge_bits_ratio": 0.037936483081609705,
+        "domain_size_histogram": {
+          "1": 37,
+          "5": 6
+        },
+        "eligible_logical_bits": 431609856,
+        "eligible_logical_edge_bits": 863219712,
+        "eligible_tensor_count": 43,
+        "naive_assignment_space": "15625",
+        "naive_assignment_space_log10": 4.1938200260161125,
+        "nondegenerate_tensor_count": 6,
+        "nondegenerate_tensor_ratio": 0.13953488372093023,
+        "path_nondegenerate_count": 0,
+        "placement_nondegenerate_count": 6
+      },
+      "semantic_hash": "c08d9d2a41dbdcd226922f92423b25c5b81ad0c6793367c8ff9ccf667b1e00be",
+      "tensors": [
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 0,
+          "logical_bits": 6422528,
+          "logical_edge_bits": 12845056,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "activation",
+          "shape": [
+            1,
+            64,
+            56,
+            56
+          ],
+          "tensor": "/maxpool/MaxPool_output_0_2",
+          "variable_id": "group-0:/maxpool/MaxPool_output_0_2"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 5,
+          "baseline_placement_count": 5,
+          "compatible_placement_count": 5,
+          "element_bitwidth": 32,
+          "group": 0,
+          "logical_bits": 4816896,
+          "logical_edge_bits": 9633792,
+          "nondegenerate": true,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "placement_nondegenerate": true,
+          "provenance": "model_input",
+          "shape": [
+            1,
+            3,
+            224,
+            224
+          ],
+          "tensor": "input.1_1",
+          "variable_id": "group-0:input.1_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 5,
+          "baseline_placement_count": 5,
+          "compatible_placement_count": 5,
+          "element_bitwidth": 32,
+          "group": 0,
+          "logical_bits": 301056,
+          "logical_edge_bits": 602112,
+          "nondegenerate": true,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "placement_nondegenerate": true,
+          "provenance": "constant",
+          "shape": [
+            64,
+            3,
+            7,
+            7
+          ],
+          "tensor": "onnx::Conv_193_1",
+          "variable_id": "group-0:onnx::Conv_193_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 1,
+          "logical_bits": 6422528,
+          "logical_edge_bits": 12845056,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "activation",
+          "shape": [
+            1,
+            64,
+            56,
+            56
+          ],
+          "tensor": "/layer1/layer1.0/relu_1/Relu_output_0_2",
+          "variable_id": "group-1:/layer1/layer1.0/relu_1/Relu_output_0_2"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 1,
+          "logical_bits": 6422528,
+          "logical_edge_bits": 12845056,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "fused_intermediate",
+          "shape": [
+            1,
+            64,
+            56,
+            56
+          ],
+          "tensor": "/maxpool/MaxPool_output_0_1",
+          "variable_id": "group-1:/maxpool/MaxPool_output_0_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 1,
+          "logical_bits": 1179648,
+          "logical_edge_bits": 2359296,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "constant",
+          "shape": [
+            64,
+            64,
+            3,
+            3
+          ],
+          "tensor": "onnx::Conv_196_1",
+          "variable_id": "group-1:onnx::Conv_196_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 1,
+          "logical_bits": 1179648,
+          "logical_edge_bits": 2359296,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "constant",
+          "shape": [
+            64,
+            64,
+            3,
+            3
+          ],
+          "tensor": "onnx::Conv_199_1",
+          "variable_id": "group-1:onnx::Conv_199_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 2,
+          "logical_bits": 6422528,
+          "logical_edge_bits": 12845056,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "fused_intermediate",
+          "shape": [
+            1,
+            64,
+            56,
+            56
+          ],
+          "tensor": "/layer1/layer1.0/relu_1/Relu_output_0_1",
+          "variable_id": "group-2:/layer1/layer1.0/relu_1/Relu_output_0_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 2,
+          "logical_bits": 6422528,
+          "logical_edge_bits": 12845056,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "activation",
+          "shape": [
+            1,
+            64,
+            56,
+            56
+          ],
+          "tensor": "/layer1/layer1.1/relu_1/Relu_output_0_2",
+          "variable_id": "group-2:/layer1/layer1.1/relu_1/Relu_output_0_2"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 2,
+          "logical_bits": 1179648,
+          "logical_edge_bits": 2359296,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "constant",
+          "shape": [
+            64,
+            64,
+            3,
+            3
+          ],
+          "tensor": "onnx::Conv_202_1",
+          "variable_id": "group-2:onnx::Conv_202_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 2,
+          "logical_bits": 1179648,
+          "logical_edge_bits": 2359296,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "constant",
+          "shape": [
+            64,
+            64,
+            3,
+            3
+          ],
+          "tensor": "onnx::Conv_205_1",
+          "variable_id": "group-2:onnx::Conv_205_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 5,
+          "baseline_placement_count": 5,
+          "compatible_placement_count": 5,
+          "element_bitwidth": 32,
+          "group": 3,
+          "logical_bits": 6422528,
+          "logical_edge_bits": 12845056,
+          "nondegenerate": true,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "placement_nondegenerate": true,
+          "provenance": "fused_intermediate",
+          "shape": [
+            1,
+            64,
+            56,
+            56
+          ],
+          "tensor": "/layer1/layer1.1/relu_1/Relu_output_0_1",
+          "variable_id": "group-3:/layer1/layer1.1/relu_1/Relu_output_0_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 3,
+          "logical_bits": 3211264,
+          "logical_edge_bits": 6422528,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "activation",
+          "shape": [
+            1,
+            128,
+            28,
+            28
+          ],
+          "tensor": "/layer2/layer2.0/relu_1/Relu_output_0_2",
+          "variable_id": "group-3:/layer2/layer2.0/relu_1/Relu_output_0_2"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 3,
+          "logical_bits": 2359296,
+          "logical_edge_bits": 4718592,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "constant",
+          "shape": [
+            128,
+            64,
+            3,
+            3
+          ],
+          "tensor": "onnx::Conv_208_1",
+          "variable_id": "group-3:onnx::Conv_208_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 3,
+          "logical_bits": 4718592,
+          "logical_edge_bits": 9437184,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "constant",
+          "shape": [
+            128,
+            128,
+            3,
+            3
+          ],
+          "tensor": "onnx::Conv_211_1",
+          "variable_id": "group-3:onnx::Conv_211_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 3,
+          "logical_bits": 262144,
+          "logical_edge_bits": 524288,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "constant",
+          "shape": [
+            128,
+            64,
+            1,
+            1
+          ],
+          "tensor": "onnx::Conv_214_1",
+          "variable_id": "group-3:onnx::Conv_214_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 4,
+          "logical_bits": 3211264,
+          "logical_edge_bits": 6422528,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "fused_intermediate",
+          "shape": [
+            1,
+            128,
+            28,
+            28
+          ],
+          "tensor": "/layer2/layer2.0/relu_1/Relu_output_0_1",
+          "variable_id": "group-4:/layer2/layer2.0/relu_1/Relu_output_0_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 4,
+          "logical_bits": 3211264,
+          "logical_edge_bits": 6422528,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "activation",
+          "shape": [
+            1,
+            128,
+            28,
+            28
+          ],
+          "tensor": "/layer2/layer2.1/relu_1/Relu_output_0_2",
+          "variable_id": "group-4:/layer2/layer2.1/relu_1/Relu_output_0_2"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 4,
+          "logical_bits": 4718592,
+          "logical_edge_bits": 9437184,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "constant",
+          "shape": [
+            128,
+            128,
+            3,
+            3
+          ],
+          "tensor": "onnx::Conv_217_1",
+          "variable_id": "group-4:onnx::Conv_217_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 4,
+          "logical_bits": 4718592,
+          "logical_edge_bits": 9437184,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "constant",
+          "shape": [
+            128,
+            128,
+            3,
+            3
+          ],
+          "tensor": "onnx::Conv_220_1",
+          "variable_id": "group-4:onnx::Conv_220_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 5,
+          "baseline_placement_count": 5,
+          "compatible_placement_count": 5,
+          "element_bitwidth": 32,
+          "group": 5,
+          "logical_bits": 3211264,
+          "logical_edge_bits": 6422528,
+          "nondegenerate": true,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "placement_nondegenerate": true,
+          "provenance": "fused_intermediate",
+          "shape": [
+            1,
+            128,
+            28,
+            28
+          ],
+          "tensor": "/layer2/layer2.1/relu_1/Relu_output_0_1",
+          "variable_id": "group-5:/layer2/layer2.1/relu_1/Relu_output_0_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 5,
+          "logical_bits": 1605632,
+          "logical_edge_bits": 3211264,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "activation",
+          "shape": [
+            1,
+            256,
+            14,
+            14
+          ],
+          "tensor": "/layer3/layer3.0/relu_1/Relu_output_0_2",
+          "variable_id": "group-5:/layer3/layer3.0/relu_1/Relu_output_0_2"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 5,
+          "logical_bits": 9437184,
+          "logical_edge_bits": 18874368,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "constant",
+          "shape": [
+            256,
+            128,
+            3,
+            3
+          ],
+          "tensor": "onnx::Conv_223_1",
+          "variable_id": "group-5:onnx::Conv_223_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 5,
+          "logical_bits": 18874368,
+          "logical_edge_bits": 37748736,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "constant",
+          "shape": [
+            256,
+            256,
+            3,
+            3
+          ],
+          "tensor": "onnx::Conv_226_1",
+          "variable_id": "group-5:onnx::Conv_226_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 5,
+          "logical_bits": 1048576,
+          "logical_edge_bits": 2097152,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "constant",
+          "shape": [
+            256,
+            128,
+            1,
+            1
+          ],
+          "tensor": "onnx::Conv_229_1",
+          "variable_id": "group-5:onnx::Conv_229_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 6,
+          "logical_bits": 1605632,
+          "logical_edge_bits": 3211264,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "fused_intermediate",
+          "shape": [
+            1,
+            256,
+            14,
+            14
+          ],
+          "tensor": "/layer3/layer3.0/relu_1/Relu_output_0_1",
+          "variable_id": "group-6:/layer3/layer3.0/relu_1/Relu_output_0_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 6,
+          "logical_bits": 1605632,
+          "logical_edge_bits": 3211264,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "activation",
+          "shape": [
+            1,
+            256,
+            14,
+            14
+          ],
+          "tensor": "/layer3/layer3.1/relu_1/Relu_output_0_2",
+          "variable_id": "group-6:/layer3/layer3.1/relu_1/Relu_output_0_2"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 6,
+          "logical_bits": 18874368,
+          "logical_edge_bits": 37748736,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "constant",
+          "shape": [
+            256,
+            256,
+            3,
+            3
+          ],
+          "tensor": "onnx::Conv_232_1",
+          "variable_id": "group-6:onnx::Conv_232_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 6,
+          "logical_bits": 18874368,
+          "logical_edge_bits": 37748736,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "constant",
+          "shape": [
+            256,
+            256,
+            3,
+            3
+          ],
+          "tensor": "onnx::Conv_235_1",
+          "variable_id": "group-6:onnx::Conv_235_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 5,
+          "baseline_placement_count": 5,
+          "compatible_placement_count": 5,
+          "element_bitwidth": 32,
+          "group": 7,
+          "logical_bits": 1605632,
+          "logical_edge_bits": 3211264,
+          "nondegenerate": true,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "placement_nondegenerate": true,
+          "provenance": "fused_intermediate",
+          "shape": [
+            1,
+            256,
+            14,
+            14
+          ],
+          "tensor": "/layer3/layer3.1/relu_1/Relu_output_0_1",
+          "variable_id": "group-7:/layer3/layer3.1/relu_1/Relu_output_0_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 7,
+          "logical_bits": 802816,
+          "logical_edge_bits": 1605632,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "activation",
+          "shape": [
+            1,
+            512,
+            7,
+            7
+          ],
+          "tensor": "/layer4/layer4.0/relu_1/Relu_output_0_2",
+          "variable_id": "group-7:/layer4/layer4.0/relu_1/Relu_output_0_2"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 7,
+          "logical_bits": 37748736,
+          "logical_edge_bits": 75497472,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "constant",
+          "shape": [
+            512,
+            256,
+            3,
+            3
+          ],
+          "tensor": "onnx::Conv_238_1",
+          "variable_id": "group-7:onnx::Conv_238_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 7,
+          "logical_bits": 75497472,
+          "logical_edge_bits": 150994944,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "constant",
+          "shape": [
+            512,
+            512,
+            3,
+            3
+          ],
+          "tensor": "onnx::Conv_241_1",
+          "variable_id": "group-7:onnx::Conv_241_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 7,
+          "logical_bits": 4194304,
+          "logical_edge_bits": 8388608,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "constant",
+          "shape": [
+            512,
+            256,
+            1,
+            1
+          ],
+          "tensor": "onnx::Conv_244_1",
+          "variable_id": "group-7:onnx::Conv_244_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 8,
+          "logical_bits": 802816,
+          "logical_edge_bits": 1605632,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "fused_intermediate",
+          "shape": [
+            1,
+            512,
+            7,
+            7
+          ],
+          "tensor": "/layer4/layer4.0/relu_1/Relu_output_0_1",
+          "variable_id": "group-8:/layer4/layer4.0/relu_1/Relu_output_0_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 8,
+          "logical_bits": 802816,
+          "logical_edge_bits": 1605632,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "activation",
+          "shape": [
+            1,
+            512,
+            7,
+            7
+          ],
+          "tensor": "/layer4/layer4.1/relu_1/Relu_output_0_2",
+          "variable_id": "group-8:/layer4/layer4.1/relu_1/Relu_output_0_2"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 8,
+          "logical_bits": 75497472,
+          "logical_edge_bits": 150994944,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "constant",
+          "shape": [
+            512,
+            512,
+            3,
+            3
+          ],
+          "tensor": "onnx::Conv_247_1",
+          "variable_id": "group-8:onnx::Conv_247_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 8,
+          "logical_bits": 75497472,
+          "logical_edge_bits": 150994944,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "constant",
+          "shape": [
+            512,
+            512,
+            3,
+            3
+          ],
+          "tensor": "onnx::Conv_250_1",
+          "variable_id": "group-8:onnx::Conv_250_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 9,
+          "logical_bits": 16384,
+          "logical_edge_bits": 32768,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "activation",
+          "shape": [
+            1,
+            512,
+            1,
+            1
+          ],
+          "tensor": "/avgpool/GlobalAveragePool_output_0_2",
+          "variable_id": "group-9:/avgpool/GlobalAveragePool_output_0_2"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 9,
+          "logical_bits": 802816,
+          "logical_edge_bits": 1605632,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "fused_intermediate",
+          "shape": [
+            1,
+            512,
+            7,
+            7
+          ],
+          "tensor": "/layer4/layer4.1/relu_1/Relu_output_0_1",
+          "variable_id": "group-9:/layer4/layer4.1/relu_1/Relu_output_0_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 5,
+          "baseline_placement_count": 5,
+          "compatible_placement_count": 5,
+          "element_bitwidth": 32,
+          "group": 10,
+          "logical_bits": 16384,
+          "logical_edge_bits": 32768,
+          "nondegenerate": true,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "placement_nondegenerate": true,
+          "provenance": "fused_intermediate",
+          "shape": [
+            1,
+            512
+          ],
+          "tensor": "/Flatten_output_0_1",
+          "variable_id": "group-10:/Flatten_output_0_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 10,
+          "logical_bits": 16384,
+          "logical_edge_bits": 32768,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "activation",
+          "shape": [
+            1,
+            512
+          ],
+          "tensor": "191_2",
+          "variable_id": "group-10:191_2"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 32,
+          "group": 10,
+          "logical_bits": 8388608,
+          "logical_edge_bits": 16777216,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "constant",
+          "shape": [
+            512,
+            512
+          ],
+          "tensor": "fc.weight_1",
+          "variable_id": "group-10:fc.weight_1"
+        }
+      ]
+    },
+    "swiglu": {
+      "family": "transformer_ffn",
+      "opportunity": {
+        "controlled_logical_bits": 524288,
+        "controlled_logical_bits_ratio": 0.0014771048744460858,
+        "controlled_logical_edge_bits": 1048576,
+        "controlled_logical_edge_bits_ratio": 0.0014771048744460858,
+        "domain_size_histogram": {
+          "1": 4,
+          "5": 1
+        },
+        "eligible_logical_bits": 354942976,
+        "eligible_logical_edge_bits": 709885952,
+        "eligible_tensor_count": 5,
+        "naive_assignment_space": "5",
+        "naive_assignment_space_log10": 0.6989700043360189,
+        "nondegenerate_tensor_count": 1,
+        "nondegenerate_tensor_ratio": 0.2,
+        "path_nondegenerate_count": 0,
+        "placement_nondegenerate_count": 1
+      },
+      "semantic_hash": "5f4a4c7cf1616920ed8b16d43a02b4fe3337d858f1ea8ba897a97f7d0b0430bd",
+      "tensors": [
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 5,
+          "baseline_placement_count": 5,
+          "compatible_placement_count": 5,
+          "element_bitwidth": 16,
+          "group": 0,
+          "logical_bits": 524288,
+          "logical_edge_bits": 1048576,
+          "nondegenerate": true,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "placement_nondegenerate": true,
+          "provenance": "model_input",
+          "shape": [
+            32,
+            1024
+          ],
+          "tensor": "input_1",
+          "variable_id": "group-0:input_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 16,
+          "group": 0,
+          "logical_bits": 2097152,
+          "logical_edge_bits": 4194304,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "activation",
+          "shape": [
+            32,
+            4096
+          ],
+          "tensor": "output_2",
+          "variable_id": "group-0:output_2"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 16,
+          "group": 0,
+          "logical_bits": 58720256,
+          "logical_edge_bits": 117440512,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "constant",
+          "shape": [
+            1024,
+            3584
+          ],
+          "tensor": "weights_1_1",
+          "variable_id": "group-0:weights_1_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 16,
+          "group": 0,
+          "logical_bits": 58720256,
+          "logical_edge_bits": 117440512,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "constant",
+          "shape": [
+            1024,
+            3584
+          ],
+          "tensor": "weights_2_1",
+          "variable_id": "group-0:weights_2_1"
+        },
+        {
+          "adjacent_transfer_count": 2,
+          "assignment_domain_size": 1,
+          "baseline_placement_count": 1,
+          "compatible_placement_count": 1,
+          "element_bitwidth": 16,
+          "group": 0,
+          "logical_bits": 234881024,
+          "logical_edge_bits": 469762048,
+          "nondegenerate": false,
+          "path_nondegenerate": false,
+          "path_tuple_counts_by_placement": [
+            1
+          ],
+          "placement_nondegenerate": false,
+          "provenance": "constant",
+          "shape": [
+            3584,
+            4096
+          ],
+          "tensor": "weights_3_1",
+          "variable_id": "group-0:weights_3_1"
+        }
+      ]
+    }
+  }
+}
