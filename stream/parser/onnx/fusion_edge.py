@@ -10,6 +10,8 @@ class FusionEdgeParser(OnnxOperatorParser):
     operand_mapping. Output shapes come from ONNX shape inference.
     """
 
+    SEMANTIC_INPUT_EXCLUSIONS = {1: "SHAPE_METADATA_OPERAND"}
+
     def generate_node(self, name_to_tensor_dict: dict[str, Tensor]) -> FusionEdge:
         # FusionEdge is a shape-only boundary node. Only the first input (data tensor)
         # is a real data-flow edge. Additional inputs (e.g., Reshape's shape tensor)

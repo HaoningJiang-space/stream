@@ -52,7 +52,7 @@ class CapacityTiler:
         """Intra-core tiling for the group, or ``[]`` when it already fits (caller keeps its own tiling)."""
         # Per physical core: its capacity and the distinct tensors resident on it (deduped by name).
         core_cap: dict[int, int] = {}
-        core_tensors: dict[int, list[tuple[Tensor, frozenset[LayerDim]]]] = {}
+        core_tensors: dict[int, list[tuple[Tensor, tuple[LayerDim, ...]]]] = {}
         core_seen: dict[int, set[str]] = {}
         for cn in cns:
             node_tensors = self._node_tensors(cn)
@@ -67,10 +67,30 @@ class CapacityTiler:
         budgets = {cid: int(cap * self.fill_fraction) for cid, cap in core_cap.items()}
 
         # Per candidate dim: per-core size (full / inter-core unroll) and divisor tile sizes.
-        all_dims: set[LayerDim] = {d for ts in core_tensors.values() for entry in ts for d in entry[1]}
+        # A set here used to leak PYTHONHASHSEED into emitted intra-core tiling order, which then
+        # became temporal loop-nest order. Sort by stable node/local-axis occurrences rather than
+        # global z numbering or node insertion order.
+        all_dims: list[LayerDim] = []
+        for tensors in core_tensors.values():
+            for _, dimensions in tensors:
+                for dimension in dimensions:
+                    if dimension not in all_dims:
+                        all_dims.append(dimension)
+        all_dims.sort(
+            key=lambda dimension: tuple(
+                sorted(
+                    (node.name, position)
+                    for node in cns
+                    for position, candidate in enumerate(self.sub_workload.get_dims(node))
+                    if candidate == dimension
+                )
+            )
+        )
         per_core: dict[LayerDim, int] = {}
         divisors: dict[LayerDim, list[int]] = {}
-        for dim in all_dims - protected:
+        for dim in all_dims:
+            if dim in protected:
+                continue
             full = self.sub_workload.get_dimension_size(dim)
             u = unroll.get(dim, 1)
             size = full // u if u > 1 and full % u == 0 else full
@@ -79,14 +99,15 @@ class CapacityTiler:
                 divisors[dim] = _divisors_desc(size)
 
         seeded = self._seed_resident(cns, seed_tiling or [], per_core)
-        resident: dict[LayerDim, int] = {dim: seeded.get(dim, per_core[dim]) for dim in per_core}
+        ordered_dims = (*seeded, *(dim for dim in per_core if dim not in seeded))
+        resident: dict[LayerDim, int] = {dim: seeded.get(dim, per_core[dim]) for dim in ordered_dims}
 
         # Per core, each resident tensor as (base bits, scaling dims) so overflow() is cheap arithmetic.
         base_of: dict[str, tuple[float, tuple[LayerDim, ...]]] = {}
         core_terms: dict[int, list[tuple[float, tuple[LayerDim, ...]]]] = {}
         for cid, tensors in core_tensors.items():
             terms: list[tuple[float, tuple[LayerDim, ...]]] = []
-            for t, dims in tensors:
+            for t, dims in sorted(tensors, key=lambda item: item[0].name):
                 cached = base_of.get(t.name)
                 if cached is None:
                     full_bits = math.prod(t.shape) * t.operand_type.bitwidth
@@ -140,16 +161,17 @@ class CapacityTiler:
 
         return self._emit(cns, resident, per_core)
 
-    def _node_tensors(self, cn: ComputationNode) -> list[tuple[Tensor, frozenset[LayerDim]]]:
+    def _node_tensors(self, cn: ComputationNode) -> list[tuple[Tensor, tuple[LayerDim, ...]]]:
         """One node's own operands, each with the global dims that index it."""
         node_dims = self.sub_workload.get_dims(cn)
         seen: set[str] = set()
-        out: list[tuple[Tensor, frozenset[LayerDim]]] = []
+        out: list[tuple[Tensor, tuple[LayerDim, ...]]] = []
         for tensor in cn.tensors:
             if tensor.name in seen:
                 continue
             seen.add(tensor.name)
-            dims = frozenset(node_dims[p] for p in map_dim_positions(cn.get_mapping(tensor)) if p < len(node_dims))
+            used_positions = set(map_dim_positions(cn.get_mapping(tensor)))
+            dims = tuple(dimension for position, dimension in enumerate(node_dims) if position in used_positions)
             out.append((tensor, dims))
         return out
 
@@ -184,7 +206,7 @@ class CapacityTiler:
         for dim, tile in resident.items():
             if tile >= per_core.get(dim, tile):
                 continue
-            for cn in cns:
+            for cn in sorted(cns, key=lambda node: node.name):
                 dims = self.sub_workload.get_dims(cn)
                 if dim in dims:
                     entries.append({"dim": f"{cn.name}.D{dims.index(dim)}", "tile": tile})

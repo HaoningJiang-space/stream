@@ -29,6 +29,10 @@ Ruff enforces formatting, imports, and lint rules with a 120-character line limi
 
 Use pytest. Name files `test_<behavior>.py` and test functions `test_<expected_behavior>`. Put focused logic tests in `tests/unit/` and end-to-end solver paths in `tests/integration/`; mark expensive cases with `@pytest.mark.slow`. Add fixtures under `tests/fixtures/` rather than embedding large generated data. There is no numeric coverage threshold, but every behavior change should include a regression test.
 
+## Remote Execution Policy
+
+Do not run tests, builds, compilers, solvers, or experiments in the local workspace. Local work is limited to source editing, Git operations, and non-executing static inspection. Synchronize the required files to `wangziheng@eex004:/home/wangziheng/Stream` and perform all runtime validation there in the project-specific Conda or container environment. Record the remote host, environment, dependency versions, command, and artifact hashes for research-grade runs. Never commit credentials, tokens, generated environments, or machine-specific paths.
+
 ## Commit & Pull Request Guidelines
 
 Recent commits use concise, imperative summaries such as `Fix dma task release ...`, often followed by a PR number. Keep each commit focused; reserve `bump version X -> Y` for automated releases. PRs should explain the problem and solution, link relevant issues, list validation commands, and update documentation for public behavior. Include generated-output excerpts or screenshots when visualization, tracing, or documentation changes are user-visible.

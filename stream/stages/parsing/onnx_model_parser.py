@@ -41,6 +41,7 @@ class ONNXModelParserStage(Stage):
         self.ctx.set(
             onnx_model=onnx_model,
             workload=workload,
+            semantic_exclusions=tuple(onnx_model_parser.semantic_exclusions),
         )
         sub_stage = self.list_of_callables[0](self.list_of_callables[1:], self.ctx)
         yield from sub_stage.run()

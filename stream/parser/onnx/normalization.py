@@ -11,6 +11,10 @@ class NormalizationParser(OnnxOperatorParser):
 
     # Softmax/LpNormalization reduce one axis; LayerNormalization reduces axis..rank-1.
     SPANS_TO_END = {"LayerNormalization"}
+    SEMANTIC_INPUT_EXCLUSIONS = {
+        1: "UNMODELED_NORMALIZATION_PARAMETER",
+        2: "UNMODELED_NORMALIZATION_PARAMETER",
+    }
 
     def _reduction_axes(self, rank: int) -> tuple[int, ...]:
         axis = self.get_node_attribute_int("axis")

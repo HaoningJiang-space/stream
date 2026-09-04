@@ -1,0 +1,86 @@
+{
+  "contract": "Gate 2A Real-Workload Production Lifting Validity",
+  "version": "gate2a-v1",
+  "selection_policy": {
+    "frozen_before_repairs": true,
+    "families": [
+      "transformer_ffn",
+      "sequential_cnn",
+      "residual_cnn",
+      "attention_fork_join"
+    ]
+  },
+  "hardware": "stream/inputs/examples/hardware/tpu_v7_ironwood.yaml",
+  "workloads": [
+    {
+      "id": "swiglu",
+      "family": "transformer_ffn",
+      "path": "stream/inputs/examples/workload/swiglu_1024_4096_14336.onnx"
+    },
+    {
+      "id": "fsrcnn",
+      "family": "sequential_cnn",
+      "path": "stream/inputs/examples/workload/fsrcnn.onnx"
+    },
+    {
+      "id": "resnet18",
+      "family": "residual_cnn",
+      "path": "stream/inputs/examples/workload/resnet18.onnx"
+    },
+    {
+      "id": "attention_head",
+      "family": "attention_fork_join",
+      "path": "stream/inputs/testing/workload/attention_head.onnx"
+    }
+  ],
+  "repeat_count": 2,
+  "preparation": {
+    "mapping_generation": "generic_production",
+    "fusion_cut_points": "derived_by_generic_mapping",
+    "timeslot_policy": "resource_aware_production",
+    "cost_lut": "unit_cost_prepare_only",
+    "run_tta": false,
+    "run_structural_search": false
+  },
+  "environment": {
+    "python": ">=3.12",
+    "ortools": ">=9.15"
+  },
+  "semantic_exclusions": [
+    {
+      "operator_types": ["Conv", "Gemm", "MatmulSoftmax"],
+      "input_indices": [2],
+      "reason": "UNMODELED_ADDITIVE_OPERAND"
+    },
+    {
+      "operator_types": ["Reshape", "Squeeze", "Unsqueeze"],
+      "input_indices": [1],
+      "reason": "SHAPE_METADATA_OPERAND"
+    },
+    {
+      "operator_types": ["Slice"],
+      "input_indices": [1, 2, 3, 4],
+      "reason": "INDEX_METADATA_OPERAND"
+    },
+    {
+      "operator_types": ["Gather"],
+      "input_indices": [1],
+      "reason": "INDEX_METADATA_OPERAND"
+    },
+    {
+      "operator_types": ["LayerNormalization"],
+      "input_indices": [1, 2],
+      "reason": "UNMODELED_NORMALIZATION_PARAMETER"
+    }
+  ],
+  "pass_criteria": {
+    "lifting_success": 1.0,
+    "deterministic_preparation": true,
+    "provenance_coverage": 1.0,
+    "empty_placement_domains": 0,
+    "empty_path_domains": 0,
+    "silent_fallbacks": 0,
+    "undeclared_semantic_exclusions": 0,
+    "forbidden_execution_events": 0
+  }
+}

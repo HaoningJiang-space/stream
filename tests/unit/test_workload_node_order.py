@@ -105,3 +105,41 @@ def test_order_is_cached_until_the_graph_changes():
     assert "replacement" in _names(workload)
     assert old.name not in _names(workload)
     assert new in workload.global_idxs
+
+
+def test_unique_dimension_elimination_is_cached(monkeypatch):
+    workload = _parse(_FIXTURE)
+    original = workload.dimension_relations
+    calls = 0
+
+    def counted():
+        nonlocal calls
+        calls += 1
+        return original()
+
+    monkeypatch.setattr(workload, "dimension_relations", counted)
+
+    first = workload.unique_dimensions()
+    second = workload.unique_dimensions()
+
+    assert first == second
+    assert calls == 1
+
+
+def test_unique_dimension_cache_detects_inherited_graph_mutation(monkeypatch):
+    workload = _parse(_FIXTURE)
+    original = workload.dimension_relations
+    calls = 0
+
+    def counted():
+        nonlocal calls
+        calls += 1
+        return original()
+
+    monkeypatch.setattr(workload, "dimension_relations", counted)
+    workload.unique_dimensions()
+    source, target = next(iter(workload.edges))
+    workload.remove_edge(source, target)
+    workload.unique_dimensions()
+
+    assert calls == 2

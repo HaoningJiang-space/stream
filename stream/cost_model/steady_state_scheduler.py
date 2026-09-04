@@ -51,7 +51,6 @@ from stream.workload.utils import (
     generate_steady_state_iteration_spaces,
     get_compute_predecessors_successors,
     get_equivalent_dimension,
-    get_node_with_largest_resource_allocation,
     is_mac_operator_type,
     is_reused_on_chip,
 )
@@ -296,32 +295,47 @@ class SteadyStateScheduler:
         *,
         pre_mapping_transform: Callable[[Mapping], Mapping] | None = None,
         post_mapping_transform: Callable[[Mapping], Mapping] | None = None,
+        preparation_observer: Callable[[str], None] | None = None,
     ) -> PreparedScheduleProblem:
         """Build the exact mapping, SSIS, multiplicities, and timeslots consumed by TTA."""
 
+        def prepared(stage: str) -> None:
+            if preparation_observer is not None:
+                preparation_observer(stage)
+
         if pre_mapping_transform is not None:
             self.mapping = pre_mapping_transform(self.mapping)
+            prepared("pre_mapping_transform")
         # Update the workload graph to include transfer nodes
         self.ssw = self.build_transfer_graph()
+        prepared("transfer_graph")
         # Update the fusion_splits based on the new workload with transfer nodes
         self.fusion_splits = self.update_fusion_splits()
+        prepared("fusion_splits")
         # Save the new workload with transfers
         # self.ssw.visualize(os.path.join(self.output_path, "tiled_workload_with_transfers.png"))
         # Update the mapping for the new workload graph
         self.mapping = self.update_mapping()
+        prepared("mapping")
         if post_mapping_transform is not None:
             self.mapping = post_mapping_transform(self.mapping)
+            prepared("post_mapping_transform")
         # Update the cost lut for the new workload graph
         self.cost_lut = self.update_cost_lut()
+        prepared("cost_lut")
         # Update the steady state iteration spaces to include transfer nodes and tensors
         self.ssis = self.generate_ssis()
+        prepared("ssis")
         # Calculate the number of iterations based on the steady state iteration spaces
         self.iterations = self.calculate_iterations()
+        prepared("iterations")
         # Calculate the multiplicity of each node's execution in the steady state workload
         multiplicities = self.calculate_multiplicities()
+        prepared("multiplicities")
         # Get the timeslots for all nodes (resource-aware: same slot allowed iff a
         # disjoint core/link assignment exists across same-class nodes in that slot).
         timeslots = self.ssw.get_timeslots(self.mapping)
+        prepared("timeslots")
         # timeslots = self.ssw.get_timeslots_simple()  # baseline: one slot per node, no resource awareness
         return PreparedScheduleProblem(timeslots, multiplicities, self.mapping)
 
@@ -509,6 +523,15 @@ class SteadyStateScheduler:
                 seen_spatial_keys.add((iv.dimension, iv.size))
 
     def build_transfer_graph(self) -> Workload:
+        # ONNX tensor names are unique, but the historical ``<name>_1``/``<name>_2``
+        # transfer suffixes are not guaranteed to be fresh (FSRCNN contains exactly such
+        # source names). Reserve every source-graph name before introducing intermediates.
+        self._tensor_names_in_use = {
+            tensor.name
+            for node in self.workload.nodes
+            if isinstance(node, HasInputs | HasOutputs)
+            for tensor in (*getattr(node, "inputs", ()), *getattr(node, "outputs", ()))
+        }
         new_nodes: dict[str, Node] = {node.name: node for node in self.workload.nodes}
         # Go through the tensors of the workload to find sources and destinations of the tensor
         for tensor in self.workload.tensors:
@@ -753,7 +776,7 @@ class SteadyStateScheduler:
     def generate_transfer_input_tensor(self, tensor: Tensor, src: HasOutputs, name_suffix: str = "") -> Tensor:
         assert len(src.outputs) == 1, "Src must have exactly one output tensor for index below."
         input_tensor = Tensor(
-            name=f"{tensor.name}{name_suffix}",
+            name=self._fresh_transfer_tensor_name(f"{tensor.name}{name_suffix}"),
             operand_type=tensor.operand_type,
             shape=tensor.shape,
             subview=tensor.subview,
@@ -767,13 +790,26 @@ class SteadyStateScheduler:
         for i, _ in enumerate(dsts):
             suffix = f".{i}" if len(dsts) > 1 else ""
             transfer_output = Tensor(
-                name=f"{out_name}{suffix}",
+                name=self._fresh_transfer_tensor_name(f"{out_name}{suffix}"),
                 operand_type=tensor.operand_type,
                 shape=tensor.shape,
                 subview=tensor.subview,
             )
             transfer_outputs.append(transfer_output)
         return transfer_outputs
+
+    def _fresh_transfer_tensor_name(self, preferred: str) -> str:
+        """Return a deterministic name that cannot alias a source or generated tensor."""
+
+        names = getattr(self, "_tensor_names_in_use", set())
+        candidate = preferred
+        suffix = 1
+        while candidate in names:
+            candidate = f"{preferred}.__stream{suffix}"
+            suffix += 1
+        names.add(candidate)
+        self._tensor_names_in_use = names
+        return candidate
 
     def generate_ssis(self) -> dict[HasIterationSpace | Tensor, SteadyStateIterationSpace]:
         ssis = generate_steady_state_iteration_spaces(
@@ -858,11 +894,14 @@ class SteadyStateScheduler:
         COMPUTE_TO_MEM output tensor is. Otherwise, allocations follow destination nodes.
         """
         if node.transfer_type in (TransferType.MEM_TO_MEM,) and isinstance(src, InEdge):
-            # Find the dst with max number of compute allocations to determine possible memory cores
             compute_dsts = get_compute_predecessors_successors(
                 tr=node, workload=self.ssw
             )  # won't have any compute preds
-            dst = get_node_with_largest_resource_allocation(compute_dsts, self.mapping)
+            # A shared input can feed a wide computation whose split does not index this tensor
+            # and a narrower computation whose split does. Staging follows the latter: choosing by
+            # raw core count would mistake an unrelated output/reduction split for a partition of
+            # the transferred tensor and can generate mutually inconsistent transfer tilings.
+            dst = self._get_tensor_relevant_compute_reference(node, compute_dsts)
             possible_memory_cores = self._get_possible_memory_core_allocations(dst, node)
         elif node.transfer_type in (TransferType.MEM_TO_MEM,) and any(isinstance(dst, OutEdge) for dst in dsts):
             assert len(dsts) == 1, "Currently only support single destination for constant output transfer."
@@ -916,10 +955,10 @@ class SteadyStateScheduler:
             if nb_cores == 1 or replicated:
                 dst_tiling = tuple()
             elif all(isinstance(dst, ComputationNode) for dst in dsts):
-                # For fan-out: use the destination with the largest resource allocation
-                # as the tiling reference (consistent with determine_possible_memory_allocations strategy)
-                dst = get_node_with_largest_resource_allocation(dsts, self.mapping)
-                dst_tiling = tuple(self.ssw.get_unique_dims_inter_core_tiling(dst, self.mapping))
+                # For fan-out, use the consumer whose spatial split actually partitions the
+                # tensor. Raw allocation width may instead come from an unrelated output axis.
+                dst = self._get_tensor_relevant_compute_reference(node, list(dsts))
+                dst_tiling = self._get_tensor_relevant_tiling(node, dst)
             else:
                 dst_tiling = self.get_inter_core_tiling_for_transfer(node, dst_allocs)
             possible_inter_core_tiling.append(dst_tiling)
@@ -934,12 +973,49 @@ class SteadyStateScheduler:
         )
         # Get the compute preds and succs
         compute_preds_succs = get_compute_predecessors_successors(tr=node, workload=self.ssw)
-        # Get the largest allocation one of these
-        largest_alloc_node = get_node_with_largest_resource_allocation(compute_preds_succs, self.mapping)
-        # Get its compute tiling and find the tiling loop that matches the number of memory allocs
-        largest_alloc_tiling = self.ssw.get_unique_dims_inter_core_tiling(largest_alloc_node, self.mapping)
-        mem_tiling = self.get_matching_tiling(largest_alloc_tiling, memory_allocs)
+        # Select by tensor-relevant spatial width, not total compute width. A consumer may use many
+        # cores along a dimension absent from this transfer (for example, Conv output channels).
+        reference = self._get_tensor_relevant_compute_reference(node, compute_preds_succs)
+        reference_tiling = self._get_tensor_relevant_tiling(node, reference)
+        mem_tiling = self.get_matching_tiling(reference_tiling, memory_allocs)
         return (mem_tiling,)
+
+    def _get_tensor_relevant_compute_reference(
+        self, transfer: TransferNode, compute_nodes: list[ComputationNode]
+    ) -> ComputationNode:
+        """Choose the computation whose split most strongly partitions ``transfer``'s tensor.
+
+        The reference is selected by the product of inter-core factors on dimensions present in
+        the transfer domain. Total allocation width is only a deterministic secondary criterion.
+        This preserves independent consumer dimensions while preventing an unrelated consumer
+        split from being reinterpreted as a tensor partition.
+        """
+
+        if not compute_nodes:
+            raise ValueError(f"Transfer {transfer.name} has no adjacent computation node")
+        projections = [(node, self._get_tensor_relevant_tiling(transfer, node)) for node in compute_nodes]
+        partitioned = {projection for _, projection in projections if projection}
+        if len(partitioned) > 1:
+            ordered = sorted(projections, key=lambda item: item[0].name)
+            rendered = ", ".join(f"{node.name}={projection}" for node, projection in ordered)
+            raise ValueError(f"Shared-input demand has incompatible tensor-relevant tilings: {rendered}")
+
+        def score(node: ComputationNode) -> tuple[int, int, str]:
+            projection = next(projection for candidate, projection in projections if candidate is node)
+            relevant_width = prod(factor for _, factor in projection)
+            allocations = self.mapping.get(node).resource_allocation
+            allocation_width = max((len(option) for option in allocations), default=0)
+            return relevant_width, allocation_width, node.name
+
+        return max(compute_nodes, key=score)
+
+    def _get_tensor_relevant_tiling(self, transfer: TransferNode, compute_node: ComputationNode) -> InterCoreTiling:
+        tensor_dims = set(self.ssw.get_dims(transfer))
+        return tuple(
+            (dimension, factor)
+            for dimension, factor in self.ssw.get_unique_dims_inter_core_tiling(compute_node, self.mapping)
+            if dimension in tensor_dims and factor > 1
+        )
 
     def get_matching_tiling(
         self, compute_tiling: InterCoreTiling, dst_allocs: tuple[Core, ...]

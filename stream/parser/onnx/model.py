@@ -1,4 +1,5 @@
 import logging
+from collections import Counter
 from typing import Any
 
 import onnx
@@ -17,7 +18,9 @@ from stream.parser.onnx.normalization import NormalizationParser
 from stream.parser.onnx.operator_parser import OnnxOperatorParser
 from stream.parser.onnx.slice_gather import GatherParser, SliceParser
 from stream.parser.onnx.utils import onnx_tensor_to_tensor
-from stream.workload.workload import InEdge, Node, OutEdge, Tensor, Workload
+from stream.workload.node import HasInputs, InEdge, Node, OutEdge
+from stream.workload.tensor import Tensor
+from stream.workload.workload import Workload
 
 logger = logging.getLogger(__name__)
 
@@ -97,6 +100,7 @@ class ONNXModelParser:
 
     def __init__(self, onnx_model_path: str) -> None:
         self.onnx_model_path = onnx_model_path
+        self.semantic_exclusions: list[dict[str, Any]] = []
 
     def run(self):
         """Parse the ONNX model at ``onnx_model_path`` into a ``Workload``."""
@@ -112,6 +116,62 @@ class ONNXModelParser:
             raise NotImplementedError(f"No parser registered for ONNX op type '{node.op_type}'.")
         return parser_class
 
+    def _generate_operator_nodes(
+        self,
+        node: NodeProto,
+        parser: OnnxOperatorParser,
+        name_to_tensor_dict: dict[str, Tensor],
+        graph_input_names: set[str],
+        initializers: dict[str, TensorProto],
+    ) -> tuple[tuple[Node, ...], set[str]]:
+        """Generate one parser result and audit every supplied ONNX input occurrence by position."""
+
+        generated_nodes = tuple(parser.run(name_to_tensor_dict))
+        remaining_modeled_inputs = Counter(
+            tensor.name for node_obj in generated_nodes if isinstance(node_obj, HasInputs) for tensor in node_obj.inputs
+        )
+        omitted_initializer_names: set[str] = set()
+        for index, input_name in enumerate(node.input):
+            if not input_name:
+                continue
+            reason = parser.SEMANTIC_INPUT_EXCLUSIONS.get(index)
+            if reason is None and remaining_modeled_inputs[input_name] > 0:
+                remaining_modeled_inputs[input_name] -= 1
+                continue
+            if reason is None:
+                raise NotImplementedError(
+                    f"{node.op_type} node {node.name!r} omitted supplied input {index} ({input_name!r}) "
+                    "without a declared semantic exclusion"
+                )
+            tensor = name_to_tensor_dict.get(input_name)
+            initializer = initializers.get(input_name)
+            shape = list(tensor.shape) if tensor is not None else list(initializer.dims) if initializer else None
+            if input_name in graph_input_names:
+                source = "graph_input"
+            elif initializer is not None:
+                source = "initializer"
+            else:
+                source = "intermediate"
+            self.semantic_exclusions.append(
+                {
+                    "node": node.name,
+                    "operator_type": node.op_type,
+                    "input_index": index,
+                    "tensor": input_name,
+                    "shape": shape,
+                    "source": source,
+                    "reason": reason,
+                }
+            )
+            if initializer is not None and input_name not in graph_input_names:
+                omitted_initializer_names.add(input_name)
+        unexpected_modeled_inputs = {name: count for name, count in remaining_modeled_inputs.items() if count > 0}
+        if unexpected_modeled_inputs:
+            raise NotImplementedError(
+                f"{node.op_type} node {node.name!r} modeled undeclared input occurrences: {unexpected_modeled_inputs}"
+            )
+        return generated_nodes, omitted_initializer_names
+
     def parse_workload(self):
         """Convert the ONNX model into a ``Workload`` graph."""
         assert self.onnx_model is not None
@@ -121,6 +181,13 @@ class ONNXModelParser:
         unnamed_id = 0
         name_to_tensor_dict: dict[str, Tensor] = {}
         workload_nodes: list[Node] = []
+        graph_input_names = {item.name for item in self.onnx_model.graph.input}
+        initializers = {item.name: item for item in self.onnx_model.graph.initializer}
+        initializer_names = set(initializers)
+        referenced_input_names = {name for node in self.onnx_model.graph.node for name in node.input}
+        dead_initializer_names = initializer_names - referenced_input_names - graph_input_names
+        omitted_initializer_names: set[str] = set()
+        self.semantic_exclusions = []
 
         # Add InEdges
         for input in self.onnx_model.graph.input:
@@ -153,7 +220,16 @@ class ONNXModelParser:
             )
 
             logger.info("Parsed %s node %s.", node.op_type, node.name)
-            for node_obj in parser.run(name_to_tensor_dict):
+            generated_nodes, omitted = self._generate_operator_nodes(
+                node,
+                parser,
+                name_to_tensor_dict,
+                graph_input_names,
+                initializers,
+            )
+            omitted_initializer_names.update(omitted)
+
+            for node_obj in generated_nodes:
                 for output in node_obj.outputs:
                     name_to_tensor_dict[output.name] = output
                 workload_nodes.append(node_obj)
@@ -165,6 +241,24 @@ class ONNXModelParser:
                 inputs=(name_to_tensor_dict[self.onnx_model.graph.output[0].name],),
             )
         )
+
+        # Remove dead model data and initializer operands explicitly declared optional by their
+        # parser. Keeping other disconnected InEdges is intentional: an unused model input is
+        # still part of the public interface, while an undeclared omitted initializer should remain
+        # visible as a lifting failure instead of being silently erased.
+        consumed_tensor_names = {
+            tensor.name
+            for workload_node in workload_nodes
+            if isinstance(workload_node, HasInputs)
+            for tensor in workload_node.inputs
+        }
+        workload_nodes = [
+            workload_node
+            for workload_node in workload_nodes
+            if not isinstance(workload_node, InEdge)
+            or workload_node.name not in omitted_initializer_names | dead_initializer_names
+            or any(tensor.name in consumed_tensor_names for tensor in workload_node.outputs)
+        ]
 
         workload = Workload(workload_nodes)
         logger.info(

@@ -19,6 +19,7 @@ except ModuleNotFoundError:
 
 from stream.cost_model.communication_manager import MulticastPathPlan
 from stream.cost_model.core_cost_lut import CoreCostLUT
+from stream.execution_boundary import ExecutionEvent, record_execution_event
 from stream.hardware.architecture.accelerator import Accelerator
 from stream.hardware.architecture.core import Core
 from stream.hardware.architecture.noc.communication_link import CommunicationLink
@@ -125,6 +126,7 @@ class TransferAndTensorAllocator:
         constraint_selection: ConstraintSelection | None = None,
         tensor_restrictions: tuple[TensorRestriction, ...] = (),
     ):
+        record_execution_event(ExecutionEvent.TTA_CONSTRUCT)
         self.workload = workload
         self.slot_of = timeslots
         self.accelerator = accelerator
@@ -2046,6 +2048,7 @@ class TransferAndTensorAllocator:
     def solve(
         self, *, tee: bool = True
     ) -> tuple[TensorReuseLevels, TensorDepths, TensorAlloc, TransferAlloc, MemoryAlloc, int, int, int]:
+        record_execution_event(ExecutionEvent.TTA_SOLVE)
         self.model.set_param(SolverParams.VERBOSITY, 1 if tee else 0)
         self.model.optimize(self._mip_progress_callback)
         if self.model.get_status() != "OPTIMAL":

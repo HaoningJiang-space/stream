@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from itertools import product
 
+from stream.execution_boundary import ExecutionEvent, record_execution_event
 from stream.structural.factors import FactorGraph, OwnedEventFactor, StateValue
 
 
@@ -99,6 +100,7 @@ def variable_elimination(graph: FactorGraph, order: tuple[str, ...] | None = Non
     Missing factor-table entries are illegal assignments. The implementation
     performs no beam search, dominance, approximation, or value truncation.
     """
+    record_execution_event(ExecutionEvent.STRUCTURAL_VARIABLE_ELIMINATION)
     domains = graph.domains
     elimination_order = order or tuple(variable.name for variable in graph.variables)
     if len(set(elimination_order)) != len(elimination_order) or set(elimination_order) != set(domains):

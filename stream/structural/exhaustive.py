@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 
+from stream.execution_boundary import ExecutionEvent, record_execution_event
 from stream.structural.factors import FactorGraph, StateValue
 
 Objective = Callable[[Mapping[str, StateValue]], int | None]
@@ -20,6 +21,7 @@ class ExhaustiveResult:
 
 def exhaustive_minimize(graph: FactorGraph, objective: Objective) -> ExhaustiveResult:
     """Enumerate every full assignment; ``None`` marks an illegal assignment."""
+    record_execution_event(ExecutionEvent.STRUCTURAL_EXHAUSTIVE)
     optimum: int | None = None
     best: list[dict[str, StateValue]] = []
     visited = 0

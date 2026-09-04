@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from stream.cost_model.steady_state_scheduler import PreparedScheduleProblem, SteadyStateScheduler
+from stream.datatypes import LayerDim
 from stream.mapping.mapping import Mapping
 from stream.opt.allocation.constraint_optimization.tensor_restriction import TensorRestriction
 
@@ -58,12 +59,29 @@ def test_prepare_problem_runs_both_transforms_before_ssis_and_timeslots(monkeypa
     monkeypatch.setattr(scheduler, "calculate_multiplicities", lambda: {})
     steady_state.get_timeslots.side_effect = lambda mapping: events.append("timeslots") or timeslots
 
-    prepared = scheduler.prepare_problem(pre_mapping_transform=pre, post_mapping_transform=post)
+    preparation_stages: list[str] = []
+    prepared = scheduler.prepare_problem(
+        pre_mapping_transform=pre,
+        post_mapping_transform=post,
+        preparation_observer=preparation_stages.append,
+    )
 
     assert events == ["pre", "transfer", "mapping", "post", "cost", "ssis", "timeslots"]
     assert prepared.mapping is after_post
     assert scheduler.mapping is after_post
     steady_state.get_timeslots.assert_called_once_with(after_post)
+    assert preparation_stages == [
+        "pre_mapping_transform",
+        "transfer_graph",
+        "fusion_splits",
+        "mapping",
+        "post_mapping_transform",
+        "cost_lut",
+        "ssis",
+        "iterations",
+        "multiplicities",
+        "timeslots",
+    ]
 
 
 def test_build_tta_passes_prepared_objects_without_reconstruction(monkeypatch):
@@ -98,3 +116,55 @@ def test_build_tta_rejects_a_stale_mapping():
 
     with pytest.raises(ValueError, match="stale"):
         scheduler.build_tta(stale)
+
+
+def test_transfer_tensor_names_do_not_alias_source_graph_names():
+    scheduler = _scheduler()
+    scheduler._tensor_names_in_use = {"output_1_1"}
+
+    assert scheduler._fresh_transfer_tensor_name("output_1_1") == "output_1_1.__stream1"
+    assert scheduler._fresh_transfer_tensor_name("output_1_1") == "output_1_1.__stream2"
+
+
+def test_transfer_reference_prefers_tensor_relevant_split_over_raw_core_count():
+    scheduler = _scheduler()
+    scheduler.ssw = MagicMock()
+    scheduler.mapping = MagicMock()
+    transfer = SimpleNamespace(name="Transfer(shared)")
+    relevant = SimpleNamespace(name="relevant")
+    unrelated = SimpleNamespace(name="unrelated")
+    tensor_dim = LayerDim(position=0, prefix="z")
+    other_dim = LayerDim(position=1, prefix="z")
+    scheduler.ssw.get_dims.return_value = (tensor_dim,)
+
+    def tiling(node, _mapping):
+        return ((tensor_dim, 4),) if node is relevant else ((other_dim, 32),)
+
+    scheduler.ssw.get_unique_dims_inter_core_tiling.side_effect = tiling
+    scheduler.mapping.get.side_effect = lambda node: SimpleNamespace(
+        resource_allocation=(tuple(range(4 if node is relevant else 32)),)
+    )
+
+    assert scheduler._get_tensor_relevant_compute_reference(transfer, [unrelated, relevant]) is relevant
+
+
+@pytest.mark.parametrize("other_factor", [2, 4])
+def test_transfer_reference_rejects_incompatible_consumer_partitions(other_factor):
+    scheduler = _scheduler()
+    scheduler.ssw = MagicMock()
+    scheduler.mapping = MagicMock()
+    transfer = SimpleNamespace(name="Transfer(shared)")
+    by_height = SimpleNamespace(name="by_height")
+    by_width = SimpleNamespace(name="by_width")
+    height = LayerDim(position=0, prefix="z")
+    width = LayerDim(position=1, prefix="z")
+    scheduler.ssw.get_dims.return_value = (height, width)
+
+    def tiling(node, _mapping):
+        return ((height, 4),) if node is by_height else ((width, other_factor),)
+
+    scheduler.ssw.get_unique_dims_inter_core_tiling.side_effect = tiling
+    scheduler.mapping.get.return_value = SimpleNamespace(resource_allocation=(tuple(range(4)),))
+
+    with pytest.raises(ValueError, match="incompatible tensor-relevant tilings"):
+        scheduler._get_tensor_relevant_compute_reference(transfer, [by_height, by_width])

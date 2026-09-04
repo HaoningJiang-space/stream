@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from collections.abc import Generator
-from typing import Any
+from typing import Any, ClassVar
 
 from onnx import ModelProto, NodeProto
 from zigzag.parser.onnx.utils import (
@@ -12,6 +12,10 @@ from stream.workload.workload import HasOutputs, Tensor
 
 
 class OnnxOperatorParser(metaclass=ABCMeta):
+    #: Supplied ONNX operands deliberately encoded as attributes or omitted by this parser.
+    #: Every such operand is exported as an auditable semantic exclusion by ``ONNXModelParser``.
+    SEMANTIC_INPUT_EXCLUSIONS: ClassVar[dict[int, str]] = {}
+
     def __init__(
         self,
         node: NodeProto,

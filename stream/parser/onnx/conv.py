@@ -8,6 +8,7 @@ class ConvParser(OnnxOperatorParser):
     """Parses an ONNX Conv operator into a ComputationNode"""
 
     EXPECTED_NB_OF_INPUTS = 2  # activation and weight are required, bias is optional
+    SEMANTIC_INPUT_EXCLUSIONS = {2: "UNMODELED_ADDITIVE_OPERAND"}
 
     def get_mappings_1d_conv(self) -> tuple[AffineMap, AffineMap, AffineMap]:
         raise NotImplementedError("1D convolution is not supported yet.")
@@ -38,7 +39,9 @@ class ConvParser(OnnxOperatorParser):
         # Inputs
         all_inputs = tuple(name_to_tensor_dict[inp] for inp in self.node.input)
         assert len(all_inputs) >= self.EXPECTED_NB_OF_INPUTS, "Conv must have at least activation and weight inputs."
-        inputs = all_inputs[: self.EXPECTED_NB_OF_INPUTS]  # drop the optional bias silently
+        # The current affine Conv IR models activation and weight. ONNXModelParser records any
+        # supplied bias as a declared semantic exclusion before removing its disconnected InEdge.
+        inputs = all_inputs[: self.EXPECTED_NB_OF_INPUTS]
         input_dimensionalities = tuple(len(tensor.shape) for tensor in inputs)
         assert all(dim == input_dimensionalities[0] for dim in input_dimensionalities), (
             "All input tensors must have the same dimensionality."

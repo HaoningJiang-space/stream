@@ -26,6 +26,12 @@ class SliceParser(_IndexReadingParser):
 
     # ONNX Slice input positions: data, starts, ends, axes(opt), steps(opt).
     _STARTS, _ENDS, _AXES, _STEPS = 1, 2, 3, 4
+    SEMANTIC_INPUT_EXCLUSIONS = {
+        _STARTS: "INDEX_METADATA_OPERAND",
+        _ENDS: "INDEX_METADATA_OPERAND",
+        _AXES: "INDEX_METADATA_OPERAND",
+        _STEPS: "INDEX_METADATA_OPERAND",
+    }
 
     def _optional_ints(self, index: int) -> list[int] | None:
         inputs = self.node.input
@@ -64,6 +70,8 @@ class GatherParser(_IndexReadingParser):
     Indices are data-dependent, so the source ``axis`` is modelled as read in full (a safe
     over-approximation for paged/sparse KV-cache gathers). Only the 1-D-index case, which keeps the
     gathered axis, is supported."""
+
+    SEMANTIC_INPUT_EXCLUSIONS = {1: "INDEX_METADATA_OPERAND"}
 
     def generate_node(self, name_to_tensor_dict: dict[str, Tensor]) -> ComputationNode:
         data = name_to_tensor_dict[self.node.input[0]]

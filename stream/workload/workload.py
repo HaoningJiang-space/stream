@@ -57,6 +57,15 @@ def _order_inputs_by_use(nodes: list[Node]) -> None:
 class Workload(DiGraphWrapper[Node]):
     _dataflow_order: list[Node] | None = None
     _global_dimension_idxs: dict[Node, range] | None = None
+    _unique_dimensions_cache: (
+        tuple[
+            tuple[Node, ...],
+            tuple[tuple[Node, Node], ...],
+            tuple[LayerDim, ...],
+            tuple[AffineExpr, ...],
+        ]
+        | None
+    ) = None
 
     def __init__(self, nodes: Sequence[Node] = ()):
         graph = nx.DiGraph()
@@ -79,6 +88,7 @@ class Workload(DiGraphWrapper[Node]):
     def _invalidate_order(self) -> None:
         self._dataflow_order = None
         self._global_dimension_idxs = None
+        self._unique_dimensions_cache = None
 
     def dataflow_sort(self) -> list[Node]:
         """Nodes in topological order, ties broken by the order they were added.
@@ -448,6 +458,13 @@ class Workload(DiGraphWrapper[Node]):
         return dim_ranges[idx]
 
     def unique_dimensions(self):
+        nodes = tuple(self.nodes)
+        edges = tuple(self.edges)
+        if self._unique_dimensions_cache is not None:
+            cached_nodes, cached_edges, unique_dims, dim_values = self._unique_dimensions_cache
+            if nodes == cached_nodes and edges == cached_edges:
+                return list(unique_dims), list(dim_values)
+
         relations = AffineMap(self.num_dims, 0, tuple(self.dimension_relations()))
         transform = AffineTransform.from_affine_map(relations)
 
@@ -482,7 +499,8 @@ class Workload(DiGraphWrapper[Node]):
 
         dim_values = [sympy_to_xdsl(sp.simplify(expr)) for expr in x]
         z = [LayerDim(position=i, prefix="z") for i in range(len(free_vars))]
-        return z, dim_values
+        self._unique_dimensions_cache = nodes, edges, tuple(z), tuple(dim_values)
+        return list(z), list(dim_values)
 
     def get_unique_dims_inter_core_tiling(self, node: ComputationNode, mapping: "Mapping") -> InterCoreTiling:
         """Convert inter_core_tiling dimensions from LayerDim to unique workload indices."""
