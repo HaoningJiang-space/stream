@@ -12,6 +12,7 @@ from stream.structural.real_workload_lifting import (
     _criteria_manifest,
     _next_preparation_stage,
     _require_complete_trace,
+    _resolve_worker_count,
     _source_manifest,
     _source_run_manifest,
     _validate_semantic_exclusions,
@@ -147,6 +148,18 @@ def test_environment_version_comparison_enforces_frozen_minimums():
     assert not _version_at_least(None, "9.15")
 
 
+def test_gate2a_worker_count_is_bounded_and_rejects_invalid_values(monkeypatch):
+    monkeypatch.setattr("stream.structural.real_workload_lifting.os.cpu_count", lambda: 4)
+
+    assert _resolve_worker_count(None, 8) == 4
+    assert _resolve_worker_count(2, 8) == 2
+    assert _resolve_worker_count(32, 3) == 3
+    with pytest.raises(ValueError, match="at least one"):
+        _resolve_worker_count(0, 8)
+    with pytest.raises(ValueError, match="at least one preparation attempt"):
+        _resolve_worker_count(None, 0)
+
+
 def test_incomplete_or_reordered_preparation_trace_is_rejected():
     with pytest.raises(LiftingError, match="incomplete or reordered trace"):
         _require_complete_trace("prepare", ["transfer_graph", "mapping"], ("transfer_graph", "mapping", "ssis"))
@@ -170,6 +183,35 @@ def test_source_manifest_fails_closed_when_git_status_fails(monkeypatch, tmp_pat
 
     assert source["identified"] is False
     assert source["git_checks"] == {"root": True, "head": True, "status": False}
+
+
+def test_source_manifest_requires_executed_module_inside_checkout(monkeypatch, tmp_path):
+    def git_checked(*arguments):
+        return {
+            ("rev-parse", "--show-toplevel"): (True, str(tmp_path)),
+            ("rev-parse", "HEAD"): (True, "expected"),
+            ("status", "--porcelain"): (True, ""),
+        }[arguments]
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr("stream.structural.real_workload_lifting._git_checked", git_checked)
+    monkeypatch.setattr("stream.structural.real_workload_lifting._source_snapshot_digest", lambda: "snapshot")
+    monkeypatch.setattr(
+        "stream.structural.real_workload_lifting.__file__",
+        str(tmp_path / "stream" / "structural" / "real_workload_lifting.py"),
+    )
+
+    inside = _source_manifest("expected")
+    monkeypatch.setattr(
+        "stream.structural.real_workload_lifting.__file__",
+        str(tmp_path.parent / "installed" / "real_workload_lifting.py"),
+    )
+    outside = _source_manifest("expected")
+
+    assert inside["identified"] is True
+    assert inside["module_within_checkout"] is True
+    assert outside["identified"] is False
+    assert outside["module_within_checkout"] is False
 
 
 def test_source_run_manifest_requires_stable_checkout_and_external_output(tmp_path):

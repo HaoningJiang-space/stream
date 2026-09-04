@@ -8,6 +8,7 @@ import platform
 import re
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import Enum
@@ -17,6 +18,7 @@ from importlib.resources import files
 from math import prod
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from time import perf_counter
 from typing import Any
 
 from stream.cost_model.communication_manager import MulticastPathPlan
@@ -45,6 +47,7 @@ from stream.workload.node import ComputationNode, HasInputs, HasIterationSpace, 
 from stream.workload.tensor import Tensor
 
 _MIN_STAGING_TRANSFERS = 2
+_MAX_AUTOMATIC_WORKERS = 8
 _WORKER_ARGUMENT_COUNT = 3
 _FRONTEND_STAGES = (
     "accelerator_parser",
@@ -106,24 +109,33 @@ def _contract_digest() -> str:
     return "sha256:" + sha256(resource.read_bytes()).hexdigest()
 
 
-def run_real_workload_lifting(output_path: str | Path, *, source_commit: str | None = None) -> dict[str, Any]:
+def run_real_workload_lifting(
+    output_path: str | Path,
+    *,
+    source_commit: str | None = None,
+    max_workers: int | None = None,
+) -> dict[str, Any]:
     """Run the frozen census without constructing or solving TTA."""
 
     contract = load_gate2a_contract()
+    workload_specs = contract["workloads"]
+    repeat_count = int(contract["repeat_count"])
+    attempt_count = len(workload_specs) * repeat_count
+    worker_count = _resolve_worker_count(max_workers, attempt_count)
     destination = Path(output_path).resolve()
     source_before = _source_manifest(source_commit)
     environment = _environment_manifest(contract)
     hardware_path = Path(contract["hardware"])
-    workload_results: dict[str, Any] = {}
+    preparation_started = perf_counter()
     with TemporaryDirectory(prefix="stream-gate2a-") as temporary:
-        temporary_root = Path(temporary)
-        for workload_spec in contract["workloads"]:
-            workload_results[workload_spec["id"]] = _repeat_workload_preparation(
-                workload_spec,
-                hardware_path,
-                temporary_root,
-                int(contract["repeat_count"]),
-            )
+        workload_results = _run_preparation_attempts(
+            workload_specs,
+            hardware_path,
+            Path(temporary),
+            repeat_count,
+            worker_count,
+        )
+    preparation_wall_seconds = perf_counter() - preparation_started
 
     source_after = _source_manifest(source_commit)
     source = _source_run_manifest(source_before, source_after, destination)
@@ -136,6 +148,11 @@ def run_real_workload_lifting(output_path: str | Path, *, source_commit: str | N
         "criteria": criteria,
         "source": source,
         "environment": environment,
+        "execution": {
+            "attempt_count": attempt_count,
+            "max_workers": worker_count,
+            "preparation_wall_seconds": round(preparation_wall_seconds, 6),
+        },
         "hardware": {"path": str(hardware_path), "sha256": _file_digest(hardware_path)},
         "workloads": workload_results,
         "summary": _summary(workload_results),
@@ -148,19 +165,60 @@ def run_real_workload_lifting(output_path: str | Path, *, source_commit: str | N
     return payload
 
 
-def _repeat_workload_preparation(
-    workload_spec: dict[str, str], hardware_path: Path, temporary_root: Path, repeat_count: int
+def _resolve_worker_count(requested: int | None, attempt_count: int) -> int:
+    if attempt_count < 1:
+        raise ValueError("Gate 2A requires at least one preparation attempt")
+    if requested is not None and requested < 1:
+        raise ValueError("max_workers must be at least one")
+    available_cpus = os.cpu_count() or 1
+    limit = requested if requested is not None else _MAX_AUTOMATIC_WORKERS
+    return min(attempt_count, available_cpus, limit)
+
+
+def _run_preparation_attempts(
+    workload_specs: list[dict[str, str]],
+    hardware_path: Path,
+    temporary_root: Path,
+    repeat_count: int,
+    max_workers: int,
 ) -> dict[str, Any]:
-    attempts = []
-    for repeat in range(repeat_count):
-        attempts.append(
-            _run_isolated_attempt(
-                workload_spec,
-                hardware_path,
-                temporary_root / f"{workload_spec['id']}-{repeat}",
-                repeat,
-            )
+    attempts_by_workload: dict[str, list[dict[str, Any] | None]] = {
+        workload_spec["id"]: [None] * repeat_count for workload_spec in workload_specs
+    }
+    with ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="gate2a") as executor:
+        pending = {}
+        for workload_spec in workload_specs:
+            workload_id = workload_spec["id"]
+            for repeat in range(repeat_count):
+                future = executor.submit(
+                    _run_isolated_attempt,
+                    workload_spec,
+                    hardware_path,
+                    temporary_root / f"{workload_id}-{repeat}",
+                    repeat,
+                )
+                pending[future] = (workload_id, repeat)
+        for future in as_completed(pending):
+            workload_id, repeat = pending[future]
+            attempts_by_workload[workload_id][repeat] = future.result()
+
+    results = {}
+    for workload_spec in workload_specs:
+        workload_id = workload_spec["id"]
+        ordered_attempts = attempts_by_workload[workload_id]
+        if any(attempt is None for attempt in ordered_attempts):
+            raise RuntimeError(f"missing preparation attempt for {workload_id}")
+        results[workload_id] = _summarize_workload_preparation(
+            workload_spec,
+            [attempt for attempt in ordered_attempts if attempt is not None],
+            repeat_count,
         )
+    return results
+
+
+def _summarize_workload_preparation(
+    workload_spec: dict[str, str], attempts: list[dict[str, Any]], repeat_count: int
+) -> dict[str, Any]:
     successful = [attempt for attempt in attempts if "manifest" in attempt]
     hashes = [_digest(attempt["manifest"]) for attempt in successful]
     deterministic = len(successful) == repeat_count and len(set(hashes)) == 1
@@ -195,6 +253,7 @@ def _run_isolated_attempt(
 ) -> dict[str, Any]:
     """Prepare once in a fresh interpreter with a repeat-specific hash seed."""
 
+    started = perf_counter()
     work_dir.mkdir(parents=True, exist_ok=True)
     request_path = work_dir / "worker-request.json"
     result_path = work_dir / "worker-result.json"
@@ -225,12 +284,19 @@ def _run_isolated_attempt(
         return {
             "repeat": repeat,
             "hash_seed": hash_seed,
+            "wall_seconds": round(perf_counter() - started, 6),
             "reason": LiftingReason.FRONTEND_INVALID.value,
             "stage": "worker_process",
             "detail": f"exit={completed.returncode}: {detail[-2000:]}",
         }
     attempt = json.loads(result_path.read_text(encoding="utf-8"))
-    attempt.update({"repeat": repeat, "hash_seed": hash_seed})
+    attempt.update(
+        {
+            "repeat": repeat,
+            "hash_seed": hash_seed,
+            "wall_seconds": round(perf_counter() - started, 6),
+        }
+    )
     return attempt
 
 
@@ -807,16 +873,29 @@ def _require_complete_trace(stage: str, actual: list[str], expected: tuple[str, 
 
 def _source_manifest(expected_commit: str | None) -> dict[str, Any]:
     root_ok, root = _git_checked("rev-parse", "--show-toplevel")
-    inside_git = root_ok and Path(root).resolve() == Path.cwd().resolve()
+    resolved_root = Path(root).resolve() if root_ok else None
+    inside_git = resolved_root == Path.cwd().resolve()
+    executed_module = Path(__file__).resolve()
+    module_within_checkout = resolved_root is not None and executed_module.is_relative_to(resolved_root)
     head_ok, head = _git_checked("rev-parse", "HEAD") if inside_git else (False, "")
     status_ok, status = _git_checked("status", "--porcelain") if inside_git else (False, "")
     commit = expected_commit or head
     commit_matches = not expected_commit or expected_commit == head
     return {
         "commit": commit,
-        "identified": inside_git and head_ok and status_ok and bool(head) and commit_matches and not status,
+        "identified": (
+            inside_git
+            and module_within_checkout
+            and head_ok
+            and status_ok
+            and bool(head)
+            and commit_matches
+            and not status
+        ),
         "git_checkout": inside_git,
         "git_root": root or None,
+        "executed_module": str(executed_module),
+        "module_within_checkout": module_within_checkout,
         "git_checks": {"root": root_ok, "head": head_ok, "status": status_ok},
         "head": head or None,
         "expected_commit_matches_head": commit_matches,
