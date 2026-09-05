@@ -96,7 +96,7 @@ def capture(source_root: Path, output: Path, expected_commit: str) -> dict[str, 
     from stream.stages.parsing.mapping_parser import MappingParserStage
     from stream.stages.parsing.onnx_model_parser import ONNXModelParserStage
 
-    contract_path = source_root / "stream/structural/contracts/gate2a_lifting_contract.json"
+    contract_path = source_root / "stream/structural/contracts/gate2a_contract.json"
     contract = json.loads(contract_path.read_text(encoding="utf-8"))
     original_cwd = Path.cwd()
     workloads = {}
