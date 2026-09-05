@@ -360,6 +360,8 @@ def _merge_factor_shards(spec, repeat, shards, shard_size) -> dict[str, Any]:  #
         }
     manifests = [item["manifest"] for item in ordered]
     expected_seed = str(3000 + repeat)
+    if any(item.get("repeat") != repeat for item in ordered):
+        return {"status": "CORRECTNESS_FAILURE", "repeat": repeat, "detail": "factor shard repeat drift"}
     if any(item.get("hash_seed") != expected_seed for item in ordered):
         return {"status": "CORRECTNESS_FAILURE", "repeat": repeat, "detail": "factor shard hash-seed drift"}
     stable_fields = (
@@ -919,6 +921,8 @@ def _cartesian_tuple_at(domains, ordinal: int):
 
     if ordinal < 0:
         raise IndexError("Cartesian ordinal must be non-negative")
+    if any(not domain for domain in domains):
+        raise IndexError("Cartesian product contains an empty domain")
     indices = [0] * len(domains)
     remainder = ordinal
     for index in range(len(domains) - 1, -1, -1):

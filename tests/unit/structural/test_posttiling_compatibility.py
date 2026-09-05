@@ -5,6 +5,8 @@ import subprocess
 from time import perf_counter
 from types import SimpleNamespace
 
+import pytest
+
 from stream.cost_model.steady_state_scheduler import TensorRelevantTilingDecision, TransferLineage
 from stream.datatypes import LayerDim
 from stream.structural.posttiling_compatibility import (
@@ -205,6 +207,7 @@ def test_factor_shards_merge_in_global_ordinal_order():
     def shard(start, stop):
         return {
             "status": "VALID",
+            "repeat": 0,
             "hash_seed": "3000",
             "wall_seconds": 1.0,
             "manifest": {
@@ -229,7 +232,7 @@ def test_factor_shards_merge_in_global_ordinal_order():
     assert "tuple_key_lines" not in result["manifest"]
 
 
-def test_factor_shards_reject_seed_and_key_cardinality_drift():
+def test_factor_shards_reject_repeat_seed_and_key_cardinality_drift():
     spec = {"workload_id": "w", "group": 0, "factor": 0, "total_tuple_count": 1}
     manifest = {
         "spec": spec,
@@ -251,14 +254,28 @@ def test_factor_shards_reject_seed_and_key_cardinality_drift():
     }
 
     wrong_seed = _merge_factor_shards(
-        spec, 0, {0: {"status": "VALID", "hash_seed": "wrong", "wall_seconds": 1.0, "manifest": manifest}}, 1
+        spec,
+        0,
+        {0: {"status": "VALID", "repeat": 0, "hash_seed": "wrong", "wall_seconds": 1.0, "manifest": manifest}},
+        1,
+    )
+    wrong_repeat = _merge_factor_shards(
+        spec,
+        0,
+        {0: {"status": "VALID", "repeat": 1, "hash_seed": "3000", "wall_seconds": 1.0, "manifest": manifest}},
+        1,
     )
     bad_cardinality = _merge_factor_shards(
-        spec, 0, {0: {"status": "VALID", "hash_seed": "3000", "wall_seconds": 1.0, "manifest": manifest}}, 1
+        spec,
+        0,
+        {0: {"status": "VALID", "repeat": 0, "hash_seed": "3000", "wall_seconds": 1.0, "manifest": manifest}},
+        1,
     )
 
     assert wrong_seed["status"] == "CORRECTNESS_FAILURE"
     assert "hash-seed" in wrong_seed["detail"]
+    assert wrong_repeat["status"] == "CORRECTNESS_FAILURE"
+    assert "repeat" in wrong_repeat["detail"]
     assert bad_cardinality["status"] == "CORRECTNESS_FAILURE"
     assert "cardinality" in bad_cardinality["detail"]
 
@@ -274,6 +291,9 @@ def test_mixed_radix_cartesian_lookup_matches_product_order():
         ("b", 2),
         ("b", 3),
     ]
+
+    with pytest.raises(IndexError, match="empty domain"):
+        _cartesian_tuple_at(((), (1,)), 0)
 
 
 def test_provenance_rejects_mutated_report(tmp_path):
