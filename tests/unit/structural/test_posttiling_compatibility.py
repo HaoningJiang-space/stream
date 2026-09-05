@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import json
 import subprocess
-from types import SimpleNamespace
 from time import perf_counter
+from types import SimpleNamespace
 
 from stream.cost_model.steady_state_scheduler import TransferLineage
 from stream.structural.posttiling_compatibility import (
