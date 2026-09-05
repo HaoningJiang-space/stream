@@ -781,11 +781,13 @@ def _factor_explains_ssis_rejection(
         for _, projection in decision.projections
     )
     completed = [decision for decision in decisions if decision.role == "completed_transfer_mapping"]
-    return requested and bool(completed) and all(
-        decision.accepted
-        and decision.result_resource_option_count > 0
-        and decision.result_memory_option_count > 0
-        for decision in completed
+    return (
+        requested
+        and bool(completed)
+        and all(
+            decision.accepted and decision.result_resource_option_count > 0 and decision.result_memory_option_count > 0
+            for decision in completed
+        )
     )
 
 
