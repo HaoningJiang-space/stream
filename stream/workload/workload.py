@@ -59,7 +59,7 @@ class Workload(DiGraphWrapper[Node]):
     _global_dimension_idxs: dict[Node, range] | None = None
     _num_dims_cache: int | None = None
     _dimension_sizes_cache: tuple[int, ...] | None = None
-    _global_mapping_cache: dict[tuple[int, int], AffineMap]
+    _global_mapping_cache: dict[tuple[int, int], tuple[AffineMap, AffineMap]]
     _node_dims_cache: dict[int, tuple[LayerDim, ...]]
     _tensor_strides_cache: dict[int, tuple[tuple[LayerDim, tuple[int, ...]], ...]]
     _unique_dimensions_cache: (
@@ -169,12 +169,12 @@ class Workload(DiGraphWrapper[Node]):
     def global_mapping(self, node: HasIterationSpace, mapping: AffineMap):
         key = (id(node), id(mapping))
         cached = self._global_mapping_cache.get(key)
-        if cached is not None:
-            return cached
+        if cached is not None and cached[0] is mapping:
+            return cached[1]
         result = mapping.replace_dims_and_symbols(
             [AffineDimExpr(i) for i in self.global_idxs[node]], [], self.num_dims, 0
         )
-        self._global_mapping_cache[key] = result
+        self._global_mapping_cache[key] = mapping, result
         return result
 
     def _is_identity_relation(self, relation: AffineExpr) -> bool:
