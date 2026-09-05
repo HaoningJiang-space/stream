@@ -72,7 +72,13 @@ def _mapping_manifest(workload, mapping) -> dict[str, Any]:
 def _pretiling_workload_semantics(workload) -> dict[str, Any]:
     """Serialize the graph and affine semantics consumed by the pre-tiling census."""
 
-    from stream.workload.node import ComputationNode, HasInputs, HasIterationSpace, HasOutputs, TransferNode
+    from stream.workload.node import (  # noqa: PLC0415 - imported from the selected historical source root.
+        ComputationNode,
+        HasInputs,
+        HasIterationSpace,
+        HasOutputs,
+        TransferNode,
+    )
 
     dimension_sizes = workload.get_dimension_sizes()
     nodes = []
@@ -121,7 +127,7 @@ def _pretiling_workload_semantics(workload) -> dict[str, Any]:
 
 
 def _run_stage(stage, context):
-    from stream.stages.stage import LeafStage, MainStage
+    from stream.stages.stage import LeafStage, MainStage  # noqa: PLC0415 - see capture().
 
     results = MainStage([stage, LeafStage], context).run()
     if len(results) != 1:
@@ -146,12 +152,12 @@ def capture(source_root: Path, output: Path, expected_commit: str) -> dict[str, 
         raise RuntimeError("reference output must be outside the source checkout")
 
     sys.path.insert(0, str(source_root))
-    from stream.stages.context import StageContext
-    from stream.stages.generation.generic_mapping_generation import GenericMappingGenerationStage
-    from stream.stages.generation.normalization_expansion import ExpandNormalizationStage
-    from stream.stages.parsing.accelerator_parser import AcceleratorParserStage
-    from stream.stages.parsing.mapping_parser import MappingParserStage
-    from stream.stages.parsing.onnx_model_parser import ONNXModelParserStage
+    from stream.stages.context import StageContext  # noqa: PLC0415
+    from stream.stages.generation.generic_mapping_generation import GenericMappingGenerationStage  # noqa: PLC0415
+    from stream.stages.generation.normalization_expansion import ExpandNormalizationStage  # noqa: PLC0415
+    from stream.stages.parsing.accelerator_parser import AcceleratorParserStage  # noqa: PLC0415
+    from stream.stages.parsing.mapping_parser import MappingParserStage  # noqa: PLC0415
+    from stream.stages.parsing.onnx_model_parser import ONNXModelParserStage  # noqa: PLC0415
 
     contract_path = source_root / "stream/structural/contracts/gate2a_contract.json"
     contract = json.loads(contract_path.read_text(encoding="utf-8"))
