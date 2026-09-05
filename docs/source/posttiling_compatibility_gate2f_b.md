@@ -22,4 +22,8 @@ N_{expected}=N_{enumerated}=N_{valid}.
 
 Any source drift, missing or ambiguous lineage, lost literal, empty production domain, unexpected exception, incomplete stage trace, or nondeterministic replay makes the entire run `INVALID`; such rows never enter the confusion matrix. Runtime auditing forbids TTA construction/solve, exhaustive structural optimization, and variable elimination. Tiled-workload visualization is disabled because it is nonsemantic and would otherwise dominate tuple-enumeration time.
 
+The production communication manager memoizes repeated path-planning requests with identical ordered source
+cores, destination cores, and plan limits. This changes no domain or trace: each concrete tuple still traverses
+the complete pipeline, while identical deterministic routing subproblems are reused.
+
 Gate 2F-B does not establish TTA feasibility, performance improvement, factor-graph width, or the need for a particular search algorithm.

@@ -160,6 +160,22 @@ def test_transfer_plan_limits_fail_closed(invalid):
         manager.get_possible_transfer_plan([], [], max_plans=invalid)
 
 
+def test_transfer_plan_requests_are_memoized_by_ordered_endpoints(monkeypatch):
+    manager = object.__new__(CommunicationManager)
+    manager._possible_transfer_plan_cache = {}
+    source = MagicMock()
+    destination = MagicMock()
+    expected = [MagicMock()]
+    planner = MagicMock(return_value=expected)
+    monkeypatch.setattr(manager, "_enumerate_multicast_plans", planner)
+
+    first = manager.get_possible_transfer_plan([source], [destination], max_plans=1)
+    second = manager.get_possible_transfer_plan([source], [destination], max_plans=1)
+
+    assert first == second == tuple(expected)
+    planner.assert_called_once()
+
+
 def test_transfer_tensor_names_do_not_alias_source_graph_names():
     scheduler = _scheduler()
     scheduler._tensor_names_in_use = {"output_1_1"}

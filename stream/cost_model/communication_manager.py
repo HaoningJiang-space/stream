@@ -144,6 +144,9 @@ class CommunicationManager:
         self.shortest_paths = self.get_shortest_paths()
         self.all_shortest_paths = self.get_all_shortest_paths()
         self.all_pair_links = self.get_all_links_for_all_core_pairs()
+        self._possible_transfer_plan_cache: dict[
+            tuple[tuple[Core, ...], tuple[Core, ...], int], tuple[MulticastPathPlan, ...]
+        ] = {}
         self.event_id = 0
 
     def get_shortest_paths(self):
@@ -358,6 +361,10 @@ class CommunicationManager:
     ) -> tuple[MulticastPathPlan, ...]:
         if type(max_plans) is not int or max_plans < 1:
             raise ValueError("max_plans must be a positive integer")
+        cache_key = (tuple(src_allocs), tuple(dst_allocs), max_plans)
+        cached = self._possible_transfer_plan_cache.get(cache_key)
+        if cached is not None:
+            return cached
         request = MulticastRequest(
             sources=src_allocs,  # type: ignore
             destinations=dst_allocs,  # type: ignore
@@ -368,4 +375,6 @@ class CommunicationManager:
             max_allocations=max_plans,
         )
         # Stable output ordering
-        return tuple(multicast_plans)
+        result = tuple(multicast_plans)
+        self._possible_transfer_plan_cache[cache_key] = result
+        return result
