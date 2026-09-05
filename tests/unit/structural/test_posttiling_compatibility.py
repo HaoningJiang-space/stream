@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+from types import SimpleNamespace
 from time import perf_counter
 
 from stream.cost_model.steady_state_scheduler import TransferLineage
@@ -9,10 +10,37 @@ from stream.structural.posttiling_compatibility import (
     _isolated_factor_attempt,
     _lineage_matches,
     _summary,
+    _translated_fused_group_projection,
     load_posttiling_compatibility_contract,
     verify_posttiling_compatibility_provenance,
     write_posttiling_compatibility_provenance,
 )
+
+
+def test_fused_group_projection_uses_current_workload_dimension_coordinates(monkeypatch):
+    dimensions = (SimpleNamespace(position=1), SimpleNamespace(position=2))
+    translated_positions = {1: 2, 2: 1}
+    mapping = SimpleNamespace(
+        fused_groups=(
+            SimpleNamespace(
+                name="group",
+                layers=("A", "B"),
+                intra_core_tiling=((dimensions[0], 32), (dimensions[1], 112)),
+            ),
+        )
+    )
+    monkeypatch.setattr(
+        "stream.structural.posttiling_compatibility.get_equivalent_dimension",
+        lambda _source, _current, dimension: SimpleNamespace(position=translated_positions[dimension.position]),
+    )
+
+    assert _translated_fused_group_projection(object(), mapping, object()) == [
+        {
+            "name": "group",
+            "layers": ["A", "B"],
+            "intra_core_tiling": [{"position": 2, "factor": 32}, {"position": 1, "factor": 112}],
+        }
+    ]
 
 
 def test_contract_freezes_posttiling_relation_and_prepare_only_boundary():

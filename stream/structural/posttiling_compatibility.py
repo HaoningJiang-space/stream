@@ -63,6 +63,7 @@ from stream.structural.real_workload_lifting import (
     load_gate2a_contract,
 )
 from stream.workload.node import ComputationNode, TransferNode
+from stream.workload.utils import get_equivalent_dimension
 
 _CONTRACT = "gate2f_posttiling_contract.json"
 _FRONTEND_TRACE = ("accelerator_parser", "onnx_parser", "normalization_expansion", "generic_mapping")
@@ -511,7 +512,7 @@ def _verify_template_domains(domains, expected_group) -> None:
             raise PostTilingCompatibilityError(f"operator-template domain drift for {name}")
 
 
-def _evaluate_tuple(  # noqa: PLR0913
+def _evaluate_tuple(  # noqa: PLR0913, PLR0915
     workload,
     mapping,
     accelerator,
@@ -526,12 +527,18 @@ def _evaluate_tuple(  # noqa: PLR0913
     trace = []
     literal_checks = []
 
-    def mapping_check(stage, current_workload, current_mapping, *, normalized=False):
+    def mapping_check(stage, current_workload, current_mapping, *, normalized=False, updated_workload=False):
+        expected_fused_groups = (
+            _translated_fused_group_projection(workload, mapping, current_workload)
+            if updated_workload
+            else baseline_mapping["fused_groups"]
+        )
         passed = _computation_mapping_matches(
             current_workload,
             current_mapping,
             expected_templates,
             baseline_mapping,
+            expected_fused_groups=expected_fused_groups,
             normalized=normalized,
         )
         literal_checks.append({"stage": stage, "passed": passed})
@@ -603,12 +610,14 @@ def _evaluate_tuple(  # noqa: PLR0913
             "witness": {"outcome": "REJECTED", "decisions": [_decision_manifest(item) for item in decisions]},
         }
     trace.append("transfer_mapping")
-    literal_survival &= mapping_check("transfer_mapping", scheduler.ssw, scheduler.mapping, normalized=True)
+    literal_survival &= mapping_check(
+        "transfer_mapping", scheduler.ssw, scheduler.mapping, normalized=True, updated_workload=True
+    )
     scheduler.cost_lut = scheduler.update_cost_lut()
     trace.append("cost_lut")
     scheduler.ssis = scheduler.generate_ssis()
     trace.append("ssis")
-    literal_survival &= mapping_check("ssis", scheduler.ssw, scheduler.mapping, normalized=True)
+    literal_survival &= mapping_check("ssis", scheduler.ssw, scheduler.mapping, normalized=True, updated_workload=True)
     _validate_transfer_tiling_domains(scheduler)
     decisions = _factor_decisions(scheduler.tensor_relevant_tiling_decisions, factor)
     completed = [decision for decision in decisions if decision.role == "completed_transfer_mapping"]
@@ -663,12 +672,40 @@ def _selected_templates_match(workload, mapping, selected: tuple[OperatorTemplat
     return True
 
 
-def _computation_mapping_matches(workload, mapping, expected_templates, baseline_mapping, *, normalized=False):
+def _translated_fused_group_projection(source_workload, source_mapping, current_workload) -> list[dict[str, Any]]:
+    """Project MappingParser fused-group literals into the current workload's dimension coordinates."""
+
+    return [
+        {
+            "name": group.name,
+            "layers": list(group.layers),
+            "intra_core_tiling": [
+                {
+                    "position": get_equivalent_dimension(source_workload, current_workload, dimension).position,
+                    "factor": factor,
+                }
+                for dimension, factor in group.intra_core_tiling
+            ],
+        }
+        for group in source_mapping.fused_groups
+    ]
+
+
+def _computation_mapping_matches(
+    workload,
+    mapping,
+    expected_templates,
+    baseline_mapping,
+    *,
+    expected_fused_groups=None,
+    normalized=False,
+):
     if not _selected_templates_match(workload, mapping, expected_templates, normalized=normalized):
         return False
     observed = _parsed_compute_mapping_projection(workload, mapping)
     if (
-        observed["fused_groups"] != baseline_mapping["fused_groups"]
+        observed["fused_groups"]
+        != (baseline_mapping["fused_groups"] if expected_fused_groups is None else expected_fused_groups)
         or observed["runtime_args"] != baseline_mapping["runtime_args"]
     ):
         return False
