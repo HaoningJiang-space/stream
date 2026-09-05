@@ -96,9 +96,7 @@ def run_posttiling_compatibility(
     environment = _environment_manifest(contract)
     repeat_count = int(contract["execution"]["repeat_count"])
     shard_size = int(contract["execution"]["tuple_shard_size"])
-    shard_attempt_count = sum(
-        math.ceil(spec["total_tuple_count"] / shard_size) * repeat_count for spec in factor_specs
-    )
+    shard_attempt_count = sum(math.ceil(spec["total_tuple_count"] / shard_size) * repeat_count for spec in factor_specs)
     worker_count = _worker_count(max_workers, shard_attempt_count, contract)
     started = perf_counter()
     deadline = started + float(contract["execution"]["wall_time_budget_seconds"])
@@ -393,10 +391,7 @@ def _merge_factor_shards(spec, repeat, shards, shard_size) -> dict[str, Any]:  #
         event.value: sum(manifest["execution_boundary"][event.value] for manifest in manifests)
         for event in ExecutionEvent
     }
-    merged = {
-        field: manifests[0][field]
-        for field in stable_fields
-    }
+    merged = {field: manifests[0][field] for field in stable_fields}
     merged.update(
         {
             "tuple_count": spec["total_tuple_count"],
@@ -435,9 +430,9 @@ def _run_worker(request_path: Path) -> None:
     result_path.write_text(json.dumps(result, sort_keys=True), encoding="utf-8")
 
 
-def _evaluate_factor(
+def _evaluate_factor(  # noqa: PLR0915
     spec: dict[str, Any], work_dir: Path, *, tuple_start: int = 0, tuple_stop: int | None = None
-) -> dict[str, Any]:  # noqa: PLR0915
+) -> dict[str, Any]:
     contract = load_posttiling_compatibility_contract()
     _, gate2fa = _load_gate2fa(contract)
     gate2a = load_gate2a_contract()
