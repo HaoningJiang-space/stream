@@ -1,0 +1,31 @@
+{
+  "schema": "gate2f-a-repeat-audit-v1",
+  "source_commit": "4648f367b8ce264428f3ddd57f3bce1d38f28112",
+  "runs": {
+    "run1": {
+      "report_sha256": "0c116af9695220c13ce62fd8796d14e159d95d6d122dabc1fc180a83c1a189cd",
+      "provenance_sha256": "57c6935dd40d90c1c69e7ecb509e2cdd88575487a2470cf0597dda2ea4a41833",
+      "provenance_verified": true
+    },
+    "run2": {
+      "report_sha256": "b587661fbac41079a518e417b6cfdc2f17768814362791bdccdbd6022bb8292f",
+      "provenance_sha256": "d47da0177cba8799b01b4b4a5cb99abb9bf386f5c30ea6c801f66b6ef021a4c1",
+      "provenance_verified": true
+    }
+  },
+  "semantic_comparison": {
+    "equal": true,
+    "ignored_nonsemantic_fields": [
+      "generated_at",
+      "execution.wall_seconds",
+      "workloads.*.attempts[*].wall_seconds"
+    ],
+    "difference_count_after_projection": 0
+  },
+  "workload_semantic_hashes": {
+    "attention_head": "101d2060f1fcc81c6ac17df5aff14d62976dfadc8f05c8f9faaac84db8643b92",
+    "fsrcnn": "22e0fa7f0442d1fbb04e4cad9ec46327ba9f16813e32dbf49fb3a281a01373e8",
+    "resnet18": "8674922511dcc3df813cfbf12699f964d7d124d4d0c85f72797b34b2feabb3b3",
+    "swiglu": "9c811fb259b0ff4ce0b4c07885ea89ecdf85b7c59e9ea39e92156bf120f25d96"
+  }
+}

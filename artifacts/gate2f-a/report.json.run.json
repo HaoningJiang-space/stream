@@ -1,0 +1,49 @@
+{
+  "environment": {
+    "checks": {
+      "ortools_minimum": true,
+      "python_minimum": true
+    },
+    "compatible": true,
+    "host": "eex004",
+    "packages": {
+      "onnx": "1.21.0",
+      "ortools": "9.15.6755",
+      "stream-dse": "1.14.1",
+      "zigzag-dse": "3.8.5"
+    },
+    "platform": "Linux-3.10.0-1160.119.1.el7.x86_64-x86_64-with-glibc2.36",
+    "python": "3.12.11 (main, Sep 30 2025, 00:40:22) [GCC 12.2.0]",
+    "python_version": "3.12.11",
+    "requirements": {
+      "ortools": ">=9.15",
+      "python": ">=3.12"
+    }
+  },
+  "environment_sha256": "9c389aff6f80c1a83b47de873663f4031c4920d077cf9c3fe550ef9fe4a59bfd",
+  "host": "eex004",
+  "invocation": [
+    "/venvs/stream-gate1b-ortools915/bin/python",
+    "scripts/run_pretiling_opportunity_census.py",
+    "--output",
+    "/results/report.json",
+    "--source-commit",
+    "4648f367b8ce264428f3ddd57f3bce1d38f28112",
+    "--jobs",
+    "8"
+  ],
+  "report": {
+    "path": "report.json",
+    "sha256": "0c116af9695220c13ce62fd8796d14e159d95d6d122dabc1fc180a83c1a189cd"
+  },
+  "schema": "stream-gate-run-provenance-v1",
+  "source_commit": "4648f367b8ce264428f3ddd57f3bce1d38f28112",
+  "stderr": {
+    "path": "report.json.stderr.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "path": "report.json.stdout.log",
+    "sha256": "77b899b06bd917095cdc834b1e8050580d2953216af2a97f119f1682ca9b7e6e"
+  }
+}
