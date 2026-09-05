@@ -9,12 +9,12 @@ import io
 import sys
 from pathlib import Path
 
-
 _REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 if str(_REPOSITORY_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPOSITORY_ROOT))
 
-from stream.structural.pretiling_opportunity_census import (
+# Resolve this checkout before importing its package.
+from stream.structural.pretiling_opportunity_census import (  # noqa: E402
     run_pretiling_opportunity_census,
     verify_pretiling_opportunity_provenance,
     write_pretiling_opportunity_provenance,
