@@ -4,12 +4,10 @@ import json
 import subprocess
 from time import perf_counter
 
-import pytest
-
 from stream.cost_model.steady_state_scheduler import TransferLineage
 from stream.structural.posttiling_compatibility import (
-    _lineage_matches,
     _isolated_factor_attempt,
+    _lineage_matches,
     _summary,
     load_posttiling_compatibility_contract,
     verify_posttiling_compatibility_provenance,

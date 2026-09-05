@@ -98,9 +98,7 @@ def run_posttiling_compatibility(
     started = perf_counter()
     deadline = started + float(contract["execution"]["wall_time_budget_seconds"])
     with TemporaryDirectory(prefix="stream-gate2f-b-") as temporary:
-        factors = _run_factor_attempts(
-            factor_specs, Path(temporary), repeat_count, worker_count, contract, deadline
-        )
+        factors = _run_factor_attempts(factor_specs, Path(temporary), repeat_count, worker_count, contract, deadline)
     wall_seconds = perf_counter() - started
     source_after = _source_manifest(source_commit, executed_module_path=__file__)
     source = _source_run_manifest(source_before, source_after, destination)
@@ -331,7 +329,7 @@ def _run_worker(request_path: Path) -> None:
     result_path.write_text(json.dumps(result, sort_keys=True), encoding="utf-8")
 
 
-def _evaluate_factor(spec: dict[str, Any], work_dir: Path) -> dict[str, Any]:
+def _evaluate_factor(spec: dict[str, Any], work_dir: Path) -> dict[str, Any]:  # noqa: PLR0915
     contract = load_posttiling_compatibility_contract()
     _, gate2fa = _load_gate2fa(contract)
     gate2a = load_gate2a_contract()
@@ -523,7 +521,7 @@ def _evaluate_tuple(
     factor,
     output_path,
     contract,
-):
+):  # noqa: PLR0913
     trace = []
     assignment = OperatorTemplateAssignment("gate2f-b", tuple(selected))
     context = StageContext.from_kwargs(
@@ -665,15 +663,18 @@ def _computation_mapping_matches(workload, mapping, expected_templates, baseline
     if not _selected_templates_match(workload, mapping, expected_templates, normalized=normalized):
         return False
     observed = _parsed_compute_mapping_projection(workload, mapping)
-    if observed["fused_groups"] != baseline_mapping["fused_groups"] or observed["runtime_args"] != baseline_mapping[
-        "runtime_args"
-    ]:
+    if (
+        observed["fused_groups"] != baseline_mapping["fused_groups"]
+        or observed["runtime_args"] != baseline_mapping["runtime_args"]
+    ):
         return False
     for name, baseline in baseline_mapping["nodes"].items():
         current = observed["nodes"].get(name)
-        if current is None or current["memory_options"] != baseline["memory_options"] or current["kernel"] != baseline[
-            "kernel"
-        ]:
+        if (
+            current is None
+            or current["memory_options"] != baseline["memory_options"]
+            or current["kernel"] != baseline["kernel"]
+        ):
             return False
     return True
 
