@@ -339,7 +339,7 @@ def _isolated_factor_attempt(
     return result
 
 
-def _merge_factor_shards(spec, repeat, shards, shard_size) -> dict[str, Any]:  # noqa: PLR0911
+def _merge_factor_shards(spec, repeat, shards, shard_size) -> dict[str, Any]:  # noqa: PLR0911, PLR0912
     """Reconstruct one deterministic full-factor attempt from isolated ordinal shards."""
 
     expected_ranges = [
