@@ -125,11 +125,7 @@ def test_generator_uses_aligned_chunks_and_retains_concrete_baseline():
         )
         assert tuple(core.id for core in compiled.mapping.get(node).resource_allocation[0]) == template.core_ids
         compiled_tiling = compiled.mapping.get(node).inter_core_tiling
-        compiled_splits = (
-            tuple((dimension.position, factor) for dimension, factor in compiled_tiling[0])
-            if compiled_tiling
-            else ()
-        )
+        compiled_splits = tuple((dimension.position, factor) for dimension, factor in compiled_tiling[0]) if compiled_tiling else ()
         assert compiled_splits == template.splits
 
 

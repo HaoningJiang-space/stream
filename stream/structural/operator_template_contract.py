@@ -183,9 +183,7 @@ def generate_operator_template_library(workload: Workload, mapping: Mapping) -> 
             if core_count > len(pool) or len(pool) % core_count:
                 continue
             splits = tuple(
-                (position, factor)
-                for position, factor in zip(output_positions, factors, strict=True)
-                if factor > 1
+                (position, factor) for position, factor in zip(output_positions, factors, strict=True) if factor > 1
             )
             for offset in range(0, len(pool), core_count):
                 template = OperatorTemplate(

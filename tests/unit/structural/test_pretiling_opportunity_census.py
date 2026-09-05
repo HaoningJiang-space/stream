@@ -13,10 +13,7 @@ from stream.structural.pretiling_opportunity_census import (
 
 
 def _direct_count(domains):
-    return sum(
-        len({signature for signature in assignment if signature}) <= 1
-        for assignment in product(*domains)
-    )
+    return sum(len({signature for signature in assignment if signature}) <= 1 for assignment in product(*domains))
 
 
 def test_analytic_compatibility_matches_direct_multiset_enumeration():

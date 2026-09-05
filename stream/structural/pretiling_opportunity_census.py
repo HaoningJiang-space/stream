@@ -96,9 +96,7 @@ def run_pretiling_opportunity_census(
     source_after = _source_manifest(source_commit, executed_module_path=__file__)
     source = _source_run_manifest(source_before, source_after, destination)
     summary = _summary(workloads)
-    correctness = _correctness_criteria(
-        contract, source_gates, source, environment, workloads, summary, wall_seconds
-    )
+    correctness = _correctness_criteria(contract, source_gates, source, environment, workloads, summary, wall_seconds)
     opportunity = _opportunity_criteria(contract, workloads, summary) if all(correctness.values()) else {}
     correctness_pass = bool(correctness) and all(correctness.values())
     opportunity_pass = bool(opportunity) and all(opportunity.values())
@@ -211,9 +209,7 @@ def tensor_relevant_signature(
     relevant_positions = map_dim_positions(consumer.get_mapping(tensor))
     dimensions = workload.get_dims(consumer)
     return tuple(
-        (str(dimensions[position]), factor)
-        for position, factor in template.splits
-        if position in relevant_positions
+        (str(dimensions[position]), factor) for position, factor in template.splits if position in relevant_positions
     )
 
 
@@ -222,9 +218,7 @@ def count_signature_compatibility(
 ) -> dict[str, int | bool]:
     """Count empty-or-equal signature tuples with exact integer arithmetic."""
 
-    invalid_domains = any(
-        not counts or any(value < 1 for value in counts.values()) for counts in multiplicities
-    )
+    invalid_domains = any(not counts or any(value < 1 for value in counts.values()) for counts in multiplicities)
     if len(multiplicities) < _MIN_FACTOR_ARITY or invalid_domains:
         raise ValueError("compatibility counting requires at least two non-empty positive multiplicity domains")
     total = math.prod(sum(counts.values()) for counts in multiplicities)
@@ -236,8 +230,7 @@ def count_signature_compatibility(
         supported = counts.get((), 0) if _compatible_signature_count(remaining) > 0 else 0
         for signature, count in counts.items():
             if signature and all(
-                other == index
-                or multiplicities[other].get((), 0) + multiplicities[other].get(signature, 0) > 0
+                other == index or multiplicities[other].get((), 0) + multiplicities[other].get(signature, 0) > 0
                 for other in range(len(multiplicities))
             ):
                 supported += count
@@ -266,9 +259,7 @@ def _compatible_signature_count(multiplicities: tuple[dict[Signature, int], ...]
 
 
 def _run_attempts(workload_specs, accepted_denominator, temporary_root, repeat_count, max_workers, contract):
-    attempts: dict[str, list[dict[str, Any] | None]] = {
-        spec["id"]: [None] * repeat_count for spec in workload_specs
-    }
+    attempts: dict[str, list[dict[str, Any] | None]] = {spec["id"]: [None] * repeat_count for spec in workload_specs}
     with ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="gate2f-a") as executor:
         pending = {}
         for spec in workload_specs:
@@ -407,9 +398,7 @@ def _prepare_once(workload_spec, accepted_denominator, work_dir, maximum_domain_
         "group_trace": list(_GROUP_TRACE),
         "group_count": len(groups),
         "operator_count": sum(group["operator_count"] for group in groups),
-        "denominator_matches_gate2a": (
-            current_denominator == accepted_denominator["operator_ids"]
-        ),
+        "denominator_matches_gate2a": (current_denominator == accepted_denominator["operator_ids"]),
         "inputs_match_gate2a": (
             workload_digest == accepted_denominator["sha256"]
             and _file_digest(hardware_path) == accepted_denominator["hardware_sha256"]
@@ -431,9 +420,7 @@ def _group_manifest(index, workload, mapping, maximum_domain_size, maximum_direc
     for node in workload.get_computation_nodes():
         domain = domains[node.name]
         if len(domain) > maximum_domain_size:
-            raise PreTilingOpportunityError(
-                f"{node.name}: domain size {len(domain)} exceeds {maximum_domain_size}"
-            )
+            raise PreTilingOpportunityError(f"{node.name}: domain size {len(domain)} exceeds {maximum_domain_size}")
         baseline = baseline_operator_template(workload, mapping, node)
         iterator_types = derive_iterator_types(node)
         for ordinal, template in enumerate(domain):
@@ -448,10 +435,7 @@ def _group_manifest(index, workload, mapping, maximum_domain_size, maximum_direc
             )
             compiled_mapping = compiled.mapping.get(node)
             compiled_splits = (
-                tuple(
-                    (dimension.position, factor)
-                    for dimension, factor in compiled_mapping.inter_core_tiling[0]
-                )
+                tuple((dimension.position, factor) for dimension, factor in compiled_mapping.inter_core_tiling[0])
                 if compiled_mapping.inter_core_tiling
                 else ()
             )
@@ -507,15 +491,12 @@ def _shared_tensor_factors(workload, domains, maximum_direct_tuples):
         )
         if len(consumers) < _MIN_FACTOR_ARITY:
             continue
-        producers = [
-            node for node in workload.nodes if isinstance(node, HasOutputs) and tensor in node.outputs
-        ]
+        producers = [node for node in workload.nodes if isinstance(node, HasOutputs) and tensor in node.outputs]
         if len(producers) != 1:
             raise PreTilingOpportunityError(f"tensor {tensor.name!r} does not have one producer")
         counters = tuple(
             Counter(
-                tensor_relevant_signature(workload, consumer, tensor, template)
-                for template in domains[consumer.name]
+                tensor_relevant_signature(workload, consumer, tensor, template) for template in domains[consumer.name]
             )
             for consumer in consumers
         )
@@ -584,9 +565,7 @@ def _parsed_compute_mapping_projection(workload, mapping) -> dict[str, Any]:
 def _accepted_compute_mapping_projection(mapping_manifest) -> dict[str, Any]:
     return {
         "nodes": {
-            name: entry
-            for name, entry in mapping_manifest["nodes"].items()
-            if entry["node_type"] == "ComputationNode"
+            name: entry for name, entry in mapping_manifest["nodes"].items() if entry["node_type"] == "ComputationNode"
         },
         "fused_groups": mapping_manifest["fused_groups"],
         "runtime_args": mapping_manifest["runtime_args"],
@@ -642,9 +621,7 @@ def _summary(workloads):
                 and any(group["noncartesian_factor_count"] for group in result["manifest"]["groups"])
             }
         ),
-        "maximum_group_nominal_space_log10": max(
-            (group["nominal_space_log10"] for group in groups), default=0.0
-        ),
+        "maximum_group_nominal_space_log10": max((group["nominal_space_log10"] for group in groups), default=0.0),
     }
 
 
@@ -655,9 +632,7 @@ def _correctness_criteria(contract, source_gates, source, environment, workloads
     factors = [factor for group in groups for factor in group["factors"]]
     denominator = {entry["id"]: entry for entry in contract["workload_denominator"]}
     denominator_match = workload_denominator_matches(workloads, denominator)
-    gate2a_inputs_match = bool(manifests) and all(
-        manifest["inputs_match_gate2a"] for manifest in manifests
-    )
+    gate2a_inputs_match = bool(manifests) and all(manifest["inputs_match_gate2a"] for manifest in manifests)
     observations: dict[str, Any] = {
         "source_identified": source["identified"],
         "source_gate_hashes_match": all(gate["hash_matches"] for gate in source_gates.values()),
@@ -670,14 +645,11 @@ def _correctness_criteria(contract, source_gates, source, environment, workloads
         and all(
             manifest["frontend_trace"] == contract["allowed_stage_trace"]["frontend"]
             and all(
-                group["stage_trace"] == contract["allowed_stage_trace"]["per_group"]
-                for group in manifest["groups"]
+                group["stage_trace"] == contract["allowed_stage_trace"]["per_group"] for group in manifest["groups"]
             )
             for manifest in manifests
         ),
-        "forbidden_execution_events": sum(
-            sum(manifest["execution_boundary"].values()) for manifest in manifests
-        ),
+        "forbidden_execution_events": sum(sum(manifest["execution_boundary"].values()) for manifest in manifests),
         "candidate_templates_unique": bool(operators)
         and all(operator["domain_size"] == len(set(operator["templates"])) for operator in operators),
         "generated_templates_compile": bool(groups) and all(group["generated_templates_compile"] for group in groups),
@@ -725,7 +697,8 @@ def _evaluate_criteria(observations, expected):
     if set(observations) != set(expected):
         raise PreTilingOpportunityError("contract criteria do not match observations")
     return {
-        key: observations[key] >= target if isinstance(target, int | float) and not isinstance(target, bool)
+        key: observations[key] >= target
+        if isinstance(target, int | float) and not isinstance(target, bool)
         else observations[key] == target
         for key, target in expected.items()
     }
@@ -761,8 +734,7 @@ def _load_source_gates(contract):
                         for group in result["manifest"]["groups"]
                     ],
                     "compute_mappings": [
-                        _accepted_compute_mapping_projection(group["mapping"])
-                        for group in result["manifest"]["groups"]
+                        _accepted_compute_mapping_projection(group["mapping"]) for group in result["manifest"]["groups"]
                     ],
                 }
                 for workload_id, result in payload["workloads"].items()
