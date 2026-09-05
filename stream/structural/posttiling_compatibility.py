@@ -510,7 +510,7 @@ def _verify_template_domains(domains, expected_group) -> None:
             raise PostTilingCompatibilityError(f"operator-template domain drift for {name}")
 
 
-def _evaluate_tuple(
+def _evaluate_tuple(  # noqa: PLR0913
     workload,
     mapping,
     accelerator,
@@ -521,7 +521,7 @@ def _evaluate_tuple(
     factor,
     output_path,
     contract,
-):  # noqa: PLR0913
+):
     trace = []
     assignment = OperatorTemplateAssignment("gate2f-b", tuple(selected))
     context = StageContext.from_kwargs(
