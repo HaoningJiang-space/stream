@@ -52,6 +52,7 @@ Signature: TypeAlias = tuple[tuple[str, int], ...]
 _FRONTEND_TRACE = ("accelerator_parser", "onnx_parser", "normalization_expansion", "generic_mapping")
 _GROUP_TRACE = ("mapping_parser",)
 _CONTRACT = "gate2f_pretiling_contract.json"
+_MIN_FACTOR_ARITY = 2
 
 
 class PreTilingOpportunityError(RuntimeError):
@@ -224,7 +225,7 @@ def count_signature_compatibility(
     invalid_domains = any(
         not counts or any(value < 1 for value in counts.values()) for counts in multiplicities
     )
-    if len(multiplicities) < 2 or invalid_domains:
+    if len(multiplicities) < _MIN_FACTOR_ARITY or invalid_domains:
         raise ValueError("compatibility counting requires at least two non-empty positive multiplicity domains")
     total = math.prod(sum(counts.values()) for counts in multiplicities)
     compatible = _compatible_signature_count(multiplicities)
@@ -504,7 +505,7 @@ def _shared_tensor_factors(workload, domains, maximum_direct_tuples):
             (node for node in workload.get_computation_nodes() if tensor in node.inputs),
             key=order.__getitem__,
         )
-        if len(consumers) < 2:
+        if len(consumers) < _MIN_FACTOR_ARITY:
             continue
         producers = [
             node for node in workload.nodes if isinstance(node, HasOutputs) and tensor in node.outputs
@@ -635,8 +636,8 @@ def _summary(workloads):
         "noncartesian_factor_count": sum(factor["noncartesian"] for factor in factors),
         "noncartesian_workload_families": sorted(
             {
-                workloads[workload_id]["family"]
-                for workload_id, result in workloads.items()
+                result["family"]
+                for result in workloads.values()
                 if result["manifest"]
                 and any(group["noncartesian_factor_count"] for group in result["manifest"]["groups"])
             }
