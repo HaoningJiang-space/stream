@@ -8,6 +8,7 @@ from types import SimpleNamespace
 from stream.cost_model.steady_state_scheduler import TensorRelevantTilingDecision, TransferLineage
 from stream.datatypes import LayerDim
 from stream.structural.posttiling_compatibility import (
+    _cartesian_tuple_at,
     _factor_explains_ssis_rejection,
     _isolated_factor_attempt,
     _lineage_matches,
@@ -77,8 +78,15 @@ def test_ssis_rejection_requires_a_matching_completed_factor_decision():
         result_memory_option_count=1,
     )
 
-    assert _factor_explains_ssis_rejection([decision], SpatialUnrollingExtentError(dimension, 6, 4)) is True
-    assert _factor_explains_ssis_rejection([decision], SpatialUnrollingExtentError(dimension, 6, 2)) is False
+    assert _factor_explains_ssis_rejection(
+        [decision], SpatialUnrollingExtentError(dimension, 6, 4, ("B",))
+    ) is True
+    assert _factor_explains_ssis_rejection(
+        [decision], SpatialUnrollingExtentError(dimension, 6, 4, ("unrelated",))
+    ) is False
+    assert _factor_explains_ssis_rejection(
+        [decision], SpatialUnrollingExtentError(dimension, 6, 2, ("B",))
+    ) is False
 
 
 def test_lineage_match_requires_tensor_producer_consumers_and_operand_indices():
@@ -117,6 +125,7 @@ def test_summary_keeps_invalid_rows_out_of_the_confusion_matrix():
                         "status": "VALID",
                         "pre": True,
                         "post": True,
+                        "post_relation_witness": True,
                         "literal_survival": True,
                         "lineage_witness": True,
                         "nonempty_post_domains": True,
@@ -126,6 +135,7 @@ def test_summary_keeps_invalid_rows_out_of_the_confusion_matrix():
                         "status": "VALID",
                         "pre": True,
                         "post": False,
+                        "post_relation_witness": True,
                         "literal_survival": True,
                         "lineage_witness": True,
                         "nonempty_post_domains": True,
@@ -135,6 +145,7 @@ def test_summary_keeps_invalid_rows_out_of_the_confusion_matrix():
                         "status": "VALID",
                         "pre": False,
                         "post": True,
+                        "post_relation_witness": True,
                         "literal_survival": True,
                         "lineage_witness": True,
                         "nonempty_post_domains": True,
@@ -144,6 +155,7 @@ def test_summary_keeps_invalid_rows_out_of_the_confusion_matrix():
                         "status": "VALID",
                         "pre": False,
                         "post": False,
+                        "post_relation_witness": True,
                         "literal_survival": True,
                         "lineage_witness": True,
                         "nonempty_post_domains": True,
@@ -163,6 +175,8 @@ def test_summary_keeps_invalid_rows_out_of_the_confusion_matrix():
     assert summary["true_negative_count"] == 1
     assert summary["false_positive_count"] == 1
     assert summary["false_negative_count"] == 1
+    assert summary["accepted_tuple_count"] == 2
+    assert summary["rejected_tuple_count"] == 2
 
 
 def test_worker_timeout_is_a_terminal_environment_failure(monkeypatch, tmp_path):
@@ -194,6 +208,7 @@ def test_factor_shards_merge_in_global_ordinal_order():
     def shard(start, stop):
         return {
             "status": "VALID",
+            "hash_seed": "3000",
             "wall_seconds": 1.0,
             "manifest": {
                 "spec": spec,
@@ -215,6 +230,53 @@ def test_factor_shards_merge_in_global_ordinal_order():
     assert result["status"] == "VALID"
     assert [row["ordinal"] for row in result["manifest"]["rows"]] == [0, 1, 2]
     assert "tuple_key_lines" not in result["manifest"]
+
+
+def test_factor_shards_reject_seed_and_key_cardinality_drift():
+    spec = {"workload_id": "w", "group": 0, "factor": 0, "total_tuple_count": 1}
+    manifest = {
+        "spec": spec,
+        "frontend_trace": [],
+        "mapping_parser_reference_match": True,
+        "domain_hashes_match": True,
+        "factor_manifest_match": True,
+        "tuple_start": 0,
+        "tuple_stop": 1,
+        "tuple_key_lines": [],
+        "witnesses": {},
+        "rows": [{"ordinal": 0}],
+        "execution_boundary": {
+            "tta_construct": 0,
+            "tta_solve": 0,
+            "structural_exhaustive": 0,
+            "structural_variable_elimination": 0,
+        },
+    }
+
+    wrong_seed = _merge_factor_shards(
+        spec, 0, {0: {"status": "VALID", "hash_seed": "wrong", "wall_seconds": 1.0, "manifest": manifest}}, 1
+    )
+    bad_cardinality = _merge_factor_shards(
+        spec, 0, {0: {"status": "VALID", "hash_seed": "3000", "wall_seconds": 1.0, "manifest": manifest}}, 1
+    )
+
+    assert wrong_seed["status"] == "CORRECTNESS_FAILURE"
+    assert "hash-seed" in wrong_seed["detail"]
+    assert bad_cardinality["status"] == "CORRECTNESS_FAILURE"
+    assert "cardinality" in bad_cardinality["detail"]
+
+
+def test_mixed_radix_cartesian_lookup_matches_product_order():
+    domains = (("a", "b"), (1, 2, 3))
+
+    assert [_cartesian_tuple_at(domains, ordinal) for ordinal in range(6)] == [
+        ("a", 1),
+        ("a", 2),
+        ("a", 3),
+        ("b", 1),
+        ("b", 2),
+        ("b", 3),
+    ]
 
 
 def test_provenance_rejects_mutated_report(tmp_path):

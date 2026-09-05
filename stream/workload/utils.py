@@ -33,12 +33,16 @@ MAC_OPERATOR_TYPES: tuple[str, ...] = ("conv", "gemm", "matmul", "linear")
 class SpatialUnrollingExtentError(ValueError):
     """A global iteration extent cannot realize a requested spatial unrolling."""
 
-    def __init__(self, dimension: LayerDim, dimension_size: int, spatial_unrolling: int):
+    def __init__(
+        self, dimension: LayerDim, dimension_size: int, spatial_unrolling: int, source_nodes: tuple[str, ...] = ()
+    ):
         self.dimension = dimension
         self.dimension_size = dimension_size
         self.spatial_unrolling = spatial_unrolling
+        self.source_nodes = source_nodes
         super().__init__(
-            f"Dim size {dimension_size} not divisible by spatial unrolling {spatial_unrolling} for {dimension}"
+            f"Dim size {dimension_size} not divisible by spatial unrolling {spatial_unrolling} for {dimension}; "
+            f"sources={source_nodes}"
         )
 
 
@@ -107,11 +111,25 @@ def generate_steady_state_iteration_spaces(
     workload: "Workload", mapping: "Mapping", fusion_splits: dict[LayerDim, int]
 ) -> dict["HasIterationSpace", SteadyStateIterationSpace]:
     spatial_unrollings, unique_spatial_unrollings = collect_spatial_unrollings(workload, mapping)
+    _validate_spatial_unrolling_extents(workload, spatial_unrollings, unique_spatial_unrollings)
     iteration_variables = _create_spatial_iteration_variables(workload, spatial_unrollings, unique_spatial_unrollings)
     iteration_variables = _add_temporal_iteration_variables(iteration_variables, fusion_splits, workload)
     iteration_variables = _insert_kernel_iteration_variables(iteration_variables, workload, unique_spatial_unrollings)
     ssis_dict = _create_steady_state_iteration_spaces(iteration_variables, workload)
     return ssis_dict
+
+
+def _validate_spatial_unrolling_extents(workload, spatial_unrollings, unique_spatial_unrollings) -> None:
+    """Reject a global unrolling with the computation nodes that requested it."""
+
+    for dimension, factor in unique_spatial_unrollings:
+        dimension_size = workload.get_dimension_size(dimension)
+        if dimension_size % factor == 0:
+            continue
+        sources = tuple(
+            sorted(node.name for node, unrollings in spatial_unrollings.items() if (dimension, factor) in unrollings)
+        )
+        raise SpatialUnrollingExtentError(dimension, dimension_size, factor, sources)
 
 
 def _create_steady_state_iteration_spaces(iteration_variables, workload: "Workload"):
@@ -159,9 +177,7 @@ def _insert_kernel_iteration_variables(
         for dim in reversed(unique_dims):
             spatial_unrolling = next((su[1] for su in unique_spatial_unrollings if su[0] == dim), 1)
             dim_size = workload.get_dimension_size(dim)
-            size, rem = divmod(dim_size, spatial_unrolling)
-            if rem:
-                raise SpatialUnrollingExtentError(dim, dim_size, spatial_unrolling)
+            size = dim_size // spatial_unrolling
             effect = LoopEffect.VARYING if dim in workload.get_dims(node) else LoopEffect.INVARIANT
             iteration_variables[node].insert(
                 0,

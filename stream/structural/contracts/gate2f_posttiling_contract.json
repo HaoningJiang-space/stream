@@ -92,8 +92,9 @@
     "stage_allowlist_exact": true,
     "literal_survival_ratio": 1.0,
     "lineage_witness_ratio": 1.0,
-    "nonempty_post_domain_ratio": 1.0,
-    "ssis_semantics_ratio": 1.0,
+    "accepted_nonempty_post_domain_ratio": 1.0,
+    "accepted_ssis_semantics_ratio": 1.0,
+    "rejected_relation_witness_ratio": 1.0,
     "forbidden_execution_events": 0
   },
   "faithfulness_criteria": {

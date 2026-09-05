@@ -15,7 +15,6 @@ from dataclasses import asdict
 from datetime import UTC, datetime
 from hashlib import sha256
 from importlib.resources import files
-from itertools import islice, product
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from time import perf_counter
@@ -360,6 +359,9 @@ def _merge_factor_shards(spec, repeat, shards, shard_size) -> dict[str, Any]:  #
             "detail": failed.get("detail", "factor shard failed"),
         }
     manifests = [item["manifest"] for item in ordered]
+    expected_seed = str(3000 + repeat)
+    if any(item.get("hash_seed") != expected_seed for item in ordered):
+        return {"status": "CORRECTNESS_FAILURE", "repeat": repeat, "detail": "factor shard hash-seed drift"}
     stable_fields = (
         "spec",
         "frontend_trace",
@@ -374,12 +376,17 @@ def _merge_factor_shards(spec, repeat, shards, shard_size) -> dict[str, Any]:  #
         for manifest, expected_range in zip(manifests, expected_ranges, strict=True)
     ):
         return {"status": "CORRECTNESS_FAILURE", "repeat": repeat, "detail": "factor shard range drift"}
+    if any(
+        len(manifest["rows"]) != stop - start or len(manifest["tuple_key_lines"]) != stop - start
+        for manifest, (start, stop) in zip(manifests, expected_ranges, strict=True)
+    ):
+        return {"status": "CORRECTNESS_FAILURE", "repeat": repeat, "detail": "factor shard cardinality drift"}
     rows = [row for manifest in manifests for row in manifest["rows"]]
     if [row["ordinal"] for row in rows] != list(range(spec["total_tuple_count"])):
         return {"status": "CORRECTNESS_FAILURE", "repeat": repeat, "detail": "factor shard row conservation failed"}
     tuple_digest = sha256()
     for manifest in manifests:
-        for line in manifest.pop("tuple_key_lines"):
+        for line in manifest["tuple_key_lines"]:
             tuple_digest.update(line.encode() + b"\n")
     witnesses: dict[str, dict[str, Any]] = {}
     for manifest in manifests:
@@ -405,8 +412,8 @@ def _merge_factor_shards(spec, repeat, shards, shard_size) -> dict[str, Any]:  #
         "status": "VALID",
         "manifest": merged,
         "repeat": repeat,
-        "hash_seed": str(3000 + repeat),
-        "wall_seconds": sum(float(item["wall_seconds"]) for item in ordered),
+        "hash_seed": expected_seed,
+        "aggregate_shard_wall_seconds": sum(float(item["wall_seconds"]) for item in ordered),
     }
 
 
@@ -482,8 +489,8 @@ def _evaluate_factor(  # noqa: PLR0915
     rows = []
     tuple_work = work_dir / "tuples"
     tuple_work.mkdir(parents=True, exist_ok=True)
-    selected_tuples = islice(product(*template_domains), tuple_start, tuple_stop)
-    for ordinal, selected in enumerate(selected_tuples, start=tuple_start):
+    for ordinal in range(tuple_start, tuple_stop):
+        selected = _cartesian_tuple_at(template_domains, ordinal)
         selected_by_target = {template.target: template for template in selected}
         expected_templates = tuple(selected_by_target.get(item.target, item) for item in baseline_templates)
         indices = tuple(template_domains[index].index(template) for index, template in enumerate(selected))
@@ -516,6 +523,7 @@ def _evaluate_factor(  # noqa: PLR0915
                 "status": "VALID",
                 "pre": pre,
                 "post": outcome["post"],
+                "post_relation_witness": outcome["post_relation_witness"],
                 "literal_survival": outcome["literal_survival"],
                 "lineage_witness": outcome["lineage_witness"],
                 "nonempty_post_domains": outcome["nonempty_post_domains"],
@@ -709,10 +717,11 @@ def _evaluate_tuple(  # noqa: PLR0913, PLR0915
             ) from error
         return {
             "post": False,
+            "post_relation_witness": True,
             "literal_survival": literal_survival,
             "lineage_witness": True,
-            "nonempty_post_domains": True,
-            "ssis_semantics": True,
+            "nonempty_post_domains": None,
+            "ssis_semantics": None,
             "literal_failure_stages": [item["stage"] for item in literal_checks if not item["passed"]],
             "stage_trace": trace,
             "witness": {"outcome": "REJECTED", "decisions": [_decision_manifest(item) for item in decisions]},
@@ -734,10 +743,11 @@ def _evaluate_tuple(  # noqa: PLR0913, PLR0915
         trace.append("ssis_rejected")
         return {
             "post": False,
+            "post_relation_witness": True,
             "literal_survival": literal_survival,
             "lineage_witness": True,
             "nonempty_post_domains": True,
-            "ssis_semantics": True,
+            "ssis_semantics": None,
             "literal_failure_stages": [item["stage"] for item in literal_checks if not item["passed"]],
             "stage_trace": trace,
             "witness": {
@@ -747,6 +757,7 @@ def _evaluate_tuple(  # noqa: PLR0913, PLR0915
                     "dimension": str(error.dimension),
                     "dimension_size": error.dimension_size,
                     "spatial_unrolling": error.spatial_unrolling,
+                    "source_nodes": list(error.source_nodes),
                 },
                 "decisions": [_decision_manifest(item) for item in decisions],
             },
@@ -772,6 +783,7 @@ def _evaluate_tuple(  # noqa: PLR0913, PLR0915
     ssis_semantics = _ssis_semantics_valid(scheduler, lineage_transfers)
     return {
         "post": True,
+        "post_relation_witness": lineage_witness and nonempty and ssis_semantics,
         "literal_survival": literal_survival,
         "lineage_witness": lineage_witness,
         "nonempty_post_domains": nonempty,
@@ -883,20 +895,33 @@ def _factor_explains_ssis_rejection(
 ) -> bool:
     """Whether a frozen factor both requested and concretized the rejected unrolling."""
 
-    requested = any(
-        (error.dimension, error.spatial_unrolling) in projection
-        for decision in decisions
-        for _, projection in decision.projections
-    )
     completed = [decision for decision in decisions if decision.role == "completed_transfer_mapping"]
-    return (
-        requested
-        and bool(completed)
-        and all(
-            decision.accepted and decision.result_resource_option_count > 0 and decision.result_memory_option_count > 0
-            for decision in completed
+    matching = [
+        decision
+        for decision in completed
+        if any(
+            node in error.source_nodes and (error.dimension, error.spatial_unrolling) in projection
+            for node, projection in decision.projections
         )
+    ]
+    return bool(error.source_nodes) and bool(matching) and all(
+        decision.accepted and decision.result_resource_option_count > 0 and decision.result_memory_option_count > 0
+        for decision in matching
     )
+
+
+def _cartesian_tuple_at(domains, ordinal: int):
+    """Return one itertools.product tuple by mixed-radix ordinal without scanning its prefix."""
+
+    if ordinal < 0:
+        raise IndexError("Cartesian ordinal must be non-negative")
+    indices = [0] * len(domains)
+    remainder = ordinal
+    for index in range(len(domains) - 1, -1, -1):
+        remainder, indices[index] = divmod(remainder, len(domains[index]))
+    if remainder:
+        raise IndexError("Cartesian ordinal is outside the domain product")
+    return tuple(domain[index] for domain, index in zip(domains, indices, strict=True))
 
 
 def _lineage_matches(lineage: TransferLineage, factor: dict[str, Any]) -> bool:
@@ -976,6 +1001,8 @@ def _summary(factors):
     manifests = [result["manifest"] for result in factors.values() if result["manifest"]]
     rows = [row for manifest in manifests for row in manifest["rows"]]
     valid_rows = [row for row in rows if row["status"] == "VALID"]
+    accepted_rows = [row for row in valid_rows if row["post"]]
+    rejected_rows = [row for row in valid_rows if not row["post"]]
     return {
         "factor_count": len(factors),
         "valid_factor_count": sum(result["valid"] for result in factors.values()),
@@ -983,14 +1010,17 @@ def _summary(factors):
         "enumerated_tuple_count": len(rows),
         "valid_tuple_count": len(valid_rows),
         "invalid_tuple_count": len(rows) - len(valid_rows),
+        "accepted_tuple_count": len(accepted_rows),
+        "rejected_tuple_count": len(rejected_rows),
         "true_positive_count": sum(row["pre"] and row["post"] for row in valid_rows),
         "true_negative_count": sum(not row["pre"] and not row["post"] for row in valid_rows),
         "false_positive_count": sum(row["pre"] and not row["post"] for row in valid_rows),
         "false_negative_count": sum(not row["pre"] and row["post"] for row in valid_rows),
         "literal_survival_count": sum(row["literal_survival"] for row in valid_rows),
         "lineage_witness_count": sum(row["lineage_witness"] for row in valid_rows),
-        "nonempty_post_domain_count": sum(row["nonempty_post_domains"] for row in valid_rows),
-        "ssis_semantics_count": sum(row["ssis_semantics"] for row in valid_rows),
+        "accepted_nonempty_post_domain_count": sum(row["nonempty_post_domains"] for row in accepted_rows),
+        "accepted_ssis_semantics_count": sum(row["ssis_semantics"] for row in accepted_rows),
+        "rejected_relation_witness_count": sum(row["post_relation_witness"] for row in rejected_rows),
         "forbidden_execution_events": sum(sum(manifest["execution_boundary"].values()) for manifest in manifests),
     }
 
@@ -998,6 +1028,8 @@ def _summary(factors):
 def _correctness_criteria(contract, source_gate, source, environment, factors, summary, wall_seconds):
     manifests = [result["manifest"] for result in factors.values() if result["manifest"]]
     valid_count = summary["valid_tuple_count"]
+    accepted_count = summary["accepted_tuple_count"]
+    rejected_count = summary["rejected_tuple_count"]
     expected_count = summary["expected_tuple_count"]
     observations = {
         "source_identified": source["identified"],
@@ -1023,8 +1055,15 @@ def _correctness_criteria(contract, source_gate, source, environment, factors, s
         ),
         "literal_survival_ratio": summary["literal_survival_count"] / valid_count if valid_count else 0.0,
         "lineage_witness_ratio": summary["lineage_witness_count"] / valid_count if valid_count else 0.0,
-        "nonempty_post_domain_ratio": summary["nonempty_post_domain_count"] / valid_count if valid_count else 0.0,
-        "ssis_semantics_ratio": summary["ssis_semantics_count"] / valid_count if valid_count else 0.0,
+        "accepted_nonempty_post_domain_ratio": (
+            summary["accepted_nonempty_post_domain_count"] / accepted_count if accepted_count else 1.0
+        ),
+        "accepted_ssis_semantics_ratio": (
+            summary["accepted_ssis_semantics_count"] / accepted_count if accepted_count else 1.0
+        ),
+        "rejected_relation_witness_ratio": (
+            summary["rejected_relation_witness_count"] / rejected_count if rejected_count else 1.0
+        ),
         "forbidden_execution_events": summary["forbidden_execution_events"],
     }
     if wall_seconds > contract["execution"]["wall_time_budget_seconds"]:
