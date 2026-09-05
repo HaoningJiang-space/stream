@@ -38,6 +38,15 @@
       "fusion_splits",
       "computation_mapping_normalization",
       "transfer_mapping_rejected"
+    ],
+    "incompatible_transfer_domain": [
+      "operator_template_compilation",
+      "kernel_state",
+      "tiling_generation",
+      "transfer_graph",
+      "fusion_splits",
+      "computation_mapping_normalization",
+      "transfer_domain_rejected"
     ]
   },
   "execution": {

@@ -26,4 +26,7 @@ The production communication manager memoizes repeated path-planning requests wi
 cores, destination cores, and plan limits. This changes no domain or trace: each concrete tuple still traverses
 the complete pipeline, while identical deterministic routing subproblems are reused.
 
+Production rejects both unequal shared-input projections and transfer tiling/allocation divisibility failures
+with structured, lineage-bearing decisions. These are valid `R_post = 0` outcomes rather than harness failures.
+
 Gate 2F-B does not establish TTA feasibility, performance improvement, factor-graph width, or the need for a particular search algorithm.

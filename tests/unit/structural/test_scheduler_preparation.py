@@ -10,6 +10,7 @@ from stream.cost_model.steady_state_scheduler import (
     PreparedScheduleProblem,
     SharedInputTilingIncompatibilityError,
     SteadyStateScheduler,
+    TransferDomainIncompatibilityError,
     TransferLineage,
 )
 from stream.datatypes import LayerDim
@@ -174,6 +175,26 @@ def test_transfer_plan_requests_are_memoized_by_ordered_endpoints(monkeypatch):
 
     assert first == second == tuple(expected)
     planner.assert_called_once()
+
+
+def test_transfer_domain_mismatch_has_a_structured_lineage_witness():
+    scheduler = _scheduler()
+    scheduler.ssw = MagicMock()
+    transfer = MagicMock()
+    transfer.name = "Transfer(shared)"
+    dimension = LayerDim(position=0, prefix="z")
+    scheduler.ssw.get_dims.return_value = (dimension,)
+    lineage = TransferLineage("shared", "InEdge:shared", (), ())
+    scheduler.transfer_lineage[transfer] = lineage
+
+    with pytest.raises(TransferDomainIncompatibilityError) as raised:
+        scheduler._validate_transfer_domain_mapping(transfer, (((dimension, 2),),), ((MagicMock(),) * 3,))
+
+    decision = raised.value.decision
+    assert decision.lineage is lineage
+    assert decision.accepted is False
+    assert decision.role == "transfer_domain_validation"
+    assert decision.rejection_reason == "partition width 2 does not divide allocation width 3"
 
 
 def test_transfer_tensor_names_do_not_alias_source_graph_names():

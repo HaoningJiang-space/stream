@@ -25,6 +25,7 @@ from stream.cost_model.steady_state_scheduler import (
     SharedInputTilingIncompatibilityError,
     SteadyStateScheduler,
     TensorRelevantTilingDecision,
+    TransferDomainIncompatibilityError,
     TransferLineage,
 )
 from stream.execution_boundary import ExecutionEvent, ForbiddenExecutionError, audit_execution
@@ -505,8 +506,12 @@ def _evaluate_tuple(workload, mapping, accelerator, library, selected, factor, o
     literal_survival &= _selected_templates_match(scheduler.ssw, scheduler.mapping, selected, normalized=True)
     try:
         scheduler.mapping = scheduler.update_transfer_mapping()
-    except SharedInputTilingIncompatibilityError as error:
-        trace.append("transfer_mapping_rejected")
+    except (SharedInputTilingIncompatibilityError, TransferDomainIncompatibilityError) as error:
+        trace.append(
+            "transfer_domain_rejected"
+            if isinstance(error, TransferDomainIncompatibilityError)
+            else "transfer_mapping_rejected"
+        )
         decisions = _factor_decisions(scheduler.tensor_relevant_tiling_decisions, factor)
         if error.decision not in decisions or not decisions or error.decision.accepted:
             raise PostTilingCompatibilityError(
@@ -610,6 +615,7 @@ def _decision_manifest(decision: TensorRelevantTilingDecision) -> dict[str, Any]
         "result_tilings": [tiling_manifest(tiling) for tiling in decision.result_tilings],
         "result_resource_option_count": decision.result_resource_option_count,
         "result_memory_option_count": decision.result_memory_option_count,
+        "rejection_reason": decision.rejection_reason,
     }
 
 
@@ -698,6 +704,7 @@ def _correctness_criteria(contract, source_gate, source, environment, factors, s
             in (
                 tuple(contract["allowed_stage_trace"]["compatible"]),
                 tuple(contract["allowed_stage_trace"]["incompatible"]),
+                tuple(contract["allowed_stage_trace"]["incompatible_transfer_domain"]),
             )
             for manifest in manifests
             for row in manifest["rows"]

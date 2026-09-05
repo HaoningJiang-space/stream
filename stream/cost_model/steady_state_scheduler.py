@@ -106,6 +106,7 @@ class TensorRelevantTilingDecision:
     result_tilings: tuple[InterCoreTiling, ...] = ()
     result_resource_option_count: int = 0
     result_memory_option_count: int = 0
+    rejection_reason: str | None = None
 
     @property
     def compatible(self) -> bool:
@@ -119,6 +120,14 @@ class SharedInputTilingIncompatibilityError(ValueError):
         self.decision = decision
         rendered = ", ".join(f"{node}={projection}" for node, projection in decision.projections)
         super().__init__(f"Shared-input demand has incompatible tensor-relevant tilings: {rendered}")
+
+
+class TransferDomainIncompatibilityError(ValueError):
+    """A structured production rejection of a transfer tiling/allocation mismatch."""
+
+    def __init__(self, decision: TensorRelevantTilingDecision):
+        self.decision = decision
+        super().__init__(decision.rejection_reason or f"Transfer {decision.transfer} has an incompatible domain")
 
 
 def largest_divisor_leq(n: int, cap: int) -> int:
@@ -957,6 +966,7 @@ class SteadyStateScheduler:
     def update_mapping_for_transfer(self, node: TransferNode, src: HasOutputs, dsts: tuple[HasInputs, ...]) -> None:
         possible_dst_allocs = self.determine_possible_memory_allocations(node, src, dsts)
         possible_inter_core_tiling = self.determine_possible_inter_core_tiling(node, possible_dst_allocs, dsts)
+        self._validate_transfer_domain_mapping(node, possible_inter_core_tiling, possible_dst_allocs)
         possible_allocations = self.determine_possible_transfer_plans(src, possible_dst_allocs)
         self.mapping.set_for_node(
             node,
@@ -965,6 +975,50 @@ class SteadyStateScheduler:
             memory_allocation=possible_dst_allocs,
         )
         self._record_completed_transfer_mapping(node)
+
+    def _validate_transfer_domain_mapping(
+        self,
+        transfer: TransferNode,
+        tilings: tuple[InterCoreTiling, ...],
+        allocations: tuple[tuple[Core, ...], ...],
+    ) -> None:
+        """Reject an unrepresentable transfer domain before routing choices are generated."""
+
+        reason = None
+        if len(tilings) != len(allocations):
+            reason = f"{len(tilings)} tilings for {len(allocations)} allocations"
+        else:
+            assert self.ssw is not None
+            transfer_dimensions = set(self.ssw.get_dims(transfer))
+            for tiling, allocation in zip(tilings, allocations, strict=True):
+                if any(dimension not in transfer_dimensions for dimension, _ in tiling):
+                    reason = "tiling contains a dimension outside the transfer domain"
+                    break
+                partition_width = prod(factor for _, factor in tiling)
+                if partition_width < 1 or len(allocation) % partition_width:
+                    reason = f"partition width {partition_width} does not divide allocation width {len(allocation)}"
+                    break
+        if reason is None:
+            return
+        lineage = self.transfer_lineage.get(transfer)
+        if lineage is None:
+            raise RuntimeError(f"Transfer {transfer.name} has no source-tensor lineage")
+        consumers = self._lineage_consumers(transfer, lineage)
+        decision = TensorRelevantTilingDecision(
+            transfer=transfer.name,
+            lineage=lineage,
+            projections=tuple(
+                (consumer.name, self._get_tensor_relevant_tiling(transfer, consumer)) for consumer in consumers
+            ),
+            selected_reference=None,
+            role="transfer_domain_validation",
+            accepted=False,
+            result_tilings=tilings,
+            result_memory_option_count=len(allocations),
+            rejection_reason=reason,
+        )
+        self.tensor_relevant_tiling_decisions.append(decision)
+        raise TransferDomainIncompatibilityError(decision)
 
     def determine_possible_memory_allocations(
         self, node: TransferNode, src: HasOutputs, dsts: tuple[HasInputs, ...]
@@ -1114,18 +1168,9 @@ class SteadyStateScheduler:
         lineage = self.transfer_lineage.get(transfer)
         if lineage is None:
             raise RuntimeError(f"Transfer {transfer.name} has no source-tensor lineage")
-        consumer_names = {
-            identity.split(":", 1)[1] for identity in lineage.consumers if identity.startswith("ComputationNode:")
-        }
-        if len(consumer_names) < _MIN_SHARED_TENSOR_CONSUMERS:
+        consumers = self._lineage_consumers(transfer, lineage)
+        if len(consumers) < _MIN_SHARED_TENSOR_CONSUMERS:
             return
-        assert self.ssw is not None
-        consumers = sorted(
-            (node for node in self.ssw.get_computation_nodes() if node.name in consumer_names),
-            key=lambda node: node.name,
-        )
-        if {node.name for node in consumers} != consumer_names:
-            raise RuntimeError(f"Transfer {transfer.name} lost one or more source-graph consumers")
         node_mapping = self.mapping.get(transfer)
         self.tensor_relevant_tiling_decisions.append(
             TensorRelevantTilingDecision(
@@ -1142,6 +1187,23 @@ class SteadyStateScheduler:
                 result_memory_option_count=len(node_mapping.memory_allocation),
             )
         )
+
+    def _lineage_consumers(
+        self, transfer: TransferNode, lineage: TransferLineage
+    ) -> tuple[ComputationNode, ...]:
+        consumer_names = {
+            identity.split(":", 1)[1] for identity in lineage.consumers if identity.startswith("ComputationNode:")
+        }
+        assert self.ssw is not None
+        consumers = tuple(
+            sorted(
+                (node for node in self.ssw.get_computation_nodes() if node.name in consumer_names),
+                key=lambda node: node.name,
+            )
+        )
+        if {node.name for node in consumers} != consumer_names:
+            raise RuntimeError(f"Transfer {transfer.name} lost one or more source-graph consumers")
+        return consumers
 
     def _get_tensor_relevant_tiling(self, transfer: TransferNode, compute_node: ComputationNode) -> InterCoreTiling:
         tensor_dims = set(self.ssw.get_dims(transfer))
