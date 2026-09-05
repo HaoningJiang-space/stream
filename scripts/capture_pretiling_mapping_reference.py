@@ -69,6 +69,51 @@ def _mapping_manifest(workload, mapping) -> dict[str, Any]:
     }
 
 
+def _pretiling_workload_semantics(workload) -> dict[str, Any]:
+    """Serialize the graph and affine semantics consumed by the pre-tiling census."""
+
+    from stream.workload.node import ComputationNode, HasInputs, HasIterationSpace, HasOutputs, TransferNode
+
+    dimension_sizes = workload.get_dimension_sizes()
+    nodes = []
+    for node in workload.dataflow_sort():
+        row: dict[str, Any] = {"id": f"{type(node).__name__}:{node.name}", "node_class": type(node).__name__}
+        if isinstance(node, HasInputs):
+            row["inputs"] = [
+                {"name": tensor.name, "shape": list(tensor.shape), "type": str(tensor.operand_type)}
+                for tensor in node.inputs
+            ]
+        if isinstance(node, HasOutputs):
+            row["outputs"] = [
+                {"name": tensor.name, "shape": list(tensor.shape), "type": str(tensor.operand_type)}
+                for tensor in node.outputs
+            ]
+        if isinstance(node, HasIterationSpace):
+            row["dimensions"] = [
+                {"global_position": position, "size": dimension_sizes[position]}
+                for position in workload.global_idxs[node]
+            ]
+            row["operand_maps"] = [str(mapping) for mapping in node.operand_mapping]
+        if isinstance(node, ComputationNode):
+            row["operation"] = str(node.type)
+            row["fused_kernel"] = node.fused_kernel
+            row["reduction_axes"] = list(getattr(node, "reduction_axes", ()))
+        if isinstance(node, TransferNode):
+            row["transfer_type"] = node.transfer_type.name
+        if hasattr(node, "op_type"):
+            row["fusion_op_type"] = node.op_type
+        nodes.append(row)
+    edges = []
+    for source, target in workload.edges:
+        shared = (
+            [tensor.name for tensor in source.outputs if tensor in target.inputs]
+            if isinstance(source, HasOutputs) and isinstance(target, HasInputs)
+            else []
+        )
+        edges.append({"source": f"{type(source).__name__}:{source.name}", "target": f"{type(target).__name__}:{target.name}", "tensors": shared})
+    return {"nodes": nodes, "edges": edges, "dimension_sizes": list(dimension_sizes)}
+
+
 def _run_stage(stage, context):
     from stream.stages.stage import LeafStage, MainStage
 
@@ -141,6 +186,7 @@ def capture(source_root: Path, output: Path, expected_commit: str) -> dict[str, 
                     groups.append(
                         {
                             "operator_ids": [node.name for node in workload.get_computation_nodes()],
+                            "workload_semantics": _pretiling_workload_semantics(workload),
                             "mapping": _mapping_manifest(workload, group_context.get("mapping")),
                             "mapping_file_sha256": _digest_file(Path(mapping_path)),
                         }
