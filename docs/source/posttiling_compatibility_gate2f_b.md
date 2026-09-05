@@ -29,4 +29,7 @@ the complete pipeline, while identical deterministic routing subproblems are reu
 Production rejects both unequal shared-input projections and transfer tiling/allocation divisibility failures
 with structured, lineage-bearing decisions. These are valid `R_post = 0` outcomes rather than harness failures.
 
+Immutable per-workload dimension counts and inferred dimension sizes are cached and invalidated with graph-order
+caches. This removes repeated affine-domain reconstruction without changing any template or compatibility result.
+
 Gate 2F-B does not establish TTA feasibility, performance improvement, factor-graph width, or the need for a particular search algorithm.

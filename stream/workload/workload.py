@@ -57,6 +57,8 @@ def _order_inputs_by_use(nodes: list[Node]) -> None:
 class Workload(DiGraphWrapper[Node]):
     _dataflow_order: list[Node] | None = None
     _global_dimension_idxs: dict[Node, range] | None = None
+    _num_dims_cache: int | None = None
+    _dimension_sizes_cache: tuple[int, ...] | None = None
     _unique_dimensions_cache: (
         tuple[
             tuple[Node, ...],
@@ -68,6 +70,11 @@ class Workload(DiGraphWrapper[Node]):
     ) = None
 
     def __init__(self, nodes: Sequence[Node] = ()):
+        self._dataflow_order = None
+        self._global_dimension_idxs = None
+        self._num_dims_cache = None
+        self._dimension_sizes_cache = None
+        self._unique_dimensions_cache = None
         graph = nx.DiGraph()
         graph.add_nodes_from(nodes)
         for node in nodes:
@@ -88,6 +95,8 @@ class Workload(DiGraphWrapper[Node]):
     def _invalidate_order(self) -> None:
         self._dataflow_order = None
         self._global_dimension_idxs = None
+        self._num_dims_cache = None
+        self._dimension_sizes_cache = None
         self._unique_dimensions_cache = None
 
     def dataflow_sort(self) -> list[Node]:
@@ -117,7 +126,9 @@ class Workload(DiGraphWrapper[Node]):
 
     @property
     def num_dims(self):
-        return sum(node.num_dims for node in self.nodes if isinstance(node, HasIterationSpace))
+        if self._num_dims_cache is None:
+            self._num_dims_cache = sum(node.num_dims for node in self.nodes if isinstance(node, HasIterationSpace))
+        return self._num_dims_cache
 
     @property
     def global_idxs(self):
@@ -396,6 +407,8 @@ class Workload(DiGraphWrapper[Node]):
                         group_nodes[consumer_group].insert(0, bridge_in)
 
     def get_dimension_sizes(self) -> tuple[int, ...]:
+        if self._dimension_sizes_cache is not None:
+            return self._dimension_sizes_cache
         result_to_shape: list[tuple[AffineExpr, int]] = []
         for node in self.get_iteration_space_nodes():
             for tensor, mapping in zip(node.tensors, node.operand_mapping, strict=True):
@@ -441,7 +454,9 @@ class Workload(DiGraphWrapper[Node]):
             f"Could not determine sizes for all {self.num_dims} dims: "
             f"missing {sorted(set(range(self.num_dims)) - set(dim_to_size.keys()))}"
         )
-        return tuple(dim_to_size[i] for i in range(self.num_dims))
+        result = tuple(dim_to_size[i] for i in range(self.num_dims))
+        self._dimension_sizes_cache = result
+        return result
 
     def get_dims(self, node: HasIterationSpace) -> list[LayerDim]:
         global_idxs = self.global_idxs
