@@ -413,6 +413,7 @@ def _evaluate_factor(spec: dict[str, Any], work_dir: Path) -> dict[str, Any]:  #
                 "lineage_witness": outcome["lineage_witness"],
                 "nonempty_post_domains": outcome["nonempty_post_domains"],
                 "ssis_semantics": outcome["ssis_semantics"],
+                "literal_failure_stages": outcome["literal_failure_stages"],
                 "stage_trace": outcome["stage_trace"],
                 "witness_id": witness_id,
             }
@@ -523,6 +524,19 @@ def _evaluate_tuple(  # noqa: PLR0913
     contract,
 ):
     trace = []
+    literal_checks = []
+
+    def mapping_check(stage, current_workload, current_mapping, *, normalized=False):
+        passed = _computation_mapping_matches(
+            current_workload,
+            current_mapping,
+            expected_templates,
+            baseline_mapping,
+            normalized=normalized,
+        )
+        literal_checks.append({"stage": stage, "passed": passed})
+        return passed
+
     assignment = OperatorTemplateAssignment("gate2f-b", tuple(selected))
     context = StageContext.from_kwargs(
         workload=workload,
@@ -535,19 +549,13 @@ def _evaluate_tuple(  # noqa: PLR0913
     )
     context = _run_stage(OperatorTemplateCompilationStage, context)
     trace.append("operator_template_compilation")
-    literal_survival = _computation_mapping_matches(
-        context.get("workload"), context.get("mapping"), expected_templates, baseline_mapping
-    )
+    literal_survival = mapping_check("operator_template_compilation", context.get("workload"), context.get("mapping"))
     context = _run_stage(KernelStateStage, context)
     trace.append("kernel_state")
-    literal_survival &= _computation_mapping_matches(
-        context.get("workload"), context.get("mapping"), expected_templates, baseline_mapping
-    )
+    literal_survival &= mapping_check("kernel_state", context.get("workload"), context.get("mapping"))
     context = _run_stage(TilingGenerationStage, context)
     trace.append("tiling_generation")
-    literal_survival &= _computation_mapping_matches(
-        context.get("workload"), context.get("mapping"), expected_templates, baseline_mapping
-    )
+    literal_survival &= mapping_check("tiling_generation", context.get("workload"), context.get("mapping"))
     tiled_workload = context.require_value("workload", "Gate2F-B")
     tiled_mapping = context.require_value("mapping", "Gate2F-B")
     scheduler = SteadyStateScheduler(
@@ -563,15 +571,13 @@ def _evaluate_tuple(  # noqa: PLR0913
     )
     scheduler.ssw = scheduler.build_transfer_graph()
     trace.append("transfer_graph")
-    literal_survival &= _computation_mapping_matches(
-        scheduler.ssw, scheduler.mapping, expected_templates, baseline_mapping
-    )
+    literal_survival &= mapping_check("transfer_graph", scheduler.ssw, scheduler.mapping)
     scheduler.fusion_splits = scheduler.update_fusion_splits()
     trace.append("fusion_splits")
     scheduler.normalize_computation_mapping()
     trace.append("computation_mapping_normalization")
-    literal_survival &= _computation_mapping_matches(
-        scheduler.ssw, scheduler.mapping, expected_templates, baseline_mapping, normalized=True
+    literal_survival &= mapping_check(
+        "computation_mapping_normalization", scheduler.ssw, scheduler.mapping, normalized=True
     )
     try:
         scheduler.mapping = scheduler.update_transfer_mapping()
@@ -592,20 +598,17 @@ def _evaluate_tuple(  # noqa: PLR0913
             "lineage_witness": True,
             "nonempty_post_domains": True,
             "ssis_semantics": True,
+            "literal_failure_stages": [item["stage"] for item in literal_checks if not item["passed"]],
             "stage_trace": trace,
             "witness": {"outcome": "REJECTED", "decisions": [_decision_manifest(item) for item in decisions]},
         }
     trace.append("transfer_mapping")
-    literal_survival &= _computation_mapping_matches(
-        scheduler.ssw, scheduler.mapping, expected_templates, baseline_mapping, normalized=True
-    )
+    literal_survival &= mapping_check("transfer_mapping", scheduler.ssw, scheduler.mapping, normalized=True)
     scheduler.cost_lut = scheduler.update_cost_lut()
     trace.append("cost_lut")
     scheduler.ssis = scheduler.generate_ssis()
     trace.append("ssis")
-    literal_survival &= _computation_mapping_matches(
-        scheduler.ssw, scheduler.mapping, expected_templates, baseline_mapping, normalized=True
-    )
+    literal_survival &= mapping_check("ssis", scheduler.ssw, scheduler.mapping, normalized=True)
     _validate_transfer_tiling_domains(scheduler)
     decisions = _factor_decisions(scheduler.tensor_relevant_tiling_decisions, factor)
     completed = [decision for decision in decisions if decision.role == "completed_transfer_mapping"]
@@ -629,6 +632,7 @@ def _evaluate_tuple(  # noqa: PLR0913
         "lineage_witness": lineage_witness,
         "nonempty_post_domains": nonempty,
         "ssis_semantics": ssis_semantics,
+        "literal_failure_stages": [item["stage"] for item in literal_checks if not item["passed"]],
         "stage_trace": trace,
         "witness": {
             "outcome": "ACCEPTED",

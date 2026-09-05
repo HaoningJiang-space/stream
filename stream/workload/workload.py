@@ -59,6 +59,8 @@ class Workload(DiGraphWrapper[Node]):
     _global_dimension_idxs: dict[Node, range] | None = None
     _num_dims_cache: int | None = None
     _dimension_sizes_cache: tuple[int, ...] | None = None
+    _global_mapping_cache: dict[tuple[HasIterationSpace, AffineMap], AffineMap]
+    _node_dims_cache: dict[HasIterationSpace, tuple[LayerDim, ...]]
     _unique_dimensions_cache: (
         tuple[
             tuple[Node, ...],
@@ -74,6 +76,8 @@ class Workload(DiGraphWrapper[Node]):
         self._global_dimension_idxs = None
         self._num_dims_cache = None
         self._dimension_sizes_cache = None
+        self._global_mapping_cache = {}
+        self._node_dims_cache = {}
         self._unique_dimensions_cache = None
         graph = nx.DiGraph()
         graph.add_nodes_from(nodes)
@@ -97,6 +101,8 @@ class Workload(DiGraphWrapper[Node]):
         self._global_dimension_idxs = None
         self._num_dims_cache = None
         self._dimension_sizes_cache = None
+        self._global_mapping_cache.clear()
+        self._node_dims_cache.clear()
         self._unique_dimensions_cache = None
 
     def dataflow_sort(self) -> list[Node]:
@@ -158,9 +164,15 @@ class Workload(DiGraphWrapper[Node]):
         return tuple(tensors)
 
     def global_mapping(self, node: HasIterationSpace, mapping: AffineMap):
-        return mapping.replace_dims_and_symbols(
+        key = (node, mapping)
+        cached = self._global_mapping_cache.get(key)
+        if cached is not None:
+            return cached
+        result = mapping.replace_dims_and_symbols(
             [AffineDimExpr(i) for i in self.global_idxs[node]], [], self.num_dims, 0
         )
+        self._global_mapping_cache[key] = result
+        return result
 
     def _is_identity_relation(self, relation: AffineExpr) -> bool:
         """Whether a dimension relation merges two dims that are the *same* iteration axis.
@@ -459,12 +471,16 @@ class Workload(DiGraphWrapper[Node]):
         return result
 
     def get_dims(self, node: HasIterationSpace) -> list[LayerDim]:
+        cached = self._node_dims_cache.get(node)
+        if cached is not None:
+            return list(cached)
         global_idxs = self.global_idxs
         _, expressions = self.unique_dimensions()
         start_idx = global_idxs[node].start
         stop_idx = global_idxs[node].stop
-        dims = expressions[start_idx:stop_idx]
-        return dims
+        dims = tuple(expressions[start_idx:stop_idx])
+        self._node_dims_cache[node] = dims
+        return list(dims)
 
     def get_dimension_size(self, dim: LayerDim) -> int:
         _, expressions = self.unique_dimensions()
