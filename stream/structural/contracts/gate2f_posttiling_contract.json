@@ -1,0 +1,93 @@
+{
+  "contract": "Gate 2F-B Post-Tiling Shared-Tensor Compatibility Faithfulness",
+  "version": "gate2f-b-v1",
+  "source_gate": {
+    "report_artifact": "artifacts/gate2f-a/report.json.gz.b64",
+    "report_artifact_sha256": "sha256:fa46bbb51b5c551c600525ac529ab9c849497f60e9fe0b71f13b7c2996fe474a",
+    "provenance_artifact": "artifacts/gate2f-a/report.json.run.json",
+    "provenance_artifact_sha256": "sha256:57c6935dd40d90c1c69e7ecb509e2cdd88575487a2470cf0597dda2ea4a41833",
+    "repeat_audit_artifact": "artifacts/gate2f-a/repeat_audit.json",
+    "repeat_audit_artifact_sha256": "sha256:93cb56f5ac635a40dd5cec84ae7fb792645dda62f7556735ab6381d323ada848",
+    "required_verdict": "DISCOVERY_PASS",
+    "required_correctness_verdict": "PASS"
+  },
+  "relation": {
+    "pre": "Gate 2F-A empty-or-equal nonempty tensor-relevant signature relation",
+    "post": "production transfer-mapping acceptance with structured tensor-relevant projection and transfer-lineage witnesses",
+    "factor_scope": "all concrete ordered consumer-template tuples for every frozen Gate 2F-A shared-tensor factor; non-factor operators retain parsed baseline mappings",
+    "false_positive": "pre=true and post=false",
+    "false_negative": "pre=false and post=true"
+  },
+  "allowed_stage_trace": {
+    "compatible": [
+      "operator_template_compilation",
+      "kernel_state",
+      "tiling_generation",
+      "transfer_graph",
+      "fusion_splits",
+      "computation_mapping_normalization",
+      "transfer_mapping",
+      "cost_lut",
+      "ssis"
+    ],
+    "incompatible": [
+      "operator_template_compilation",
+      "kernel_state",
+      "tiling_generation",
+      "transfer_graph",
+      "fusion_splits",
+      "computation_mapping_normalization",
+      "transfer_mapping_rejected"
+    ]
+  },
+  "execution": {
+    "repeat_count": 2,
+    "max_workers": 8,
+    "wall_time_budget_seconds": 7200,
+    "maximum_direct_factor_tuples": 100000,
+    "max_transfer_plans_per_endpoint": 1,
+    "nb_cols_to_use": 4,
+    "backend": "ORTOOLS_GSCIP",
+    "visualize_tiled_workload": false,
+    "run_iterations": false,
+    "run_multiplicities": false,
+    "run_timeslots": false,
+    "run_tta": false,
+    "run_structural_search": false
+  },
+  "environment": {
+    "python": ">=3.12",
+    "ortools": ">=9.15"
+  },
+  "correctness_criteria": {
+    "source_identified": true,
+    "source_gate_artifacts_match": true,
+    "environment_compatible": true,
+    "gate2fa_environment_match": true,
+    "factor_denominator_match": true,
+    "concrete_tuple_conservation": true,
+    "valid_tuple_ratio": 1.0,
+    "deterministic_factor_repeat_ratio": 1.0,
+    "stage_allowlist_exact": true,
+    "literal_survival_ratio": 1.0,
+    "lineage_witness_ratio": 1.0,
+    "nonempty_post_domain_ratio": 1.0,
+    "forbidden_execution_events": 0
+  },
+  "faithfulness_criteria": {
+    "false_positive_count": 0,
+    "false_negative_count": 0
+  },
+  "outcome_policy": {
+    "correctness_failure": "INVALID",
+    "correctness_pass_relation_mismatch": "SEMANTIC_MISMATCH",
+    "correctness_and_faithfulness_pass": "PASS"
+  },
+  "excluded_claims": [
+    "tta_feasibility",
+    "latency_or_energy_improvement",
+    "variable_elimination_necessity_or_scalability",
+    "global_factor_graph_width",
+    "partial_or_streaming_tensor_realization"
+  ]
+}

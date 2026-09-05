@@ -48,7 +48,8 @@ class TilingGenerationStage(Stage):
         self.tiled_workload = self.workload.with_modified_dimension_sizes(self.tiled_sizes)
         self.tiled_mapping = self.mapping.with_updated_workload(self.tiled_workload, self.workload)
 
-        self.tiled_workload.visualize(os.path.join(self.output_path, "tiled_workload.png"))
+        if self.ctx.get("visualize_tiled_workload", True):
+            self.tiled_workload.visualize(os.path.join(self.output_path, "tiled_workload.png"))
         self.ctx.set(
             workload=self.tiled_workload,
             mapping=self.tiled_mapping,

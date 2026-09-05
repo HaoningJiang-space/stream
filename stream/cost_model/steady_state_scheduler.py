@@ -82,6 +82,44 @@ class PreparedScheduleProblem:
     tensor_restrictions: tuple[TensorRestriction, ...] = ()
 
 
+@dataclass(frozen=True, slots=True)
+class TransferLineage:
+    """Immutable source-graph identity shared by every hop of one tensor transfer."""
+
+    tensor: str
+    producer: str
+    consumers: tuple[str, ...]
+    consumer_operand_indices: tuple[tuple[int, ...], ...]
+
+
+@dataclass(frozen=True, slots=True)
+class TensorRelevantTilingDecision:
+    """Production witness for one tensor-relevant transfer-mapping decision."""
+
+    transfer: str
+    lineage: TransferLineage
+    projections: tuple[tuple[str, InterCoreTiling], ...]
+    selected_reference: str | None
+    role: str
+    accepted: bool
+    result_tilings: tuple[InterCoreTiling, ...] = ()
+    result_resource_option_count: int = 0
+    result_memory_option_count: int = 0
+
+    @property
+    def compatible(self) -> bool:
+        return len({projection for _, projection in self.projections if projection}) <= 1
+
+
+class SharedInputTilingIncompatibility(ValueError):
+    """A structured production rejection of incompatible tensor-relevant tilings."""
+
+    def __init__(self, decision: TensorRelevantTilingDecision):
+        self.decision = decision
+        rendered = ", ".join(f"{node}={projection}" for node, projection in decision.projections)
+        super().__init__(f"Shared-input demand has incompatible tensor-relevant tilings: {rendered}")
+
+
 def largest_divisor_leq(n: int, cap: int) -> int:
     """Largest divisor of ``n`` at most ``cap`` (never below 1)."""
     cap = max(1, min(cap, n))
@@ -122,6 +160,8 @@ class SteadyStateScheduler:
         self.partitioned_nodes: dict[ComputationNode, list[SteadyStateComputation]] = {}
         self.constant_tensors: dict[int, InEdge | OutEdge] = {}
         self.ssw: Workload | None = None
+        self.transfer_lineage: dict[TransferNode, TransferLineage] = {}
+        self.tensor_relevant_tiling_decisions: list[TensorRelevantTilingDecision] = []
 
         # Cost model parameters
         self.latency_total = -1
@@ -536,6 +576,8 @@ class SteadyStateScheduler:
             if isinstance(node, HasInputs | HasOutputs)
             for tensor in (*getattr(node, "inputs", ()), *getattr(node, "outputs", ()))
         }
+        self.transfer_lineage = {}
+        self.tensor_relevant_tiling_decisions = []
         new_nodes: dict[str, Node] = {node.name: node for node in self.workload.nodes}
         # Go through the tensors of the workload to find sources and destinations of the tensor
         for tensor in self.workload.tensors:
@@ -551,15 +593,30 @@ class SteadyStateScheduler:
             assert len(srcs) == 1, f"Expected exactly one source for tensor {tensor}, found {len(srcs)}"
             src = new_nodes[srcs[0].name]
             dsts = [new_nodes[n.name] for n in self.workload.nodes if isinstance(n, HasInputs) and tensor in n.inputs]
+            lineage = TransferLineage(
+                tensor=tensor.name,
+                producer=f"{type(src).__name__}:{src.name}",
+                consumers=tuple(f"{type(dst).__name__}:{dst.name}" for dst in dsts),
+                consumer_operand_indices=tuple(
+                    tuple(index for index, operand in enumerate(dst.inputs) if operand is tensor) for dst in dsts
+                ),
+            )
             is_constant_o_transfer = any(isinstance(dst, OutEdge) for dst in dsts)
             if is_constant_o_transfer and not isinstance(src, InEdge):
-                self.add_two_transfer_nodes_for_constant_output_transfer(tensor, src, dsts, new_nodes)
+                self.add_two_transfer_nodes_for_constant_output_transfer(tensor, src, dsts, new_nodes, lineage)
             else:
-                self.add_transfer_nodes(tensor, src, dsts, new_nodes)
+                self.add_transfer_nodes(tensor, src, dsts, new_nodes, lineage)
         new_workload = Workload(new_nodes.values())
         return new_workload
 
-    def add_transfer_nodes(self, tensor: Tensor, src: HasOutputs, dsts: list[HasInputs], new_nodes: dict[str, Node]):
+    def add_transfer_nodes(
+        self,
+        tensor: Tensor,
+        src: HasOutputs,
+        dsts: list[HasInputs],
+        new_nodes: dict[str, Node],
+        lineage: TransferLineage,
+    ):
         """
         Move ``tensor`` from its source to its destinations, either directly or staged on a memory tile.
 
@@ -571,6 +628,7 @@ class SteadyStateScheduler:
             transfer_type = self.determine_transfer_type(src, dsts)
             out_name = f"{tensor.name}_1"
             transfer_node, updated_tensors = self.generate_transfer_node(dsts, tensor, transfer_type, out_name)
+            self.transfer_lineage[transfer_node] = lineage
             new_nodes[transfer_node.name] = transfer_node
             for dst, updated_tensor in zip(dsts, updated_tensors, strict=True):
                 self.update_destination_node_inputs(tensor, src, new_nodes, dst, updated_tensor)
@@ -579,6 +637,7 @@ class SteadyStateScheduler:
         transfer_type_1 = self.determine_transfer_type(src, dsts, dst_type="memory")
         out_name_1 = f"{tensor.name}_1"
         transfer_node_1, updated_tensors_1 = self.generate_transfer_node([src], tensor, transfer_type_1, out_name_1)
+        self.transfer_lineage[transfer_node_1] = lineage
         new_nodes[transfer_node_1.name] = transfer_node_1
         # Second transfer node from on-chip buffer to destinations
         out_name_2 = f"{tensor.name}_2"
@@ -586,6 +645,7 @@ class SteadyStateScheduler:
         transfer_node_2, updated_tensors_2 = self.generate_transfer_node(
             dsts, updated_tensors_1[0], transfer_type_2, out_name_2
         )
+        self.transfer_lineage[transfer_node_2] = lineage
         new_nodes[transfer_node_2.name] = transfer_node_2
         for dst, updated_tensor in zip(dsts, updated_tensors_2, strict=True):
             self.update_destination_node_inputs(tensor, src, new_nodes, dst, updated_tensor)
@@ -647,7 +707,12 @@ class SteadyStateScheduler:
         self.mapping.remove(dst)
 
     def add_two_transfer_nodes_for_constant_output_transfer(
-        self, tensor: Tensor, src: HasOutputs, dsts: list[HasInputs], new_nodes: dict[str, Node]
+        self,
+        tensor: Tensor,
+        src: HasOutputs,
+        dsts: list[HasInputs],
+        new_nodes: dict[str, Node],
+        lineage: TransferLineage,
     ):
         """
         For constant output transfers, we add two transfer nodes:
@@ -669,6 +734,7 @@ class SteadyStateScheduler:
             new_tensor = self.generate_transfer_input_tensor(tensor, src, name_suffix="_1")
             out_name = f"{tensor.name}"
             transfer_node, updated_tensors = self.generate_transfer_node([dst], new_tensor, transfer_type, out_name)
+            self.transfer_lineage[transfer_node] = lineage
             new_nodes[transfer_node.name] = transfer_node
             new_src = self.update_source_tensor(tensor, src, new_nodes, new_tensor)
             self.update_destination_tensor(tensor, new_src, new_nodes, dst, updated_tensors)
@@ -678,6 +744,7 @@ class SteadyStateScheduler:
         new_tensor = self.generate_transfer_input_tensor(tensor, src, name_suffix="_1")
         out_name_1 = f"{tensor.name}_2"
         transfer_node_1, updated_tensors_1 = self.generate_transfer_node([src], new_tensor, transfer_type_1, out_name_1)
+        self.transfer_lineage[transfer_node_1] = lineage
         new_nodes[transfer_node_1.name] = transfer_node_1
         new_src = self.update_source_tensor(tensor, src, new_nodes, new_tensor)
         # Second transfer node from on-chip buffer to destination
@@ -686,6 +753,7 @@ class SteadyStateScheduler:
         transfer_node_2, updated_tensors_2 = self.generate_transfer_node(
             [dst], updated_tensors_1[0], transfer_type_2, out_name_2
         )
+        self.transfer_lineage[transfer_node_2] = lineage
         new_nodes[transfer_node_2.name] = transfer_node_2
         # Update the dst input to the second transfer node
         self.update_destination_tensor(tensor, new_src, new_nodes, dst, updated_tensors_2)
@@ -722,11 +790,19 @@ class SteadyStateScheduler:
         return updated_fusion_splits
 
     def update_mapping(self):
-        # Update inter_core_tiling of computation node to unique dimensions
+        self.normalize_computation_mapping()
+        return self.update_transfer_mapping()
+
+    def normalize_computation_mapping(self) -> None:
+        """Translate computation tilings before transfer mapping observes them."""
+
         for node in self.ssw.get_computation_nodes():
             unique_dims_tiling = (self.ssw.get_unique_dims_inter_core_tiling(node, self.mapping),)
             self.mapping.update_inter_core_tiling(node, unique_dims_tiling)
-        # Add transfer node mappings
+
+    def update_transfer_mapping(self) -> Mapping:
+        """Construct transfer options from already-normalized computation mappings."""
+
         for node in self.ssw.get_transfer_nodes():
             assert len(node.inputs) == 1, "Transfer node must have exactly one input tensor."
             src = cast(HasOutputs, list(self.ssw.predecessors(node))[0])
@@ -887,6 +963,7 @@ class SteadyStateScheduler:
             inter_core_tiling=possible_inter_core_tiling,
             memory_allocation=possible_dst_allocs,
         )
+        self._record_completed_transfer_mapping(node)
 
     def determine_possible_memory_allocations(
         self, node: TransferNode, src: HasOutputs, dsts: tuple[HasInputs, ...]
@@ -997,21 +1074,73 @@ class SteadyStateScheduler:
 
         if not compute_nodes:
             raise ValueError(f"Transfer {transfer.name} has no adjacent computation node")
-        projections = [(node, self._get_tensor_relevant_tiling(transfer, node)) for node in compute_nodes]
-        partitioned = {projection for _, projection in projections if projection}
-        if len(partitioned) > 1:
-            ordered = sorted(projections, key=lambda item: item[0].name)
-            rendered = ", ".join(f"{node.name}={projection}" for node, projection in ordered)
-            raise ValueError(f"Shared-input demand has incompatible tensor-relevant tilings: {rendered}")
+        ordered = tuple(
+            sorted(
+                ((node, self._get_tensor_relevant_tiling(transfer, node)) for node in compute_nodes),
+                key=lambda item: item[0].name,
+            )
+        )
+        lineage = self.transfer_lineage.get(transfer)
+        if lineage is None:
+            raise RuntimeError(f"Transfer {transfer.name} has no source-tensor lineage")
+        preliminary = TensorRelevantTilingDecision(
+            transfer=transfer.name,
+            lineage=lineage,
+            projections=tuple((node.name, projection) for node, projection in ordered),
+            selected_reference=None,
+            role="reference_selection",
+            accepted=True,
+        )
+        if not preliminary.compatible:
+            rejected = replace(preliminary, accepted=False)
+            self.tensor_relevant_tiling_decisions.append(rejected)
+            raise SharedInputTilingIncompatibility(rejected)
 
         def score(node: ComputationNode) -> tuple[int, int, str]:
-            projection = next(projection for candidate, projection in projections if candidate is node)
+            projection = next(projection for candidate, projection in ordered if candidate is node)
             relevant_width = prod(factor for _, factor in projection)
             allocations = self.mapping.get(node).resource_allocation
             allocation_width = max((len(option) for option in allocations), default=0)
             return relevant_width, allocation_width, node.name
 
-        return max(compute_nodes, key=score)
+        selected = max(compute_nodes, key=score)
+        self.tensor_relevant_tiling_decisions.append(
+            replace(preliminary, selected_reference=selected.name)
+        )
+        return selected
+
+    def _record_completed_transfer_mapping(self, transfer: TransferNode) -> None:
+        """Record the concrete mapping produced for a shared-tensor transfer hop."""
+
+        lineage = self.transfer_lineage.get(transfer)
+        if lineage is None:
+            raise RuntimeError(f"Transfer {transfer.name} has no source-tensor lineage")
+        consumer_names = {identity.split(":", 1)[1] for identity in lineage.consumers if identity.startswith("ComputationNode:")}
+        if len(consumer_names) < 2:
+            return
+        assert self.ssw is not None
+        consumers = sorted(
+            (node for node in self.ssw.get_computation_nodes() if node.name in consumer_names),
+            key=lambda node: node.name,
+        )
+        if {node.name for node in consumers} != consumer_names:
+            raise RuntimeError(f"Transfer {transfer.name} lost one or more source-graph consumers")
+        node_mapping = self.mapping.get(transfer)
+        self.tensor_relevant_tiling_decisions.append(
+            TensorRelevantTilingDecision(
+                transfer=transfer.name,
+                lineage=lineage,
+                projections=tuple(
+                    (consumer.name, self._get_tensor_relevant_tiling(transfer, consumer)) for consumer in consumers
+                ),
+                selected_reference=None,
+                role="completed_transfer_mapping",
+                accepted=True,
+                result_tilings=tuple(node_mapping.inter_core_tiling),
+                result_resource_option_count=len(node_mapping.resource_allocation),
+                result_memory_option_count=len(node_mapping.memory_allocation),
+            )
+        )
 
     def _get_tensor_relevant_tiling(self, transfer: TransferNode, compute_node: ComputationNode) -> InterCoreTiling:
         tensor_dims = set(self.ssw.get_dims(transfer))

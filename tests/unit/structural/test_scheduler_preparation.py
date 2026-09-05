@@ -6,7 +6,12 @@ from unittest.mock import MagicMock
 import pytest
 
 from stream.cost_model.communication_manager import CommunicationManager
-from stream.cost_model.steady_state_scheduler import PreparedScheduleProblem, SteadyStateScheduler
+from stream.cost_model.steady_state_scheduler import (
+    PreparedScheduleProblem,
+    SharedInputTilingIncompatibility,
+    SteadyStateScheduler,
+    TransferLineage,
+)
 from stream.datatypes import LayerDim
 from stream.mapping.mapping import Mapping
 from stream.opt.allocation.constraint_optimization.tensor_restriction import TensorRestriction
@@ -167,12 +172,19 @@ def test_transfer_reference_prefers_tensor_relevant_split_over_raw_core_count():
     scheduler = _scheduler()
     scheduler.ssw = MagicMock()
     scheduler.mapping = MagicMock()
-    transfer = SimpleNamespace(name="Transfer(shared)")
+    transfer = MagicMock()
+    transfer.name = "Transfer(shared)"
     relevant = SimpleNamespace(name="relevant")
     unrelated = SimpleNamespace(name="unrelated")
     tensor_dim = LayerDim(position=0, prefix="z")
     other_dim = LayerDim(position=1, prefix="z")
     scheduler.ssw.get_dims.return_value = (tensor_dim,)
+    scheduler.transfer_lineage[transfer] = TransferLineage(
+        "shared",
+        "InEdge:shared",
+        ("ComputationNode:relevant", "ComputationNode:unrelated"),
+        ((0,), (0,)),
+    )
 
     def tiling(node, _mapping):
         return ((tensor_dim, 4),) if node is relevant else ((other_dim, 32),)
@@ -183,6 +195,8 @@ def test_transfer_reference_prefers_tensor_relevant_split_over_raw_core_count():
     )
 
     assert scheduler._get_tensor_relevant_compute_reference(transfer, [unrelated, relevant]) is relevant
+    assert scheduler.tensor_relevant_tiling_decisions[-1].accepted is True
+    assert scheduler.tensor_relevant_tiling_decisions[-1].selected_reference == "relevant"
 
 
 @pytest.mark.parametrize("other_factor", [2, 4])
@@ -190,12 +204,19 @@ def test_transfer_reference_rejects_incompatible_consumer_partitions(other_facto
     scheduler = _scheduler()
     scheduler.ssw = MagicMock()
     scheduler.mapping = MagicMock()
-    transfer = SimpleNamespace(name="Transfer(shared)")
+    transfer = MagicMock()
+    transfer.name = "Transfer(shared)"
     by_height = SimpleNamespace(name="by_height")
     by_width = SimpleNamespace(name="by_width")
     height = LayerDim(position=0, prefix="z")
     width = LayerDim(position=1, prefix="z")
     scheduler.ssw.get_dims.return_value = (height, width)
+    scheduler.transfer_lineage[transfer] = TransferLineage(
+        "shared",
+        "InEdge:shared",
+        ("ComputationNode:by_height", "ComputationNode:by_width"),
+        ((0,), (0,)),
+    )
 
     def tiling(node, _mapping):
         return ((height, 4),) if node is by_height else ((width, other_factor),)
@@ -203,5 +224,7 @@ def test_transfer_reference_rejects_incompatible_consumer_partitions(other_facto
     scheduler.ssw.get_unique_dims_inter_core_tiling.side_effect = tiling
     scheduler.mapping.get.return_value = SimpleNamespace(resource_allocation=(tuple(range(4)),))
 
-    with pytest.raises(ValueError, match="incompatible tensor-relevant tilings"):
+    with pytest.raises(SharedInputTilingIncompatibility, match="incompatible tensor-relevant tilings") as failure:
         scheduler._get_tensor_relevant_compute_reference(transfer, [by_height, by_width])
+    assert failure.value.decision.accepted is False
+    assert failure.value.decision.lineage.tensor == "shared"
