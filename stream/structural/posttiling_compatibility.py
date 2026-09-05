@@ -42,6 +42,7 @@ from stream.stages.parsing.onnx_model_parser import ONNXModelParserStage
 from stream.structural.operator_template_contract import (
     OperatorTemplate,
     OperatorTemplateAssignment,
+    baseline_operator_template,
     generate_operator_template_library,
 )
 from stream.structural.pretiling_opportunity_census import (
@@ -95,8 +96,11 @@ def run_posttiling_compatibility(
     repeat_count = int(contract["execution"]["repeat_count"])
     worker_count = _worker_count(max_workers, len(factor_specs) * repeat_count, contract)
     started = perf_counter()
+    deadline = started + float(contract["execution"]["wall_time_budget_seconds"])
     with TemporaryDirectory(prefix="stream-gate2f-b-") as temporary:
-        factors = _run_factor_attempts(factor_specs, Path(temporary), repeat_count, worker_count, contract)
+        factors = _run_factor_attempts(
+            factor_specs, Path(temporary), repeat_count, worker_count, contract, deadline
+        )
     wall_seconds = perf_counter() - started
     source_after = _source_manifest(source_commit, executed_module_path=__file__)
     source = _source_run_manifest(source_before, source_after, destination)
@@ -220,14 +224,14 @@ def _factor_specs(gate2fa: dict[str, Any]) -> list[dict[str, Any]]:
     return sorted(specs, key=lambda item: (item["workload_id"], item["group"], item["factor"]))
 
 
-def _run_factor_attempts(specs, temporary_root, repeat_count, max_workers, contract):
+def _run_factor_attempts(specs, temporary_root, repeat_count, max_workers, contract, deadline):
     attempts: dict[str, list[dict[str, Any] | None]] = {_factor_key(spec): [None] * repeat_count for spec in specs}
     with ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="gate2f-b") as executor:
         pending = {}
         for spec in specs:
             for repeat in range(repeat_count):
                 work_dir = temporary_root / f"{_factor_key(spec)}-{repeat}"
-                future = executor.submit(_isolated_factor_attempt, spec, work_dir, repeat, contract)
+                future = executor.submit(_isolated_factor_attempt, spec, work_dir, repeat, contract, deadline)
                 pending[future] = (_factor_key(spec), repeat)
         for future in as_completed(pending):
             factor_key, repeat = pending[future]
@@ -242,7 +246,7 @@ def _run_factor_attempts(specs, temporary_root, repeat_count, max_workers, contr
     }
 
 
-def _isolated_factor_attempt(spec, work_dir, repeat, contract) -> dict[str, Any]:
+def _isolated_factor_attempt(spec, work_dir, repeat, contract, deadline) -> dict[str, Any]:
     work_dir.mkdir(parents=True, exist_ok=True)
     request_path = work_dir / "request.json"
     result_path = work_dir / "result.json"
@@ -260,13 +264,38 @@ def _isolated_factor_attempt(spec, work_dir, repeat, contract) -> dict[str, Any]
     environment = os.environ.copy()
     environment["PYTHONHASHSEED"] = str(3000 + repeat)
     started = perf_counter()
-    completed = subprocess.run(
-        (sys.executable, "-m", "stream.structural.posttiling_compatibility", "--worker-request", str(request_path)),
-        check=False,
-        capture_output=True,
-        text=True,
-        env=environment,
-    )
+    remaining = deadline - perf_counter()
+    if remaining <= 0:
+        return {
+            "status": "ENVIRONMENT_FAILURE",
+            "repeat": repeat,
+            "hash_seed": environment["PYTHONHASHSEED"],
+            "wall_seconds": 0.0,
+            "detail": "global Gate 2F-B deadline expired before worker start",
+        }
+    try:
+        completed = subprocess.run(
+            (
+                sys.executable,
+                "-m",
+                "stream.structural.posttiling_compatibility",
+                "--worker-request",
+                str(request_path),
+            ),
+            check=False,
+            capture_output=True,
+            text=True,
+            env=environment,
+            timeout=remaining,
+        )
+    except subprocess.TimeoutExpired:
+        return {
+            "status": "ENVIRONMENT_FAILURE",
+            "repeat": repeat,
+            "hash_seed": environment["PYTHONHASHSEED"],
+            "wall_seconds": round(perf_counter() - started, 6),
+            "detail": "worker terminated at the global Gate 2F-B deadline",
+        }
     if completed.returncode or not result_path.is_file():
         detail = completed.stderr.strip() or completed.stdout.strip() or "worker produced no result"
         return {
@@ -318,6 +347,11 @@ def _evaluate_factor(spec: dict[str, Any], work_dir: Path) -> dict[str, Any]:
     mapping = context.require_value("mapping", "Gate2F-B")
     _verify_mapping_seam(workload, mapping, Path(mapping_path), expected_group)
     library = generate_operator_template_library(workload, mapping)
+    baseline_templates = tuple(
+        baseline_operator_template(workload, mapping, node) for node in workload.get_computation_nodes()
+    )
+    baseline_mapping = _parsed_compute_mapping_projection(workload, mapping)
+    source_graph = (tuple(workload.nodes), tuple(workload.edges))
     domains = {
         node.name: tuple(template for template in library.templates if template.target == node.name)
         for node in workload.get_computation_nodes()
@@ -345,6 +379,8 @@ def _evaluate_factor(spec: dict[str, Any], work_dir: Path) -> dict[str, Any]:
     tuple_work = work_dir / "tuples"
     tuple_work.mkdir(parents=True, exist_ok=True)
     for ordinal, selected in enumerate(product(*template_domains)):
+        selected_by_target = {template.target: template for template in selected}
+        expected_templates = tuple(selected_by_target.get(item.target, item) for item in baseline_templates)
         indices = tuple(template_domains[index].index(template) for index, template in enumerate(selected))
         tuple_key = [template.key for template in selected]
         tuple_digest.update(json.dumps(tuple_key, separators=(",", ":")).encode() + b"\n")
@@ -360,6 +396,8 @@ def _evaluate_factor(spec: dict[str, Any], work_dir: Path) -> dict[str, Any]:
                 context.require_value("accelerator", "Gate2F-B"),
                 library,
                 selected,
+                expected_templates,
+                baseline_mapping,
                 expected_factor,
                 tuple_work,
                 contract,
@@ -376,6 +414,7 @@ def _evaluate_factor(spec: dict[str, Any], work_dir: Path) -> dict[str, Any]:
                 "literal_survival": outcome["literal_survival"],
                 "lineage_witness": outcome["lineage_witness"],
                 "nonempty_post_domains": outcome["nonempty_post_domains"],
+                "ssis_semantics": outcome["ssis_semantics"],
                 "stage_trace": outcome["stage_trace"],
                 "witness_id": witness_id,
             }
@@ -387,6 +426,17 @@ def _evaluate_factor(spec: dict[str, Any], work_dir: Path) -> dict[str, Any]:
                 "pre": pre,
                 "post": None,
                 "detail": f"{type(error).__name__}: {error}"[:4000],
+            }
+        if (tuple(workload.nodes), tuple(workload.edges)) != source_graph or not _computation_mapping_matches(
+            workload, mapping, baseline_templates, baseline_mapping
+        ):
+            row = {
+                "ordinal": ordinal,
+                "template_indices": list(indices),
+                "status": "INVALID",
+                "pre": pre,
+                "post": None,
+                "detail": "source workload or MappingParser mapping mutated across tuple evaluation",
             }
         rows.append(row)
     return {
@@ -462,7 +512,18 @@ def _verify_template_domains(domains, expected_group) -> None:
             raise PostTilingCompatibilityError(f"operator-template domain drift for {name}")
 
 
-def _evaluate_tuple(workload, mapping, accelerator, library, selected, factor, output_path, contract):
+def _evaluate_tuple(
+    workload,
+    mapping,
+    accelerator,
+    library,
+    selected,
+    expected_templates,
+    baseline_mapping,
+    factor,
+    output_path,
+    contract,
+):
     trace = []
     assignment = OperatorTemplateAssignment("gate2f-b", tuple(selected))
     context = StageContext.from_kwargs(
@@ -476,13 +537,19 @@ def _evaluate_tuple(workload, mapping, accelerator, library, selected, factor, o
     )
     context = _run_stage(OperatorTemplateCompilationStage, context)
     trace.append("operator_template_compilation")
-    literal_survival = _selected_templates_match(context.get("workload"), context.get("mapping"), selected)
+    literal_survival = _computation_mapping_matches(
+        context.get("workload"), context.get("mapping"), expected_templates, baseline_mapping
+    )
     context = _run_stage(KernelStateStage, context)
     trace.append("kernel_state")
-    literal_survival &= _selected_templates_match(context.get("workload"), context.get("mapping"), selected)
+    literal_survival &= _computation_mapping_matches(
+        context.get("workload"), context.get("mapping"), expected_templates, baseline_mapping
+    )
     context = _run_stage(TilingGenerationStage, context)
     trace.append("tiling_generation")
-    literal_survival &= _selected_templates_match(context.get("workload"), context.get("mapping"), selected)
+    literal_survival &= _computation_mapping_matches(
+        context.get("workload"), context.get("mapping"), expected_templates, baseline_mapping
+    )
     tiled_workload = context.require_value("workload", "Gate2F-B")
     tiled_mapping = context.require_value("mapping", "Gate2F-B")
     scheduler = SteadyStateScheduler(
@@ -498,12 +565,16 @@ def _evaluate_tuple(workload, mapping, accelerator, library, selected, factor, o
     )
     scheduler.ssw = scheduler.build_transfer_graph()
     trace.append("transfer_graph")
-    literal_survival &= _selected_templates_match(scheduler.ssw, scheduler.mapping, selected)
+    literal_survival &= _computation_mapping_matches(
+        scheduler.ssw, scheduler.mapping, expected_templates, baseline_mapping
+    )
     scheduler.fusion_splits = scheduler.update_fusion_splits()
     trace.append("fusion_splits")
     scheduler.normalize_computation_mapping()
     trace.append("computation_mapping_normalization")
-    literal_survival &= _selected_templates_match(scheduler.ssw, scheduler.mapping, selected, normalized=True)
+    literal_survival &= _computation_mapping_matches(
+        scheduler.ssw, scheduler.mapping, expected_templates, baseline_mapping, normalized=True
+    )
     try:
         scheduler.mapping = scheduler.update_transfer_mapping()
     except (SharedInputTilingIncompatibilityError, TransferDomainIncompatibilityError) as error:
@@ -522,16 +593,21 @@ def _evaluate_tuple(workload, mapping, accelerator, library, selected, factor, o
             "literal_survival": literal_survival,
             "lineage_witness": True,
             "nonempty_post_domains": True,
+            "ssis_semantics": True,
             "stage_trace": trace,
             "witness": {"outcome": "REJECTED", "decisions": [_decision_manifest(item) for item in decisions]},
         }
     trace.append("transfer_mapping")
-    literal_survival &= _selected_templates_match(scheduler.ssw, scheduler.mapping, selected, normalized=True)
+    literal_survival &= _computation_mapping_matches(
+        scheduler.ssw, scheduler.mapping, expected_templates, baseline_mapping, normalized=True
+    )
     scheduler.cost_lut = scheduler.update_cost_lut()
     trace.append("cost_lut")
     scheduler.ssis = scheduler.generate_ssis()
     trace.append("ssis")
-    literal_survival &= _selected_templates_match(scheduler.ssw, scheduler.mapping, selected, normalized=True)
+    literal_survival &= _computation_mapping_matches(
+        scheduler.ssw, scheduler.mapping, expected_templates, baseline_mapping, normalized=True
+    )
     _validate_transfer_tiling_domains(scheduler)
     decisions = _factor_decisions(scheduler.tensor_relevant_tiling_decisions, factor)
     completed = [decision for decision in decisions if decision.role == "completed_transfer_mapping"]
@@ -548,11 +624,13 @@ def _evaluate_tuple(workload, mapping, accelerator, library, selected, factor, o
         raise PostTilingCompatibilityError("completed transfer mapping retained a rejected compatibility decision")
     if any(transfer not in scheduler.ssis for transfer in lineage_transfers):
         raise PostTilingCompatibilityError("a factor transfer is missing from the generated SSIS")
+    ssis_semantics = _ssis_semantics_valid(scheduler, lineage_transfers)
     return {
         "post": True,
         "literal_survival": literal_survival,
         "lineage_witness": lineage_witness,
         "nonempty_post_domains": nonempty,
+        "ssis_semantics": ssis_semantics,
         "stage_trace": trace,
         "witness": {
             "outcome": "ACCEPTED",
@@ -580,6 +658,39 @@ def _selected_templates_match(workload, mapping, selected: tuple[OperatorTemplat
                 return False
         elif tuple((dimension.position, factor) for dimension, factor in tiling if factor > 1) != template.splits:
             return False
+    return True
+
+
+def _computation_mapping_matches(workload, mapping, expected_templates, baseline_mapping, *, normalized=False):
+    if not _selected_templates_match(workload, mapping, expected_templates, normalized=normalized):
+        return False
+    observed = _parsed_compute_mapping_projection(workload, mapping)
+    if observed["fused_groups"] != baseline_mapping["fused_groups"] or observed["runtime_args"] != baseline_mapping[
+        "runtime_args"
+    ]:
+        return False
+    for name, baseline in baseline_mapping["nodes"].items():
+        current = observed["nodes"].get(name)
+        if current is None or current["memory_options"] != baseline["memory_options"] or current["kernel"] != baseline[
+            "kernel"
+        ]:
+            return False
+    return True
+
+
+def _ssis_semantics_valid(scheduler, transfers) -> bool:
+    for transfer in transfers:
+        variables = scheduler.ssis[transfer].variables
+        if not variables or any(variable.size < 1 for variable in variables):
+            return False
+        spatial = {
+            (variable.dimension, variable.size)
+            for variable in variables
+            if variable.type.name == "SPATIAL" and variable.effect.name == "VARYING"
+        }
+        for tiling in scheduler.mapping.get(transfer).inter_core_tiling:
+            if any((dimension, factor) not in spatial for dimension, factor in tiling):
+                return False
     return True
 
 
@@ -681,6 +792,7 @@ def _summary(factors):
         "literal_survival_count": sum(row["literal_survival"] for row in valid_rows),
         "lineage_witness_count": sum(row["lineage_witness"] for row in valid_rows),
         "nonempty_post_domain_count": sum(row["nonempty_post_domains"] for row in valid_rows),
+        "ssis_semantics_count": sum(row["ssis_semantics"] for row in valid_rows),
         "forbidden_execution_events": sum(sum(manifest["execution_boundary"].values()) for manifest in manifests),
     }
 
@@ -713,6 +825,7 @@ def _correctness_criteria(contract, source_gate, source, environment, factors, s
         "literal_survival_ratio": summary["literal_survival_count"] / valid_count if valid_count else 0.0,
         "lineage_witness_ratio": summary["lineage_witness_count"] / valid_count if valid_count else 0.0,
         "nonempty_post_domain_ratio": summary["nonempty_post_domain_count"] / valid_count if valid_count else 0.0,
+        "ssis_semantics_ratio": summary["ssis_semantics_count"] / valid_count if valid_count else 0.0,
         "forbidden_execution_events": summary["forbidden_execution_events"],
     }
     if wall_seconds > contract["execution"]["wall_time_budget_seconds"]:

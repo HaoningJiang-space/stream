@@ -1,10 +1,15 @@
 from __future__ import annotations
 
 import json
+import subprocess
+from time import perf_counter
+
+import pytest
 
 from stream.cost_model.steady_state_scheduler import TransferLineage
 from stream.structural.posttiling_compatibility import (
     _lineage_matches,
+    _isolated_factor_attempt,
     _summary,
     load_posttiling_compatibility_contract,
     verify_posttiling_compatibility_provenance,
@@ -62,6 +67,7 @@ def test_summary_keeps_invalid_rows_out_of_the_confusion_matrix():
                         "literal_survival": True,
                         "lineage_witness": True,
                         "nonempty_post_domains": True,
+                        "ssis_semantics": True,
                     },
                     {
                         "status": "VALID",
@@ -70,6 +76,7 @@ def test_summary_keeps_invalid_rows_out_of_the_confusion_matrix():
                         "literal_survival": True,
                         "lineage_witness": True,
                         "nonempty_post_domains": True,
+                        "ssis_semantics": True,
                     },
                     {
                         "status": "VALID",
@@ -78,6 +85,7 @@ def test_summary_keeps_invalid_rows_out_of_the_confusion_matrix():
                         "literal_survival": True,
                         "lineage_witness": True,
                         "nonempty_post_domains": True,
+                        "ssis_semantics": True,
                     },
                     {
                         "status": "VALID",
@@ -86,6 +94,7 @@ def test_summary_keeps_invalid_rows_out_of_the_confusion_matrix():
                         "literal_survival": True,
                         "lineage_witness": True,
                         "nonempty_post_domains": True,
+                        "ssis_semantics": True,
                     },
                     {"status": "INVALID", "pre": True, "post": None},
                 ],
@@ -101,6 +110,23 @@ def test_summary_keeps_invalid_rows_out_of_the_confusion_matrix():
     assert summary["true_negative_count"] == 1
     assert summary["false_positive_count"] == 1
     assert summary["false_negative_count"] == 1
+
+
+def test_worker_timeout_is_a_terminal_environment_failure(monkeypatch, tmp_path):
+    def time_out(*_args, **_kwargs):
+        raise subprocess.TimeoutExpired("worker", 1)
+
+    monkeypatch.setattr(subprocess, "run", time_out)
+    result = _isolated_factor_attempt(
+        {"workload_id": "w", "group": 0, "factor": 0},
+        tmp_path,
+        0,
+        {},
+        perf_counter() + 1,
+    )
+
+    assert result["status"] == "ENVIRONMENT_FAILURE"
+    assert "deadline" in result["detail"]
 
 
 def test_provenance_rejects_mutated_report(tmp_path):
