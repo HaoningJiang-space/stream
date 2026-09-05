@@ -81,8 +81,14 @@ def _run_stage(stage, context):
 def capture(source_root: Path, output: Path, expected_commit: str) -> dict[str, Any]:
     source_root = source_root.resolve()
     output = output.resolve()
+    instrument_path = Path(__file__).resolve()
+    instrument_root = instrument_path.parents[1]
+    instrument_head = _git(instrument_root, "rev-parse", "HEAD")
+    instrument_status = _git(instrument_root, "status", "--porcelain")
     head = _git(source_root, "rev-parse", "HEAD")
     status = _git(source_root, "status", "--porcelain")
+    if instrument_status:
+        raise RuntimeError("reference instrument must come from a clean commit")
     if head != expected_commit or status:
         raise RuntimeError("reference source must be the expected clean commit")
     if output.is_relative_to(source_root):
@@ -156,8 +162,12 @@ def capture(source_root: Path, output: Path, expected_commit: str) -> dict[str, 
         raise RuntimeError("reference source changed during capture")
     return {
         "schema": "gate2f-a-pretiling-reference-v1",
-        "source": {"commit": head, "clean": True, "root": str(source_root)},
-        "instrument": {"path": str(Path(__file__).resolve()), "sha256": _digest_file(Path(__file__).resolve())},
+        "source": {"commit": head, "clean": True},
+        "instrument": {
+            "commit": instrument_head,
+            "path": str(instrument_path.relative_to(instrument_root)),
+            "sha256": _digest_file(instrument_path),
+        },
         "environment": {
             "python_version": ".".join(str(component) for component in sys.version_info[:3]),
             "packages": {
