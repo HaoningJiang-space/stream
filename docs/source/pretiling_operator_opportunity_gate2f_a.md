@@ -8,6 +8,8 @@ Gate 2E-A counted templates from Gate 2A manifests after baseline tiling. Gate 2
 
 The frozen workload denominator remains SwiGLU, FSRCNN, ResNet18, and an attention head. Each preparation stops before `KernelState`, `TilingGeneration`, scheduler construction, and TTA.
 
+The input audit binds every ONNX and hardware artifact byte-for-byte to the accepted Gate 2A evidence and requires equality of Gate 2A's recorded Python/package manifest. A separate hash-pinned reference was captured from Gate 2A's clean source commit at this exact MappingParser seam. The current graph topology, tensor identities/shapes/types, operation and fusion metadata, loop extents, affine operand maps, core, local-split, fused-group, runtime-argument, and generated mapping-file manifests must equal that reference. This directly compares the consumed workload semantics and compiler outputs instead of relying on a hand-maintained transitive source-code allowlist. Gate 2A's later post-`update_mapping()` global `z` names are not compared with MappingParser's local `D` names because they belong to different compiler seams.
+
 ## Template domain
 
 For a parsed core pool of width (W), output-parallel split factors must divide the pre-tiling loop extents and have product (k\mid W). Core order is the parsed mapping order. Width-(k) placements are aligned chunks:

@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from itertools import product
 
 from stream.structural.pretiling_opportunity_census import (
     count_signature_compatibility,
     load_pretiling_opportunity_contract,
+    pretiling_mapping_reference_matches,
     verify_pretiling_opportunity_provenance,
     workload_denominator_matches,
     write_pretiling_opportunity_provenance,
@@ -96,7 +98,46 @@ def test_contract_freezes_pretiling_boundary_and_proxy_claim():
     assert contract["execution"]["run_tiling_generation"] is False
     assert contract["execution"]["run_tta"] is False
     assert contract["signature_proxy"]["evidence_class"] == "PRETILING_SIGNATURE_PROXY"
+    reference = contract["source_gates"]["gate2a"]["pretiling_reference"]
+    assert reference["artifact"] == "artifacts/gate2f-a/gate2a-pretiling-reference-v2.json.gz.b64"
+    assert reference["sha256"].startswith("sha256:")
+    assert reference["instrument_commit"]
+    assert reference["instrument_path"] == "scripts/capture_pretiling_mapping_reference.py"
+    assert contract["correctness_criteria"]["gate2a_recorded_environment_match"] is True
+    assert contract["correctness_criteria"]["gate2a_pretiling_reference_match"] is True
     assert "global_compatible_assignment_count" in contract["excluded_claims"]
+
+
+def test_mapping_reference_requires_exact_group_mapping_and_generated_file_identity():
+    reference_groups = [
+        {
+            "operator_ids": ["A", "B"],
+            "workload_semantics": {"nodes": [{"id": "ComputationNode:A"}]},
+            "mapping": {"nodes": {"A": {"resource_options": [[0]]}}},
+            "mapping_file_sha256": "sha256:accepted",
+        }
+    ]
+    groups = [
+        {
+            "operator_ids": ["ComputationNode:A", "ComputationNode:B"],
+            "workload_semantics": {"nodes": [{"id": "ComputationNode:A"}]},
+            "parsed_compute_mapping": {"nodes": {"A": {"resource_options": [[0]]}}},
+            "mapping_file_sha256": "sha256:accepted",
+        }
+    ]
+
+    assert pretiling_mapping_reference_matches(groups, reference_groups) is True
+    groups[0]["mapping_file_sha256"] = "sha256:changed"
+    assert pretiling_mapping_reference_matches(groups, reference_groups) is False
+    groups[0]["mapping_file_sha256"] = "sha256:accepted"
+    groups[0]["parsed_compute_mapping"]["nodes"]["A"]["resource_options"] = [[1]]
+    assert pretiling_mapping_reference_matches(groups, reference_groups) is False
+    groups[0]["parsed_compute_mapping"] = deepcopy(reference_groups[0]["mapping"])
+    groups[0]["workload_semantics"] = {"nodes": [{"id": "ComputationNode:B"}]}
+    assert pretiling_mapping_reference_matches(groups, reference_groups) is False
+    groups[0]["workload_semantics"] = deepcopy(reference_groups[0]["workload_semantics"])
+    groups[0]["operator_ids"] = ["ComputationNode:B", "ComputationNode:A"]
+    assert pretiling_mapping_reference_matches(groups, reference_groups) is False
 
 
 def test_provenance_bundle_detects_report_mutation(tmp_path):

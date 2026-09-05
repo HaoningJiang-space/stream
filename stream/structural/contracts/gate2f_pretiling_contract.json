@@ -7,7 +7,14 @@
     "gate2a": {
       "artifact": "artifacts/gate2a/report.json",
       "sha256": "sha256:d2473721f8e9d4796db5db7797ddf7c0099e82d4788ab4d081fe9b6a218aa145",
-      "required_verdict": "PASS"
+      "required_verdict": "PASS",
+      "pretiling_reference": {
+        "artifact": "artifacts/gate2f-a/gate2a-pretiling-reference-v2.json.gz.b64",
+        "sha256": "sha256:01580f922fdb95a8c6773653da4fec589d96e937302123f1055459bf9918f0db",
+        "schema": "gate2f-a-pretiling-reference-v1",
+        "instrument_commit": "84ed1b0cefc6b7eed604e5743b7e7bf91da2d74b",
+        "instrument_path": "scripts/capture_pretiling_mapping_reference.py"
+      }
     },
     "gate1a_v4": {
       "artifact": "artifacts/gate1a-v4/report.json",
@@ -66,6 +73,8 @@
     "source_identified": true,
     "source_gate_hashes_match": true,
     "environment_compatible": true,
+    "gate2a_recorded_environment_match": true,
+    "gate2a_pretiling_reference_match": true,
     "workload_denominator_match": true,
     "gate2a_inputs_match": true,
     "preparation_success_ratio": 1.0,

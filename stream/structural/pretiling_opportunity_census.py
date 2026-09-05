@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import argparse
+import base64
+import gzip
 import json
 import math
 import os
@@ -41,10 +43,9 @@ from stream.structural.real_workload_lifting import (
     _source_run_manifest,
     load_gate2a_contract,
 )
-from stream.structural.stream_contract import canonical_mapping_manifest, tiling_key
 from stream.workload.affine_access import map_dim_positions
 from stream.workload.iterator_type import IteratorType, derive_iterator_types
-from stream.workload.node import ComputationNode, HasOutputs
+from stream.workload.node import ComputationNode, HasInputs, HasIterationSpace, HasOutputs, TransferNode
 from stream.workload.tensor import Tensor
 
 Signature: TypeAlias = tuple[tuple[str, int], ...]
@@ -382,12 +383,12 @@ def _prepare_once(workload_spec, accepted_denominator, work_dir, maximum_domain_
                 index,
                 workload,
                 group_context.get("mapping"),
+                _file_digest(Path(mapping_path)),
                 maximum_domain_size,
                 maximum_direct_tuples,
             )
         )
     current_denominator = [group["operator_ids"] for group in groups]
-    current_mapping_projection = [group["parsed_compute_mapping"] for group in groups]
     workload_digest = _file_digest(Path(workload_spec["path"]))
     return {
         "workload_id": workload_spec["id"],
@@ -399,16 +400,17 @@ def _prepare_once(workload_spec, accepted_denominator, work_dir, maximum_domain_
         "group_count": len(groups),
         "operator_count": sum(group["operator_count"] for group in groups),
         "denominator_matches_gate2a": (current_denominator == accepted_denominator["operator_ids"]),
-        "inputs_match_gate2a": (
-            workload_digest == accepted_denominator["sha256"]
-            and _file_digest(hardware_path) == accepted_denominator["hardware_sha256"]
-            and current_mapping_projection == accepted_denominator["compute_mappings"]
+        "inputs_match_gate2a": workload_digest == accepted_denominator["sha256"]
+        and _file_digest(hardware_path) == accepted_denominator["hardware_sha256"],
+        "pretiling_reference_match": pretiling_mapping_reference_matches(
+            groups,
+            accepted_denominator["pretiling_groups"],
         ),
         "groups": groups,
     }
 
 
-def _group_manifest(index, workload, mapping, maximum_domain_size, maximum_direct_tuples):
+def _group_manifest(index, workload, mapping, mapping_file_sha256, maximum_domain_size, maximum_direct_tuples):
     library = generate_operator_template_library(workload, mapping)
     domains = {
         node.name: tuple(template for template in library.templates if template.target == node.name)
@@ -466,6 +468,8 @@ def _group_manifest(index, workload, mapping, maximum_domain_size, maximum_direc
         "group": index,
         "stage_trace": list(_GROUP_TRACE),
         "parsed_compute_mapping": _parsed_compute_mapping_projection(workload, mapping),
+        "workload_semantics": _pretiling_workload_semantics(workload),
+        "mapping_file_sha256": mapping_file_sha256,
         "operator_ids": [operator["id"] for operator in operators],
         "operator_count": len(operators),
         "state_sum": sum(operator["domain_size"] for operator in operators),
@@ -547,29 +551,94 @@ def _signature_manifest(signature: Signature) -> list[dict[str, Any]]:
 
 
 def _parsed_compute_mapping_projection(workload, mapping) -> dict[str, Any]:
-    manifest = canonical_mapping_manifest(mapping)
-    computation_nodes = {node.name: node for node in workload.get_computation_nodes()}
     nodes = {}
-    for name, node in sorted(computation_nodes.items()):
-        entry = dict(manifest["nodes"][name])
-        unique_tiling = workload.get_unique_dims_inter_core_tiling(node, mapping)
-        entry["tiling_options"] = [tiling_key(unique_tiling)] if unique_tiling else []
-        nodes[name] = entry
+    for node in sorted(workload.get_computation_nodes(), key=lambda item: item.name):
+        node_mapping = mapping.get(node)
+        nodes[node.name] = {
+            "resource_options": [[core.id for core in option] for option in node_mapping.resource_allocation],
+            "tiling_options": [
+                [{"position": dimension.position, "factor": factor} for dimension, factor in option]
+                for option in node_mapping.inter_core_tiling
+            ],
+            "memory_options": [[core.id for core in option] for option in node_mapping.memory_allocation],
+            "kernel": type(node_mapping.kernel).__name__ if node_mapping.kernel is not None else None,
+        }
     return {
         "nodes": nodes,
-        "fused_groups": manifest["fused_groups"],
-        "runtime_args": manifest["runtime_args"],
+        "fused_groups": [
+            {
+                "name": group.name,
+                "layers": list(group.layers),
+                "intra_core_tiling": [
+                    {"position": dimension.position, "factor": factor}
+                    for dimension, factor in group.intra_core_tiling
+                ],
+            }
+            for group in mapping.fused_groups
+        ],
+        "runtime_args": dict(sorted(mapping.runtime_args.items())),
     }
 
 
-def _accepted_compute_mapping_projection(mapping_manifest) -> dict[str, Any]:
-    return {
-        "nodes": {
-            name: entry for name, entry in mapping_manifest["nodes"].items() if entry["node_type"] == "ComputationNode"
-        },
-        "fused_groups": mapping_manifest["fused_groups"],
-        "runtime_args": mapping_manifest["runtime_args"],
-    }
+def pretiling_mapping_reference_matches(groups, reference_groups) -> bool:
+    """Compare complete MappingParser-seam workload, mapping, and mapping-file identity."""
+
+    return len(groups) == len(reference_groups) and all(
+        group["operator_ids"] == [f"ComputationNode:{name}" for name in reference["operator_ids"]]
+        and group["workload_semantics"] == reference["workload_semantics"]
+        and group["parsed_compute_mapping"] == reference["mapping"]
+        and group["mapping_file_sha256"] == reference["mapping_file_sha256"]
+        for group, reference in zip(groups, reference_groups, strict=True)
+    )
+
+
+def _pretiling_workload_semantics(workload) -> dict[str, Any]:
+    """Serialize the graph and affine semantics consumed by the pre-tiling census."""
+
+    dimension_sizes = workload.get_dimension_sizes()
+    nodes = []
+    for node in workload.dataflow_sort():
+        row: dict[str, Any] = {"id": f"{type(node).__name__}:{node.name}", "node_class": type(node).__name__}
+        if isinstance(node, HasInputs):
+            row["inputs"] = [
+                {"name": tensor.name, "shape": list(tensor.shape), "type": str(tensor.operand_type)}
+                for tensor in node.inputs
+            ]
+        if isinstance(node, HasOutputs):
+            row["outputs"] = [
+                {"name": tensor.name, "shape": list(tensor.shape), "type": str(tensor.operand_type)}
+                for tensor in node.outputs
+            ]
+        if isinstance(node, HasIterationSpace):
+            row["dimensions"] = [
+                {"global_position": position, "size": dimension_sizes[position]}
+                for position in workload.global_idxs[node]
+            ]
+            row["operand_maps"] = [str(mapping) for mapping in node.operand_mapping]
+        if isinstance(node, ComputationNode):
+            row["operation"] = str(node.type)
+            row["fused_kernel"] = node.fused_kernel
+            row["reduction_axes"] = list(getattr(node, "reduction_axes", ()))
+        if isinstance(node, TransferNode):
+            row["transfer_type"] = node.transfer_type.name
+        if hasattr(node, "op_type"):
+            row["fusion_op_type"] = node.op_type
+        nodes.append(row)
+    edges = []
+    for source, target in workload.edges:
+        shared = (
+            [tensor.name for tensor in source.outputs if tensor in target.inputs]
+            if isinstance(source, HasOutputs) and isinstance(target, HasInputs)
+            else []
+        )
+        edges.append(
+            {
+                "source": f"{type(source).__name__}:{source.name}",
+                "target": f"{type(target).__name__}:{target.name}",
+                "tensors": shared,
+            }
+        )
+    return {"nodes": nodes, "edges": edges, "dimension_sizes": list(dimension_sizes)}
 
 
 def _summarize_attempts(spec, attempts, repeat_count):
@@ -633,10 +702,16 @@ def _correctness_criteria(contract, source_gates, source, environment, workloads
     denominator = {entry["id"]: entry for entry in contract["workload_denominator"]}
     denominator_match = workload_denominator_matches(workloads, denominator)
     gate2a_inputs_match = bool(manifests) and all(manifest["inputs_match_gate2a"] for manifest in manifests)
+    gate2a = source_gates["gate2a"]
     observations: dict[str, Any] = {
         "source_identified": source["identified"],
-        "source_gate_hashes_match": all(gate["hash_matches"] for gate in source_gates.values()),
+        "source_gate_hashes_match": all(
+            gate["hash_matches"] and gate.get("reference_hash_matches", True) for gate in source_gates.values()
+        ),
         "environment_compatible": environment["compatible"],
+        "gate2a_recorded_environment_match": environment == gate2a["environment"],
+        "gate2a_pretiling_reference_match": bool(manifests)
+        and all(manifest["pretiling_reference_match"] for manifest in manifests),
         "workload_denominator_match": denominator_match,
         "gate2a_inputs_match": gate2a_inputs_match,
         "preparation_success_ratio": summary["valid_workloads"] / summary["required_workloads"],
@@ -721,10 +796,21 @@ def _load_source_gates(contract):
             "hash_matches": True,
         }
         if name == "gate2a":
+            reference, reference_digest = _load_pretiling_reference(expected["pretiling_reference"], payload)
+            loaded[name].update(
+                {
+                    "source_commit": payload["source"]["commit"],
+                    "environment": payload["environment"],
+                    "reference_path": expected["pretiling_reference"]["artifact"],
+                    "reference_sha256": reference_digest,
+                    "reference_hash_matches": True,
+                }
+            )
             accepted_denominator = {
                 workload_id: {
                     "sha256": result["sha256"],
                     "hardware_sha256": payload["hardware"]["sha256"],
+                    "pretiling_groups": reference["workloads"][workload_id]["groups"],
                     "operator_ids": [
                         [
                             node["id"]
@@ -733,15 +819,77 @@ def _load_source_gates(contract):
                         ]
                         for group in result["manifest"]["groups"]
                     ],
-                    "compute_mappings": [
-                        _accepted_compute_mapping_projection(group["mapping"]) for group in result["manifest"]["groups"]
-                    ],
                 }
                 for workload_id, result in payload["workloads"].items()
             }
     if accepted_denominator is None:
         raise PreTilingOpportunityError("Gate 2A source denominator is unavailable")
     return loaded, accepted_denominator
+
+
+def _load_pretiling_reference(expected, gate2a):
+    path = Path(expected["artifact"])
+    digest = _file_digest(path)
+    encoded = path.read_text(encoding="utf-8")
+    reference = json.loads(gzip.decompress(base64.b64decode(encoded)).decode("utf-8"))
+    environment = gate2a["environment"]
+    recorded_environment = {
+        "python_version": environment["python_version"],
+        "packages": environment["packages"],
+    }
+    accepted_workloads = {
+        workload_id: {
+            "family": result["family"],
+            "sha256": result["sha256"],
+            "operator_ids": [
+                [
+                    node["id"].split(":", 1)[1]
+                    for node in group["input_workload"]["nodes"]
+                    if node["id"].startswith("ComputationNode:")
+                ]
+                for group in result["manifest"]["groups"]
+            ],
+        }
+        for workload_id, result in gate2a["workloads"].items()
+    }
+    reference_workloads = {
+        workload_id: {
+            "family": result["family"],
+            "sha256": result["sha256"],
+            "operator_ids": [group["operator_ids"] for group in result["groups"]],
+        }
+        for workload_id, result in reference.get("workloads", {}).items()
+    }
+    valid = (
+        digest == expected["sha256"]
+        and reference.get("schema") == expected["schema"]
+        and reference.get("source") == {"commit": gate2a["source"]["commit"], "clean": True}
+        and reference.get("instrument", {}).get("commit") == expected["instrument_commit"]
+        and reference.get("instrument", {}).get("path") == expected["instrument_path"]
+        and reference.get("instrument", {}).get("sha256")
+        == _git_blob_digest(expected["instrument_commit"], expected["instrument_path"])
+        and reference.get("environment") == recorded_environment
+        and reference.get("hardware") == {
+            "path": gate2a["hardware"]["path"],
+            "sha256": gate2a["hardware"]["sha256"],
+        }
+        and reference_workloads == accepted_workloads
+    )
+    if not valid:
+        raise PreTilingOpportunityError("Gate 2A pre-tiling reference does not match its frozen provenance")
+    return reference, digest
+
+
+def _git_blob_digest(commit: str, path: str) -> str | None:
+    try:
+        result = subprocess.run(
+            ("git", "show", f"{commit}:{path}"),
+            check=True,
+            capture_output=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return None
+    return "sha256:" + sha256(result.stdout).hexdigest()
 
 
 def _worker_count(requested, attempts, contract):
