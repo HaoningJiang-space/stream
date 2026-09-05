@@ -99,7 +99,7 @@ def test_contract_freezes_pretiling_boundary_and_proxy_claim():
     assert contract["execution"]["run_tta"] is False
     assert contract["signature_proxy"]["evidence_class"] == "PRETILING_SIGNATURE_PROXY"
     reference = contract["source_gates"]["gate2a"]["pretiling_reference"]
-    assert reference["artifact"] == "artifacts/gate2f-a/gate2a-pretiling-reference-v2.json.gz.b64"
+    assert reference["artifact"] == "artifacts/gate2f-a/gate2a-pretiling-reference-v3.json.gz.b64"
     assert reference["sha256"].startswith("sha256:")
     assert reference["instrument_commit"]
     assert reference["instrument_path"] == "scripts/capture_pretiling_mapping_reference.py"
