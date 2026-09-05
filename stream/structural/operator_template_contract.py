@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from hashlib import sha256
+from itertools import product
 from math import prod
 from typing import Any
 
@@ -64,6 +65,7 @@ class OperatorTemplateLibrary:
 
     templates: tuple[OperatorTemplate, ...]
     version: int = 1
+    _keys: frozenset[str] = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         if self.version != 1:
@@ -71,10 +73,11 @@ class OperatorTemplateLibrary:
         keys = [template.key for template in self.templates]
         if not keys or len(keys) != len(set(keys)):
             raise ValueError("operator-template library must be non-empty and duplicate-free")
+        object.__setattr__(self, "_keys", frozenset(keys))
 
     @property
     def keys(self) -> frozenset[str]:
-        return frozenset(template.key for template in self.templates)
+        return self._keys
 
 
 @dataclass(frozen=True, slots=True)
@@ -113,6 +116,89 @@ class CompiledOperatorTemplates:
     def semantic_hash(self) -> str:
         encoded = json.dumps(self.manifest, sort_keys=True, separators=(",", ":"))
         return sha256(encoded.encode()).hexdigest()
+
+
+def baseline_operator_template(workload: Workload, mapping: Mapping, node: ComputationNode) -> OperatorTemplate:
+    """Return the parsed mapping's concrete paired template for ``node``.
+
+    A multi-core pool without one matching split is not silently reinterpreted as
+    an unspecialized state: it lies outside the finite paired-template contract.
+    """
+
+    node_mapping = mapping.get(node)
+    if len(node_mapping.resource_allocation) != 1:
+        raise OperatorTemplateCompileError(f"{node.name}: baseline mapping must provide exactly one core pool")
+    core_ids = tuple(core.id for core in node_mapping.resource_allocation[0])
+    if not core_ids:
+        raise OperatorTemplateCompileError(f"{node.name}: baseline core pool must be non-empty")
+    if len(node_mapping.inter_core_tiling) > 1:
+        raise OperatorTemplateCompileError(f"{node.name}: baseline mapping must provide at most one tiling")
+    tiling = node_mapping.inter_core_tiling[0] if node_mapping.inter_core_tiling else ()
+    splits = tuple((dimension.position, factor) for dimension, factor in tiling if factor > 1)
+    try:
+        template = OperatorTemplate(node.name, core_ids, splits)
+    except ValueError as error:
+        message = f"{node.name}: baseline mapping is not one paired template: {error}"
+        raise OperatorTemplateCompileError(message) from error
+    _validate_splits(workload, node, template)
+    return template
+
+
+def generate_operator_template_library(workload: Workload, mapping: Mapping) -> OperatorTemplateLibrary:
+    """Generate deterministic paired templates at the pre-tiling mapping seam.
+
+    Core contiguity follows the parsed pool order. For a template width ``k``,
+    the only groups are aligned chunks ``pool[j:j+k]`` for ``j = 0, k, ...``.
+    Different widths may reuse cores. Split candidates use the same legality
+    predicate as :func:`compile_operator_templates`.
+    """
+
+    templates: list[OperatorTemplate] = []
+    for node in workload.dataflow_sort():
+        if not isinstance(node, ComputationNode):
+            continue
+        node_mapping = mapping.get(node)
+        if len(node_mapping.resource_allocation) != 1:
+            raise OperatorTemplateCompileError(f"{node.name}: baseline mapping must provide exactly one core pool")
+        pool = tuple(node_mapping.resource_allocation[0])
+        if not pool:
+            raise OperatorTemplateCompileError(f"{node.name}: baseline core pool must be non-empty")
+        iterator_types = derive_iterator_types(node)
+        output_positions = sorted(
+            {
+                position
+                for output in node.outputs
+                for position in map_dim_positions(node.get_mapping(output))
+                if iterator_types.get(position) is IteratorType.PARALLEL
+            }
+        )
+        node_dims = workload.get_dims(node)
+        factor_domains = [
+            _divisors_up_to(workload.get_dimension_size(node_dims[position]), len(pool))
+            for position in output_positions
+        ]
+        combinations = product(*factor_domains) if factor_domains else [()]
+        for factors in combinations:
+            core_count = prod(factors)
+            if core_count > len(pool) or len(pool) % core_count:
+                continue
+            splits = tuple(
+                (position, factor)
+                for position, factor in zip(output_positions, factors, strict=True)
+                if factor > 1
+            )
+            for offset in range(0, len(pool), core_count):
+                template = OperatorTemplate(
+                    node.name,
+                    tuple(core.id for core in pool[offset : offset + core_count]),
+                    splits,
+                )
+                _validate_splits(workload, node, template)
+                templates.append(template)
+        baseline = baseline_operator_template(workload, mapping, node)
+        if baseline not in templates:
+            raise OperatorTemplateCompileError(f"{node.name}: generated domain does not retain the parsed baseline")
+    return OperatorTemplateLibrary(tuple(templates))
 
 
 def compile_operator_templates(
@@ -172,6 +258,12 @@ def _validate_splits(workload: Workload, node: ComputationNode, template: Operat
         extent = workload.get_dimension_size(node_dims[position])
         if extent % factor:
             raise OperatorTemplateCompileError(f"{node.name}: extent {extent} is not divisible by split {factor}")
+
+
+def _divisors_up_to(size: int, limit: int) -> tuple[int, ...]:
+    if size < 1 or limit < 1:
+        raise OperatorTemplateCompileError("dimension extents and core-pool width must be positive")
+    return tuple(factor for factor in range(1, min(size, limit) + 1) if size % factor == 0)
 
 
 def _copy_mapping(mapping: Mapping) -> Mapping:

@@ -1,0 +1,102 @@
+{
+  "contract": "Gate 2F-A Pre-Tiling Operator-Template Opportunity Census",
+  "version": "gate2f-a-v1",
+  "design_status": "exploratory thresholds informed by a disclosed read-only preflight",
+  "threshold_origin": "EXPLORATORY_PREFLIGHT_INFORMED",
+  "source_gates": {
+    "gate2a": {
+      "artifact": "artifacts/gate2a/report.json",
+      "sha256": "sha256:d2473721f8e9d4796db5db7797ddf7c0099e82d4788ab4d081fe9b6a218aa145",
+      "required_verdict": "PASS"
+    },
+    "gate1a_v4": {
+      "artifact": "artifacts/gate1a-v4/report.json",
+      "sha256": "sha256:f30b6f07c0649ccf5d2666465c9e23bca730098d2da218c43972da93ca4be396",
+      "required_verdict": "PASS"
+    }
+  },
+  "workload_denominator": [
+    {"id": "swiglu", "family": "transformer_ffn", "group_count": 1, "operator_count": 5},
+    {"id": "fsrcnn", "family": "sequential_cnn", "group_count": 1, "operator_count": 8},
+    {"id": "resnet18", "family": "residual_cnn", "group_count": 11, "operator_count": 48},
+    {"id": "attention_head", "family": "attention_fork_join", "group_count": 2, "operator_count": 9}
+  ],
+  "allowed_stage_trace": {
+    "frontend": [
+      "accelerator_parser",
+      "onnx_parser",
+      "normalization_expansion",
+      "generic_mapping"
+    ],
+    "per_group": ["mapping_parser"]
+  },
+  "template_rules": {
+    "core_order": "parsed resource-allocation pool order",
+    "core_chunks": "for width k, aligned chunks pool[j:j+k] at j=0,k,...,W-k; widths may share cores",
+    "split_dimensions": "output-indexed PARALLEL local dimensions only",
+    "split_factors": "positive divisors of the pre-tiling extent whose product divides the parsed pool width",
+    "paired_state": "ordered core group and local split tuple are one atomic template",
+    "baseline": "the parsed single core-pool option and single tiling option must themselves satisfy the paired template invariant and occur in the generated domain"
+  },
+  "signature_proxy": {
+    "evidence_class": "PRETILING_SIGNATURE_PROXY",
+    "definition": "ordered non-unit selected split dimensions that index the shared tensor operand, expressed in the pre-tiling workload unique-dimension namespace",
+    "compatibility": "a tuple is proxy-compatible iff it contains at most one distinct non-empty signature; empty signatures are wildcards",
+    "count_formula": "T=product_i(N_i); E=product_i(e_i); C=E+sum_s(product_i(e_i+m_i(s))-E), over the union of non-empty signatures",
+    "noncartesian_definition": "C is smaller than the product of the unary support projections of the compatibility relation",
+    "validation_boundary": "the abstract empty-or-equal rule passed Gate 1A-v4 micro production validation; equivalence of this pre-tiling projector on real transformed workloads remains unproved"
+  },
+  "execution": {
+    "repeat_count": 2,
+    "max_workers": 8,
+    "wall_time_budget_seconds": 120,
+    "maximum_operator_domain_size": 10000,
+    "maximum_direct_factor_tuples": 100000,
+    "integer_arithmetic": "exact_python_integer",
+    "run_kernel_state": false,
+    "run_tiling_generation": false,
+    "run_scheduler_preparation": false,
+    "run_tta": false
+  },
+  "environment": {
+    "python": ">=3.12",
+    "ortools": ">=9.15"
+  },
+  "correctness_criteria": {
+    "source_identified": true,
+    "source_gate_hashes_match": true,
+    "environment_compatible": true,
+    "workload_denominator_match": true,
+    "gate2a_inputs_match": true,
+    "preparation_success_ratio": 1.0,
+    "deterministic_repeat_ratio": 1.0,
+    "stage_allowlist_exact": true,
+    "forbidden_execution_events": 0,
+    "candidate_templates_unique": true,
+    "generated_templates_compile": true,
+    "baseline_retention_ratio": 1.0,
+    "reduction_axis_split_count": 0,
+    "shared_tensor_factor_coverage": 1.0,
+    "analytic_direct_factor_count_match": true,
+    "maximum_domain_size_within_budget": true,
+    "wall_time_within_budget": true
+  },
+  "opportunity_criteria": {
+    "operator_nondegenerate_ratio": 1.0,
+    "minimum_noncartesian_workload_families": 3
+  },
+  "outcome_policy": {
+    "correctness_failure": "INVALID",
+    "correctness_pass_opportunity_negative": "DISCOVERY_NEGATIVE",
+    "correctness_and_opportunity_pass": "DISCOVERY_PASS"
+  },
+  "excluded_claims": [
+    "post_tiling_signature_equivalence_on_real_workloads",
+    "all_generated_templates_survive_tiling_generation",
+    "all_generated_templates_are_tta_executable",
+    "global_compatible_assignment_count",
+    "factor_independence",
+    "variable_elimination_necessity_or_scalability",
+    "latency_or_energy_improvement"
+  ]
+}
