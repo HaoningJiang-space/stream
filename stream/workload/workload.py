@@ -59,12 +59,13 @@ class Workload(DiGraphWrapper[Node]):
     _global_dimension_idxs: dict[Node, range] | None = None
     _num_dims_cache: int | None = None
     _dimension_sizes_cache: tuple[int, ...] | None = None
-    _global_mapping_cache: dict[tuple[HasIterationSpace, AffineMap], AffineMap]
-    _node_dims_cache: dict[HasIterationSpace, tuple[LayerDim, ...]]
+    _global_mapping_cache: dict[tuple[int, int], AffineMap]
+    _node_dims_cache: dict[int, tuple[LayerDim, ...]]
+    _tensor_strides_cache: dict[int, tuple[tuple[LayerDim, tuple[int, ...]], ...]]
     _unique_dimensions_cache: (
         tuple[
-            tuple[Node, ...],
-            tuple[tuple[Node, Node], ...],
+            tuple[int, ...],
+            tuple[tuple[int, int], ...],
             tuple[LayerDim, ...],
             tuple[AffineExpr, ...],
         ]
@@ -78,6 +79,7 @@ class Workload(DiGraphWrapper[Node]):
         self._dimension_sizes_cache = None
         self._global_mapping_cache = {}
         self._node_dims_cache = {}
+        self._tensor_strides_cache = {}
         self._unique_dimensions_cache = None
         graph = nx.DiGraph()
         graph.add_nodes_from(nodes)
@@ -103,6 +105,7 @@ class Workload(DiGraphWrapper[Node]):
         self._dimension_sizes_cache = None
         self._global_mapping_cache.clear()
         self._node_dims_cache.clear()
+        self._tensor_strides_cache.clear()
         self._unique_dimensions_cache = None
 
     def dataflow_sort(self) -> list[Node]:
@@ -164,7 +167,7 @@ class Workload(DiGraphWrapper[Node]):
         return tuple(tensors)
 
     def global_mapping(self, node: HasIterationSpace, mapping: AffineMap):
-        key = (node, mapping)
+        key = (id(node), id(mapping))
         cached = self._global_mapping_cache.get(key)
         if cached is not None:
             return cached
@@ -471,7 +474,8 @@ class Workload(DiGraphWrapper[Node]):
         return result
 
     def get_dims(self, node: HasIterationSpace) -> list[LayerDim]:
-        cached = self._node_dims_cache.get(node)
+        node_key = id(node)
+        cached = self._node_dims_cache.get(node_key)
         if cached is not None:
             return list(cached)
         global_idxs = self.global_idxs
@@ -479,7 +483,7 @@ class Workload(DiGraphWrapper[Node]):
         start_idx = global_idxs[node].start
         stop_idx = global_idxs[node].stop
         dims = tuple(expressions[start_idx:stop_idx])
-        self._node_dims_cache[node] = dims
+        self._node_dims_cache[node_key] = dims
         return list(dims)
 
     def get_dimension_size(self, dim: LayerDim) -> int:
@@ -489,8 +493,8 @@ class Workload(DiGraphWrapper[Node]):
         return dim_ranges[idx]
 
     def unique_dimensions(self):
-        nodes = tuple(self.nodes)
-        edges = tuple(self.edges)
+        nodes = tuple(id(node) for node in self.nodes)
+        edges = tuple((id(source), id(target)) for source, target in self.edges)
         if self._unique_dimensions_cache is not None:
             cached_nodes, cached_edges, unique_dims, dim_values = self._unique_dimensions_cache
             if nodes == cached_nodes and edges == cached_edges:
@@ -796,6 +800,9 @@ class Workload(DiGraphWrapper[Node]):
         return tuple(relevant_dims)
 
     def strides_for_tensor(self, tensor: Tensor) -> dict[LayerDim, tuple[int, ...]]:
+        cached = self._tensor_strides_cache.get(id(tensor))
+        if cached is not None:
+            return dict(cached)
         unique_dims, all_dims = self.unique_dimensions()
         node = next(iter(n for n in self.get_iteration_space_nodes() if tensor in n.tensors))
         mapping = node.get_mapping(tensor)
@@ -813,6 +820,7 @@ class Workload(DiGraphWrapper[Node]):
             # STRIDE = delta output, constants cancel out
             stride = tuple(int(b) - int(a) for a, b in zip(base_out, bumped_out, strict=True))
             result[unique_dim] = stride
+        self._tensor_strides_cache[id(tensor)] = tuple(result.items())
         return result
 
     _PALETTE = {
