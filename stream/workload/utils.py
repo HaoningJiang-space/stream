@@ -30,6 +30,18 @@ if TYPE_CHECKING:
 MAC_OPERATOR_TYPES: tuple[str, ...] = ("conv", "gemm", "matmul", "linear")
 
 
+class SpatialUnrollingExtentError(ValueError):
+    """A global iteration extent cannot realize a requested spatial unrolling."""
+
+    def __init__(self, dimension: LayerDim, dimension_size: int, spatial_unrolling: int):
+        self.dimension = dimension
+        self.dimension_size = dimension_size
+        self.spatial_unrolling = spatial_unrolling
+        super().__init__(
+            f"Dim size {dimension_size} not divisible by spatial unrolling {spatial_unrolling} for {dimension}"
+        )
+
+
 def is_mac_operator_type(op_type: object) -> bool:
     """Whether ``op_type`` names multiply-accumulate work (the matmul/conv family)."""
     lowered = str(op_type).lower()
@@ -148,7 +160,8 @@ def _insert_kernel_iteration_variables(
             spatial_unrolling = next((su[1] for su in unique_spatial_unrollings if su[0] == dim), 1)
             dim_size = workload.get_dimension_size(dim)
             size, rem = divmod(dim_size, spatial_unrolling)
-            assert rem == 0, f"Dim size {dim_size} not divisible by spatial unrolling {spatial_unrolling}"
+            if rem:
+                raise SpatialUnrollingExtentError(dim, dim_size, spatial_unrolling)
             effect = LoopEffect.VARYING if dim in workload.get_dims(node) else LoopEffect.INVARIANT
             iteration_variables[node].insert(
                 0,

@@ -63,7 +63,7 @@ from stream.structural.real_workload_lifting import (
     load_gate2a_contract,
 )
 from stream.workload.node import ComputationNode, TransferNode
-from stream.workload.utils import get_equivalent_dimension
+from stream.workload.utils import SpatialUnrollingExtentError, get_equivalent_dimension
 
 _CONTRACT = "gate2f_posttiling_contract.json"
 _FRONTEND_TRACE = ("accelerator_parser", "onnx_parser", "normalization_expansion", "generic_mapping")
@@ -615,7 +615,34 @@ def _evaluate_tuple(  # noqa: PLR0913, PLR0915
     )
     scheduler.cost_lut = scheduler.update_cost_lut()
     trace.append("cost_lut")
-    scheduler.ssis = scheduler.generate_ssis()
+    try:
+        scheduler.ssis = scheduler.generate_ssis()
+    except SpatialUnrollingExtentError as error:
+        decisions = _factor_decisions(scheduler.tensor_relevant_tiling_decisions, factor)
+        if not _factor_explains_ssis_rejection(decisions, error):
+            raise PostTilingCompatibilityError(
+                "SSIS spatial-unrolling rejection did not match the frozen factor"
+            ) from error
+        trace.append("ssis_rejected")
+        return {
+            "post": False,
+            "literal_survival": literal_survival,
+            "lineage_witness": True,
+            "nonempty_post_domains": True,
+            "ssis_semantics": True,
+            "literal_failure_stages": [item["stage"] for item in literal_checks if not item["passed"]],
+            "stage_trace": trace,
+            "witness": {
+                "outcome": "REJECTED",
+                "reason": {
+                    "kind": "spatial_unrolling_extent",
+                    "dimension": str(error.dimension),
+                    "dimension_size": error.dimension_size,
+                    "spatial_unrolling": error.spatial_unrolling,
+                },
+                "decisions": [_decision_manifest(item) for item in decisions],
+            },
+        }
     trace.append("ssis")
     literal_survival &= mapping_check("ssis", scheduler.ssw, scheduler.mapping, normalized=True, updated_workload=True)
     _validate_transfer_tiling_domains(scheduler)
@@ -743,6 +770,25 @@ def _factor_decisions(decisions: list[TensorRelevantTilingDecision], factor) -> 
     return matching
 
 
+def _factor_explains_ssis_rejection(
+    decisions: list[TensorRelevantTilingDecision], error: SpatialUnrollingExtentError
+) -> bool:
+    """Whether a frozen factor both requested and concretized the rejected unrolling."""
+
+    requested = any(
+        (error.dimension, error.spatial_unrolling) in projection
+        for decision in decisions
+        for _, projection in decision.projections
+    )
+    completed = [decision for decision in decisions if decision.role == "completed_transfer_mapping"]
+    return requested and bool(completed) and all(
+        decision.accepted
+        and decision.result_resource_option_count > 0
+        and decision.result_memory_option_count > 0
+        for decision in completed
+    )
+
+
 def _lineage_matches(lineage: TransferLineage, factor: dict[str, Any]) -> bool:
     observed_consumers = dict(zip(lineage.consumers, lineage.consumer_operand_indices, strict=True))
     expected_consumers = dict(zip(factor["consumers"], map(tuple, factor["consumer_operand_indices"]), strict=True))
@@ -859,6 +905,7 @@ def _correctness_criteria(contract, source_gate, source, environment, factors, s
                 tuple(contract["allowed_stage_trace"]["compatible"]),
                 tuple(contract["allowed_stage_trace"]["incompatible"]),
                 tuple(contract["allowed_stage_trace"]["incompatible_transfer_domain"]),
+                tuple(contract["allowed_stage_trace"]["incompatible_ssis"]),
             )
             for manifest in manifests
             for row in manifest["rows"]

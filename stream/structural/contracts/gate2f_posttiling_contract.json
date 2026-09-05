@@ -13,7 +13,7 @@
   },
   "relation": {
     "pre": "Gate 2F-A empty-or-equal nonempty tensor-relevant signature relation",
-    "post": "production transfer-mapping acceptance with structured tensor-relevant projection and transfer-lineage witnesses",
+    "post": "production acceptance through SSIS construction with structured tensor-relevant projection and transfer-lineage witnesses",
     "factor_scope": "all concrete ordered consumer-template tuples for every frozen Gate 2F-A shared-tensor factor; non-factor operators retain parsed baseline mappings",
     "false_positive": "pre=true and post=false",
     "false_negative": "pre=false and post=true"
@@ -47,6 +47,17 @@
       "fusion_splits",
       "computation_mapping_normalization",
       "transfer_domain_rejected"
+    ],
+    "incompatible_ssis": [
+      "operator_template_compilation",
+      "kernel_state",
+      "tiling_generation",
+      "transfer_graph",
+      "fusion_splits",
+      "computation_mapping_normalization",
+      "transfer_mapping",
+      "cost_lut",
+      "ssis_rejected"
     ]
   },
   "execution": {

@@ -5,8 +5,10 @@ import subprocess
 from time import perf_counter
 from types import SimpleNamespace
 
-from stream.cost_model.steady_state_scheduler import TransferLineage
+from stream.cost_model.steady_state_scheduler import TensorRelevantTilingDecision, TransferLineage
+from stream.datatypes import LayerDim
 from stream.structural.posttiling_compatibility import (
+    _factor_explains_ssis_rejection,
     _isolated_factor_attempt,
     _lineage_matches,
     _summary,
@@ -15,6 +17,7 @@ from stream.structural.posttiling_compatibility import (
     verify_posttiling_compatibility_provenance,
     write_posttiling_compatibility_provenance,
 )
+from stream.workload.utils import SpatialUnrollingExtentError
 
 
 def test_fused_group_projection_uses_current_workload_dimension_coordinates(monkeypatch):
@@ -47,11 +50,34 @@ def test_contract_freezes_posttiling_relation_and_prepare_only_boundary():
     contract = load_posttiling_compatibility_contract()
 
     assert contract["version"] == "gate2f-b-v1"
-    assert contract["relation"]["post"].startswith("production transfer-mapping acceptance")
+    assert contract["relation"]["post"].startswith("production acceptance through SSIS construction")
     assert contract["execution"]["visualize_tiled_workload"] is False
     assert contract["execution"]["run_tta"] is False
     assert contract["execution"]["run_structural_search"] is False
     assert contract["faithfulness_criteria"] == {"false_positive_count": 0, "false_negative_count": 0}
+
+
+def test_ssis_rejection_requires_a_matching_completed_factor_decision():
+    dimension = LayerDim(position=4, prefix="z")
+    lineage = TransferLineage(
+        "shared",
+        "InEdge:shared",
+        ("ComputationNode:A", "ComputationNode:B"),
+        ((0,), (0,)),
+    )
+    decision = TensorRelevantTilingDecision(
+        transfer="Transfer(shared)",
+        lineage=lineage,
+        projections=(("A", ()), ("B", ((dimension, 4),))),
+        selected_reference=None,
+        role="completed_transfer_mapping",
+        accepted=True,
+        result_resource_option_count=4,
+        result_memory_option_count=1,
+    )
+
+    assert _factor_explains_ssis_rejection([decision], SpatialUnrollingExtentError(dimension, 6, 4)) is True
+    assert _factor_explains_ssis_rejection([decision], SpatialUnrollingExtentError(dimension, 6, 2)) is False
 
 
 def test_lineage_match_requires_tensor_producer_consumers_and_operand_indices():
