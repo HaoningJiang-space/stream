@@ -62,7 +62,8 @@
   },
   "execution": {
     "repeat_count": 2,
-    "max_workers": 8,
+    "max_workers": 64,
+    "tuple_shard_size": 512,
     "wall_time_budget_seconds": 7200,
     "maximum_direct_factor_tuples": 100000,
     "max_transfer_plans_per_endpoint": 1,

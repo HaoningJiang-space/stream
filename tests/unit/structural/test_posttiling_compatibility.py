@@ -11,6 +11,7 @@ from stream.structural.posttiling_compatibility import (
     _factor_explains_ssis_rejection,
     _isolated_factor_attempt,
     _lineage_matches,
+    _merge_factor_shards,
     _summary,
     _translated_fused_group_projection,
     load_posttiling_compatibility_contract,
@@ -170,7 +171,7 @@ def test_worker_timeout_is_a_terminal_environment_failure(monkeypatch, tmp_path)
 
     monkeypatch.setattr(subprocess, "run", time_out)
     result = _isolated_factor_attempt(
-        {"workload_id": "w", "group": 0, "factor": 0},
+        {"workload_id": "w", "group": 0, "factor": 0, "total_tuple_count": 1},
         tmp_path,
         0,
         {},
@@ -179,6 +180,41 @@ def test_worker_timeout_is_a_terminal_environment_failure(monkeypatch, tmp_path)
 
     assert result["status"] == "ENVIRONMENT_FAILURE"
     assert "deadline" in result["detail"]
+
+
+def test_factor_shards_merge_in_global_ordinal_order():
+    spec = {"workload_id": "w", "group": 0, "factor": 0, "total_tuple_count": 3}
+    boundary = {
+        "tta_construct": 0,
+        "tta_solve": 0,
+        "structural_exhaustive": 0,
+        "structural_variable_elimination": 0,
+    }
+
+    def shard(start, stop):
+        return {
+            "status": "VALID",
+            "wall_seconds": 1.0,
+            "manifest": {
+                "spec": spec,
+                "frontend_trace": ["mapping_parser"],
+                "mapping_parser_reference_match": True,
+                "domain_hashes_match": True,
+                "factor_manifest_match": True,
+                "tuple_start": start,
+                "tuple_stop": stop,
+                "tuple_key_lines": [f"key-{ordinal}" for ordinal in range(start, stop)],
+                "witnesses": {},
+                "rows": [{"ordinal": ordinal} for ordinal in range(start, stop)],
+                "execution_boundary": boundary,
+            },
+        }
+
+    result = _merge_factor_shards(spec, 0, {2: shard(2, 3), 0: shard(0, 2)}, 2)
+
+    assert result["status"] == "VALID"
+    assert [row["ordinal"] for row in result["manifest"]["rows"]] == [0, 1, 2]
+    assert "tuple_key_lines" not in result["manifest"]
 
 
 def test_provenance_rejects_mutated_report(tmp_path):

@@ -15,7 +15,7 @@ from dataclasses import asdict
 from datetime import UTC, datetime
 from hashlib import sha256
 from importlib.resources import files
-from itertools import product
+from itertools import islice, product
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from time import perf_counter
@@ -95,7 +95,11 @@ def run_posttiling_compatibility(
     source_before = _source_manifest(source_commit, executed_module_path=__file__)
     environment = _environment_manifest(contract)
     repeat_count = int(contract["execution"]["repeat_count"])
-    worker_count = _worker_count(max_workers, len(factor_specs) * repeat_count, contract)
+    shard_size = int(contract["execution"]["tuple_shard_size"])
+    shard_attempt_count = sum(
+        math.ceil(spec["total_tuple_count"] / shard_size) * repeat_count for spec in factor_specs
+    )
+    worker_count = _worker_count(max_workers, shard_attempt_count, contract)
     started = perf_counter()
     deadline = started + float(contract["execution"]["wall_time_budget_seconds"])
     with TemporaryDirectory(prefix="stream-gate2f-b-") as temporary:
@@ -128,6 +132,8 @@ def run_posttiling_compatibility(
         "environment": environment,
         "execution": {
             "factor_attempt_count": len(factor_specs) * repeat_count,
+            "shard_attempt_count": shard_attempt_count,
+            "tuple_shard_size": shard_size,
             "max_workers": worker_count,
             "wall_seconds": round(wall_seconds, 6),
             "tta_solve_invoked": False,
@@ -224,28 +230,47 @@ def _factor_specs(gate2fa: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def _run_factor_attempts(specs, temporary_root, repeat_count, max_workers, contract, deadline):
-    attempts: dict[str, list[dict[str, Any] | None]] = {_factor_key(spec): [None] * repeat_count for spec in specs}
+    attempts: dict[str, list[dict[int, dict[str, Any]]]] = {
+        _factor_key(spec): [{} for _ in range(repeat_count)] for spec in specs
+    }
+    shard_size = int(contract["execution"]["tuple_shard_size"])
     with ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="gate2f-b") as executor:
         pending = {}
         for spec in specs:
             for repeat in range(repeat_count):
-                work_dir = temporary_root / f"{_factor_key(spec)}-{repeat}"
-                future = executor.submit(_isolated_factor_attempt, spec, work_dir, repeat, contract, deadline)
-                pending[future] = (_factor_key(spec), repeat)
+                for start in range(0, spec["total_tuple_count"], shard_size):
+                    stop = min(start + shard_size, spec["total_tuple_count"])
+                    work_dir = temporary_root / f"{_factor_key(spec)}-{repeat}-{start}-{stop}"
+                    future = executor.submit(
+                        _isolated_factor_attempt,
+                        spec,
+                        work_dir,
+                        repeat,
+                        contract,
+                        deadline,
+                        start,
+                        stop,
+                    )
+                    pending[future] = (_factor_key(spec), repeat, start)
         for future in as_completed(pending):
-            factor_key, repeat = pending[future]
-            attempts[factor_key][repeat] = future.result()
+            factor_key, repeat, start = pending[future]
+            attempts[factor_key][repeat][start] = future.result()
     return {
         _factor_key(spec): _summarize_factor(
             spec,
-            [item for item in attempts[_factor_key(spec)] if item is not None],
+            [
+                _merge_factor_shards(spec, repeat, shards, shard_size)
+                for repeat, shards in enumerate(attempts[_factor_key(spec)])
+            ],
             repeat_count,
         )
         for spec in specs
     }
 
 
-def _isolated_factor_attempt(spec, work_dir, repeat, contract, deadline) -> dict[str, Any]:
+def _isolated_factor_attempt(
+    spec, work_dir, repeat, contract, deadline, tuple_start: int = 0, tuple_stop: int | None = None
+) -> dict[str, Any]:
     work_dir.mkdir(parents=True, exist_ok=True)
     request_path = work_dir / "request.json"
     result_path = work_dir / "result.json"
@@ -255,6 +280,8 @@ def _isolated_factor_attempt(spec, work_dir, repeat, contract, deadline) -> dict
                 "spec": spec,
                 "work_dir": str(work_dir / "preparation"),
                 "result_path": str(result_path),
+                "tuple_start": tuple_start,
+                "tuple_stop": spec["total_tuple_count"] if tuple_stop is None else tuple_stop,
             },
             sort_keys=True,
         ),
@@ -315,12 +342,90 @@ def _isolated_factor_attempt(spec, work_dir, repeat, contract, deadline) -> dict
     return result
 
 
+def _merge_factor_shards(spec, repeat, shards, shard_size) -> dict[str, Any]:  # noqa: PLR0911
+    """Reconstruct one deterministic full-factor attempt from isolated ordinal shards."""
+
+    expected_ranges = [
+        (start, min(start + shard_size, spec["total_tuple_count"]))
+        for start in range(0, spec["total_tuple_count"], shard_size)
+    ]
+    if sorted(shards) != [start for start, _ in expected_ranges]:
+        return {"status": "ENVIRONMENT_FAILURE", "repeat": repeat, "detail": "one or more shards never started"}
+    ordered = [shards[start] for start, _ in expected_ranges]
+    failed = next((item for item in ordered if item.get("status") != "VALID"), None)
+    if failed is not None:
+        return {
+            "status": failed["status"],
+            "repeat": repeat,
+            "hash_seed": failed.get("hash_seed"),
+            "wall_seconds": sum(float(item.get("wall_seconds", 0.0)) for item in ordered),
+            "detail": failed.get("detail", "factor shard failed"),
+        }
+    manifests = [item["manifest"] for item in ordered]
+    stable_fields = (
+        "spec",
+        "frontend_trace",
+        "mapping_parser_reference_match",
+        "domain_hashes_match",
+        "factor_manifest_match",
+    )
+    if any(manifest[field] != manifests[0][field] for manifest in manifests[1:] for field in stable_fields):
+        return {"status": "CORRECTNESS_FAILURE", "repeat": repeat, "detail": "factor shard manifest drift"}
+    if any(
+        (manifest["tuple_start"], manifest["tuple_stop"]) != expected_range
+        for manifest, expected_range in zip(manifests, expected_ranges, strict=True)
+    ):
+        return {"status": "CORRECTNESS_FAILURE", "repeat": repeat, "detail": "factor shard range drift"}
+    rows = [row for manifest in manifests for row in manifest["rows"]]
+    if [row["ordinal"] for row in rows] != list(range(spec["total_tuple_count"])):
+        return {"status": "CORRECTNESS_FAILURE", "repeat": repeat, "detail": "factor shard row conservation failed"}
+    tuple_digest = sha256()
+    for manifest in manifests:
+        for line in manifest.pop("tuple_key_lines"):
+            tuple_digest.update(line.encode() + b"\n")
+    witnesses: dict[str, dict[str, Any]] = {}
+    for manifest in manifests:
+        for witness_id, witness in manifest["witnesses"].items():
+            if witness_id in witnesses and witnesses[witness_id] != witness:
+                return {"status": "CORRECTNESS_FAILURE", "repeat": repeat, "detail": "witness hash collision"}
+            witnesses[witness_id] = witness
+    boundary = {
+        event.value: sum(manifest["execution_boundary"][event.value] for manifest in manifests)
+        for event in ExecutionEvent
+    }
+    merged = {
+        field: manifests[0][field]
+        for field in stable_fields
+    }
+    merged.update(
+        {
+            "tuple_count": spec["total_tuple_count"],
+            "tuple_key_sha256": tuple_digest.hexdigest(),
+            "witnesses": witnesses,
+            "rows": rows,
+            "execution_boundary": boundary,
+        }
+    )
+    return {
+        "status": "VALID",
+        "manifest": merged,
+        "repeat": repeat,
+        "hash_seed": str(3000 + repeat),
+        "wall_seconds": sum(float(item["wall_seconds"]) for item in ordered),
+    }
+
+
 def _run_worker(request_path: Path) -> None:
     request = json.loads(request_path.read_text(encoding="utf-8"))
     result_path = Path(request["result_path"])
     try:
         with audit_execution(forbidden=frozenset(ExecutionEvent)) as execution:
-            manifest = _evaluate_factor(request["spec"], Path(request["work_dir"]))
+            manifest = _evaluate_factor(
+                request["spec"],
+                Path(request["work_dir"]),
+                tuple_start=int(request["tuple_start"]),
+                tuple_stop=int(request["tuple_stop"]),
+            )
         manifest["execution_boundary"] = execution.manifest()
         result = {"status": "VALID", "manifest": manifest}
     except ForbiddenExecutionError as error:
@@ -330,7 +435,9 @@ def _run_worker(request_path: Path) -> None:
     result_path.write_text(json.dumps(result, sort_keys=True), encoding="utf-8")
 
 
-def _evaluate_factor(spec: dict[str, Any], work_dir: Path) -> dict[str, Any]:  # noqa: PLR0915
+def _evaluate_factor(
+    spec: dict[str, Any], work_dir: Path, *, tuple_start: int = 0, tuple_stop: int | None = None
+) -> dict[str, Any]:  # noqa: PLR0915
     contract = load_posttiling_compatibility_contract()
     _, gate2fa = _load_gate2fa(contract)
     gate2a = load_gate2a_contract()
@@ -371,18 +478,22 @@ def _evaluate_factor(spec: dict[str, Any], work_dir: Path) -> dict[str, Any]:  #
     tuple_count = math.prod(len(domain) for domain in template_domains)
     if tuple_count != expected_factor["total_tuple_count"]:
         raise PostTilingCompatibilityError(f"factor tuple denominator drift for {_factor_key(spec)}")
+    tuple_stop = tuple_count if tuple_stop is None else tuple_stop
+    if not 0 <= tuple_start < tuple_stop <= tuple_count:
+        raise PostTilingCompatibilityError(f"invalid tuple shard [{tuple_start}, {tuple_stop})")
 
-    tuple_digest = sha256()
+    tuple_key_lines = []
     witnesses: dict[str, dict[str, Any]] = {}
     rows = []
     tuple_work = work_dir / "tuples"
     tuple_work.mkdir(parents=True, exist_ok=True)
-    for ordinal, selected in enumerate(product(*template_domains)):
+    selected_tuples = islice(product(*template_domains), tuple_start, tuple_stop)
+    for ordinal, selected in enumerate(selected_tuples, start=tuple_start):
         selected_by_target = {template.target: template for template in selected}
         expected_templates = tuple(selected_by_target.get(item.target, item) for item in baseline_templates)
         indices = tuple(template_domains[index].index(template) for index, template in enumerate(selected))
         tuple_key = [template.key for template in selected]
-        tuple_digest.update(json.dumps(tuple_key, separators=(",", ":")).encode() + b"\n")
+        tuple_key_lines.append(json.dumps(tuple_key, separators=(",", ":")))
         pre_signatures = tuple(
             tensor_relevant_signature(workload, consumer, tensor, template)
             for consumer, template in zip(consumers, selected, strict=True)
@@ -446,7 +557,9 @@ def _evaluate_factor(spec: dict[str, Any], work_dir: Path) -> dict[str, Any]:  #
         "domain_hashes_match": True,
         "factor_manifest_match": True,
         "tuple_count": tuple_count,
-        "tuple_key_sha256": tuple_digest.hexdigest(),
+        "tuple_start": tuple_start,
+        "tuple_stop": tuple_stop,
+        "tuple_key_lines": tuple_key_lines,
         "witnesses": witnesses,
         "rows": rows,
     }
