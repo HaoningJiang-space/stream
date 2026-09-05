@@ -20,10 +20,11 @@ def _digest_file(path: Path) -> str:
 
 def _git(root: Path, *arguments: str) -> str:
     return subprocess.run(
-        ("git", "-C", str(root), *arguments),
+        ("git", *arguments),
         check=True,
         capture_output=True,
         text=True,
+        cwd=root,
     ).stdout.strip()
 
 
