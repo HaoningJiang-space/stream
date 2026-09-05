@@ -110,7 +110,13 @@ def _pretiling_workload_semantics(workload) -> dict[str, Any]:
             if isinstance(source, HasOutputs) and isinstance(target, HasInputs)
             else []
         )
-        edges.append({"source": f"{type(source).__name__}:{source.name}", "target": f"{type(target).__name__}:{target.name}", "tensors": shared})
+        edges.append(
+            {
+                "source": f"{type(source).__name__}:{source.name}",
+                "target": f"{type(target).__name__}:{target.name}",
+                "tensors": shared,
+            }
+        )
     return {"nodes": nodes, "edges": edges, "dimension_sizes": list(dimension_sizes)}
 
 
