@@ -1105,9 +1105,7 @@ class SteadyStateScheduler:
             return relevant_width, allocation_width, node.name
 
         selected = max(compute_nodes, key=score)
-        self.tensor_relevant_tiling_decisions.append(
-            replace(preliminary, selected_reference=selected.name)
-        )
+        self.tensor_relevant_tiling_decisions.append(replace(preliminary, selected_reference=selected.name))
         return selected
 
     def _record_completed_transfer_mapping(self, transfer: TransferNode) -> None:
@@ -1117,9 +1115,7 @@ class SteadyStateScheduler:
         if lineage is None:
             raise RuntimeError(f"Transfer {transfer.name} has no source-tensor lineage")
         consumer_names = {
-            identity.split(":", 1)[1]
-            for identity in lineage.consumers
-            if identity.startswith("ComputationNode:")
+            identity.split(":", 1)[1] for identity in lineage.consumers if identity.startswith("ComputationNode:")
         }
         if len(consumer_names) < _MIN_SHARED_TENSOR_CONSUMERS:
             return

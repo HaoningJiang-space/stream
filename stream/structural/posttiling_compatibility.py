@@ -60,7 +60,7 @@ from stream.structural.real_workload_lifting import (
     _validate_transfer_tiling_domains,
     load_gate2a_contract,
 )
-from stream.workload.node import ComputationNode, HasInputs, HasOutputs, TransferNode
+from stream.workload.node import ComputationNode, TransferNode
 
 _CONTRACT = "gate2f_posttiling_contract.json"
 _FRONTEND_TRACE = ("accelerator_parser", "onnx_parser", "normalization_expansion", "generic_mapping")
@@ -220,9 +220,7 @@ def _factor_specs(gate2fa: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def _run_factor_attempts(specs, temporary_root, repeat_count, max_workers, contract):
-    attempts: dict[str, list[dict[str, Any] | None]] = {
-        _factor_key(spec): [None] * repeat_count for spec in specs
-    }
+    attempts: dict[str, list[dict[str, Any] | None]] = {_factor_key(spec): [None] * repeat_count for spec in specs}
     with ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="gate2f-b") as executor:
         pending = {}
         for spec in specs:
@@ -533,9 +531,7 @@ def _evaluate_tuple(workload, mapping, accelerator, library, selected, factor, o
     decisions = _factor_decisions(scheduler.tensor_relevant_tiling_decisions, factor)
     completed = [decision for decision in decisions if decision.role == "completed_transfer_mapping"]
     lineage_transfers = [
-        transfer
-        for transfer, lineage in scheduler.transfer_lineage.items()
-        if _lineage_matches(lineage, factor)
+        transfer for transfer, lineage in scheduler.transfer_lineage.items() if _lineage_matches(lineage, factor)
     ]
     lineage_witness = bool(completed) and {item.transfer for item in completed} == {
         transfer.name for transfer in lineage_transfers
@@ -557,8 +553,7 @@ def _evaluate_tuple(workload, mapping, accelerator, library, selected, factor, o
             "outcome": "ACCEPTED",
             "decisions": [_decision_manifest(item) for item in decisions],
             "ssis": [
-                _ssis_entry(scheduler, transfer)
-                for transfer in sorted(lineage_transfers, key=lambda item: item.name)
+                _ssis_entry(scheduler, transfer) for transfer in sorted(lineage_transfers, key=lambda item: item.name)
             ],
         },
     }
@@ -607,9 +602,7 @@ def _decision_manifest(decision: TensorRelevantTilingDecision) -> dict[str, Any]
     return {
         "transfer": decision.transfer,
         "lineage": asdict(decision.lineage),
-        "projections": [
-            {"node": node, "tiling": tiling_manifest(tiling)} for node, tiling in decision.projections
-        ],
+        "projections": [{"node": node, "tiling": tiling_manifest(tiling)} for node, tiling in decision.projections],
         "selected_reference": decision.selected_reference,
         "role": decision.role,
         "accepted": decision.accepted,
@@ -682,9 +675,7 @@ def _summary(factors):
         "literal_survival_count": sum(row["literal_survival"] for row in valid_rows),
         "lineage_witness_count": sum(row["lineage_witness"] for row in valid_rows),
         "nonempty_post_domain_count": sum(row["nonempty_post_domains"] for row in valid_rows),
-        "forbidden_execution_events": sum(
-            sum(manifest["execution_boundary"].values()) for manifest in manifests
-        ),
+        "forbidden_execution_events": sum(sum(manifest["execution_boundary"].values()) for manifest in manifests),
     }
 
 

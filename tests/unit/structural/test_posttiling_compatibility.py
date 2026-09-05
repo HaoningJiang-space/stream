@@ -38,9 +38,7 @@ def test_lineage_match_requires_tensor_producer_consumers_and_operand_indices():
     )
 
     assert _lineage_matches(lineage, factor) is True
-    assert _lineage_matches(
-        TransferLineage("shared", "InEdge:input", lineage.consumers, ((0,), (0,))), factor
-    ) is False
+    assert _lineage_matches(TransferLineage("shared", "InEdge:input", lineage.consumers, ((0,), (0,))), factor) is False
 
 
 def test_summary_keeps_invalid_rows_out_of_the_confusion_matrix():
