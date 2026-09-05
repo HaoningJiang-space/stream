@@ -8,7 +8,7 @@ import pytest
 from stream.cost_model.communication_manager import CommunicationManager
 from stream.cost_model.steady_state_scheduler import (
     PreparedScheduleProblem,
-    SharedInputTilingIncompatibility,
+    SharedInputTilingIncompatibilityError,
     SteadyStateScheduler,
     TransferLineage,
 )
@@ -224,7 +224,7 @@ def test_transfer_reference_rejects_incompatible_consumer_partitions(other_facto
     scheduler.ssw.get_unique_dims_inter_core_tiling.side_effect = tiling
     scheduler.mapping.get.return_value = SimpleNamespace(resource_allocation=(tuple(range(4)),))
 
-    with pytest.raises(SharedInputTilingIncompatibility, match="incompatible tensor-relevant tilings") as failure:
+    with pytest.raises(SharedInputTilingIncompatibilityError, match="incompatible tensor-relevant tilings") as failure:
         scheduler._get_tensor_relevant_compute_reference(transfer, [by_height, by_width])
     assert failure.value.decision.accepted is False
     assert failure.value.decision.lineage.tensor == "shared"

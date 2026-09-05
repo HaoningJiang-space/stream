@@ -22,7 +22,7 @@ from time import perf_counter
 from typing import Any
 
 from stream.cost_model.steady_state_scheduler import (
-    SharedInputTilingIncompatibility,
+    SharedInputTilingIncompatibilityError,
     SteadyStateScheduler,
     TensorRelevantTilingDecision,
     TransferLineage,
@@ -507,11 +507,13 @@ def _evaluate_tuple(workload, mapping, accelerator, library, selected, factor, o
     literal_survival &= _selected_templates_match(scheduler.ssw, scheduler.mapping, selected, normalized=True)
     try:
         scheduler.mapping = scheduler.update_transfer_mapping()
-    except SharedInputTilingIncompatibility as error:
+    except SharedInputTilingIncompatibilityError as error:
         trace.append("transfer_mapping_rejected")
         decisions = _factor_decisions(scheduler.tensor_relevant_tiling_decisions, factor)
         if error.decision not in decisions or not decisions or error.decision.accepted:
-            raise PostTilingCompatibilityError("structured incompatibility witness did not match the frozen factor")
+            raise PostTilingCompatibilityError(
+                "structured incompatibility witness did not match the frozen factor"
+            ) from error
         return {
             "post": False,
             "literal_survival": literal_survival,
@@ -554,7 +556,10 @@ def _evaluate_tuple(workload, mapping, accelerator, library, selected, factor, o
         "witness": {
             "outcome": "ACCEPTED",
             "decisions": [_decision_manifest(item) for item in decisions],
-            "ssis": [_ssis_entry(scheduler, transfer) for transfer in sorted(lineage_transfers, key=lambda item: item.name)],
+            "ssis": [
+                _ssis_entry(scheduler, transfer)
+                for transfer in sorted(lineage_transfers, key=lambda item: item.name)
+            ],
         },
     }
 

@@ -70,6 +70,7 @@ _LOOP_NEST_DEPTH: dict[str, int] = {
 
 #: Core kinds that model a memory/DMA endpoint, not a compute engine -- never in a compute roofline.
 _NON_COMPUTE_CORE_TYPES: frozenset[str] = frozenset({"offchip", "shim", "memory"})
+_MIN_SHARED_TENSOR_CONSUMERS = 2
 
 
 @dataclass(frozen=True, slots=True)
@@ -111,7 +112,7 @@ class TensorRelevantTilingDecision:
         return len({projection for _, projection in self.projections if projection}) <= 1
 
 
-class SharedInputTilingIncompatibility(ValueError):
+class SharedInputTilingIncompatibilityError(ValueError):
     """A structured production rejection of incompatible tensor-relevant tilings."""
 
     def __init__(self, decision: TensorRelevantTilingDecision):
@@ -1094,7 +1095,7 @@ class SteadyStateScheduler:
         if not preliminary.compatible:
             rejected = replace(preliminary, accepted=False)
             self.tensor_relevant_tiling_decisions.append(rejected)
-            raise SharedInputTilingIncompatibility(rejected)
+            raise SharedInputTilingIncompatibilityError(rejected)
 
         def score(node: ComputationNode) -> tuple[int, int, str]:
             projection = next(projection for candidate, projection in ordered if candidate is node)
@@ -1115,8 +1116,12 @@ class SteadyStateScheduler:
         lineage = self.transfer_lineage.get(transfer)
         if lineage is None:
             raise RuntimeError(f"Transfer {transfer.name} has no source-tensor lineage")
-        consumer_names = {identity.split(":", 1)[1] for identity in lineage.consumers if identity.startswith("ComputationNode:")}
-        if len(consumer_names) < 2:
+        consumer_names = {
+            identity.split(":", 1)[1]
+            for identity in lineage.consumers
+            if identity.startswith("ComputationNode:")
+        }
+        if len(consumer_names) < _MIN_SHARED_TENSOR_CONSUMERS:
             return
         assert self.ssw is not None
         consumers = sorted(
