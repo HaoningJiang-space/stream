@@ -1188,9 +1188,7 @@ class SteadyStateScheduler:
             )
         )
 
-    def _lineage_consumers(
-        self, transfer: TransferNode, lineage: TransferLineage
-    ) -> tuple[ComputationNode, ...]:
+    def _lineage_consumers(self, transfer: TransferNode, lineage: TransferLineage) -> tuple[ComputationNode, ...]:
         consumer_names = {
             identity.split(":", 1)[1] for identity in lineage.consumers if identity.startswith("ComputationNode:")
         }
