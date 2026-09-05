@@ -59,8 +59,7 @@ def _mapping_manifest(workload, mapping) -> dict[str, Any]:
                 "name": group.name,
                 "layers": list(group.layers),
                 "intra_core_tiling": [
-                    {"position": dimension.position, "factor": factor}
-                    for dimension, factor in group.intra_core_tiling
+                    {"position": dimension.position, "factor": factor} for dimension, factor in group.intra_core_tiling
                 ],
             }
             for group in mapping.fused_groups
@@ -228,10 +227,7 @@ def capture(source_root: Path, output: Path, expected_commit: str) -> dict[str, 
         },
         "environment": {
             "python_version": ".".join(str(component) for component in sys.version_info[:3]),
-            "packages": {
-                name: _package_version(name)
-                for name in ("onnx", "ortools", "stream-dse", "zigzag-dse")
-            },
+            "packages": {name: _package_version(name) for name in ("onnx", "ortools", "stream-dse", "zigzag-dse")},
         },
         "hardware": {
             "path": contract["hardware"],

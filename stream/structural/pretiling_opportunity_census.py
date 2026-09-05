@@ -570,8 +570,7 @@ def _parsed_compute_mapping_projection(workload, mapping) -> dict[str, Any]:
                 "name": group.name,
                 "layers": list(group.layers),
                 "intra_core_tiling": [
-                    {"position": dimension.position, "factor": factor}
-                    for dimension, factor in group.intra_core_tiling
+                    {"position": dimension.position, "factor": factor} for dimension, factor in group.intra_core_tiling
                 ],
             }
             for group in mapping.fused_groups
@@ -869,7 +868,8 @@ def _load_pretiling_reference(expected, gate2a):
         and reference.get("instrument", {}).get("sha256")
         == _git_blob_digest(expected["instrument_commit"], expected["instrument_path"])
         and reference.get("environment") == recorded_environment
-        and reference.get("hardware") == {
+        and reference.get("hardware")
+        == {
             "path": gate2a["hardware"]["path"],
             "sha256": gate2a["hardware"]["sha256"],
         }
