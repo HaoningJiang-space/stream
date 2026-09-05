@@ -78,15 +78,12 @@ def test_ssis_rejection_requires_a_matching_completed_factor_decision():
         result_memory_option_count=1,
     )
 
-    assert _factor_explains_ssis_rejection(
-        [decision], SpatialUnrollingExtentError(dimension, 6, 4, ("B",))
-    ) is True
-    assert _factor_explains_ssis_rejection(
-        [decision], SpatialUnrollingExtentError(dimension, 6, 4, ("unrelated",))
-    ) is False
-    assert _factor_explains_ssis_rejection(
-        [decision], SpatialUnrollingExtentError(dimension, 6, 2, ("B",))
-    ) is False
+    assert _factor_explains_ssis_rejection([decision], SpatialUnrollingExtentError(dimension, 6, 4, ("B",))) is True
+    assert (
+        _factor_explains_ssis_rejection([decision], SpatialUnrollingExtentError(dimension, 6, 4, ("unrelated",)))
+        is False
+    )
+    assert _factor_explains_ssis_rejection([decision], SpatialUnrollingExtentError(dimension, 6, 2, ("B",))) is False
 
 
 def test_lineage_match_requires_tensor_producer_consumers_and_operand_indices():

@@ -904,9 +904,13 @@ def _factor_explains_ssis_rejection(
             for node, projection in decision.projections
         )
     ]
-    return bool(error.source_nodes) and bool(matching) and all(
-        decision.accepted and decision.result_resource_option_count > 0 and decision.result_memory_option_count > 0
-        for decision in matching
+    return (
+        bool(error.source_nodes)
+        and bool(matching)
+        and all(
+            decision.accepted and decision.result_resource_option_count > 0 and decision.result_memory_option_count > 0
+            for decision in matching
+        )
     )
 
 
