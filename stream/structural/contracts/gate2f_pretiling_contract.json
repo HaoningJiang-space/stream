@@ -9,10 +9,10 @@
       "sha256": "sha256:d2473721f8e9d4796db5db7797ddf7c0099e82d4788ab4d081fe9b6a218aa145",
       "required_verdict": "PASS",
       "pretiling_reference": {
-        "artifact": "artifacts/gate2f-a/gate2a-pretiling-reference-v3.json.gz.b64",
-        "sha256": "sha256:a6cbf16519b82f179f0ec6127d3ed6a71cfa6a7e4cca3a8f25cef321403cd76e",
+        "artifact": "artifacts/gate2f-a/gate2a-pretiling-reference-v4.json.gz.b64",
+        "sha256": "sha256:7faec02e0f70c819c18e3d27f665cff54d644793d7ea59bb9a8834da6c07fc37",
         "schema": "gate2f-a-pretiling-reference-v1",
-        "instrument_commit": "8eecb3cb31f278a0e7837d66380f27b3c549e171",
+        "instrument_commit": "49495859e4fa4b657191f1e8cea4f2cad53b3fb3",
         "instrument_path": "scripts/capture_pretiling_mapping_reference.py"
       }
     },
